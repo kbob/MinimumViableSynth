@@ -44,36 +44,15 @@ static AUPreset kPresets [kNumberOfPresets] = {
 class MVSNote : public SynthNote {
 
 public:
-	virtual			~MVSNote() {}
+    virtual         ~MVSNote() {}
 
-	virtual bool	 Attack(const MusicDeviceNoteParams &inParams)
-    {
-#if DEBUG_PRINT
-        printf("MVSNote::Attack %p %d\n", this, GetState());
-#endif
-        double sampleRate  = SampleRate();
-        Float32 maxLevel   = powf(inParams.mVelocity/127.0, 3.0);
+    virtual bool     Attack(const MusicDeviceNoteParams &inParams);
 
-        float attackTime   = GetGlobalParameter(kParameter_AmpAttackTime);
-        float decayTime    = GetGlobalParameter(kParameter_AmpDecayTime);
-        float sustainLevel = GetGlobalParameter(kParameter_AmpSustainLevel);
-        float releaseTime  = GetGlobalParameter(kParameter_AmpReleaseTime);
-
-        mOsc1.initialize(sampleRate);
-        mAmpEnv.initialize(sampleRate,
-                           maxLevel,
-                           attackTime, decayTime, sustainLevel, releaseTime);
-        return true;
-    }
-
-	virtual void	 Kill(UInt32 inFrame); // voice is being stolen.
-	virtual void	 Release(UInt32 inFrame);
-	virtual void	 FastRelease(UInt32 inFrame);
-	virtual Float32	 Amplitude()
-    {
-        return mAmpEnv.amplitude();
-    }
-	virtual OSStatus Render(UInt64            inAbsoluteSampleFrame,
+    virtual void     Kill(UInt32 inFrame); // voice is being stolen.
+    virtual void     Release(UInt32 inFrame);
+    virtual void     FastRelease(UInt32 inFrame);
+    virtual Float32  Amplitude();
+    virtual OSStatus Render(UInt64            inAbsoluteSampleFrame,
                             UInt32            inNumFrames,
                             AudioBufferList **nBufferList,
                             UInt32            inOutBusCount);
@@ -84,32 +63,33 @@ private:
 
 };
 
-class MVS : public AUMonotimbralInstrumentBase
-{
+class MVS : public AUMonotimbralInstrumentBase {
+
 public:
-								MVS(AudioUnit inComponentInstance);
-	virtual						~MVS();
-				
-	virtual OSStatus			Initialize();
-	virtual void				Cleanup();
-	virtual OSStatus			Version() { return kMVSVersion; }
+    MVS(AudioUnit inComponentInstance);
+    virtual           ~MVS();
+                                
+    virtual OSStatus   Initialize();
+    virtual void       Cleanup();
+    virtual OSStatus   Version() { return kMVSVersion; }
 
-	virtual AUElement*			CreateElement(			AudioUnitScope					scope,
-											  AudioUnitElement				element);
+    virtual AUElement *CreateElement(AudioUnitScope  scope,
+                                     AudioUnitElement element);
 
-	virtual OSStatus			GetParameterInfo(		AudioUnitScope					inScope,
-														AudioUnitParameterID			inParameterID,
-														AudioUnitParameterInfo &		outParameterInfo);
+    virtual OSStatus   GetParameterInfo(
+                               AudioUnitScope          inScope,
+                               AudioUnitParameterID    inParameterID,
+                               AudioUnitParameterInfo &outParameterInfo);
 
-	MidiControls*				GetControls( MusicDeviceGroupID inChannel)
-	{
-		SynthGroupElement *group = GetElForGroupID(inChannel);
-		return (MidiControls *) group->GetMIDIControlHandler();
-	}
-	
+    MidiControls      *GetControls(MusicDeviceGroupID inChannel)
+    {
+        SynthGroupElement *group = GetElForGroupID(inChannel);
+        return (MidiControls *) group->GetMIDIControlHandler();
+    }
+        
 private:
-	
-	MVSNote mNotes[kNumNotes];
+    MVSNote mNotes[kNumNotes];
+
 };
 
 #endif /* !__MVS__ */

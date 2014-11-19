@@ -25,26 +25,26 @@ void Oscillator::generate(Float64 freq, float *sampBuf, UInt32 count)
     Float64 phase = mPhase;
     switch (mType) {
 
-        case OT_Sine:
-            // ???
-            break;
+    case OT_Sine:
+        // ???
+        break;
 
-        case OT_Saw:
-            for (UInt32 i = 0; i < count; i++) {
-                phase += 2 * freq * mInverseSampleRate;
-                if (phase > 1.0)
-                    phase -= 2.0;
-                sampBuf[i] = phase;
-            }
-            break;
+    case OT_Saw:
+        for (UInt32 i = 0; i < count; i++) {
+            phase += 2 * freq * mInverseSampleRate;
+            if (phase > 1.0)
+                phase -= 2.0;
+            sampBuf[i] = phase;
+        }
+        break;
 
-        case OT_Triangle:
-            // ???
-            break;
+    case OT_Triangle:
+        // ???
+        break;
 
-        case OT_Pulse:
-            // ???
-            break;
+    case OT_Pulse:
+        // ???
+        break;
 
     }
     mPhase = phase;
