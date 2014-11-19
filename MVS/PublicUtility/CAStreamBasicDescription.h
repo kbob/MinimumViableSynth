@@ -290,7 +290,7 @@ public:
 				// note: leaves sample rate untouched
 	{
 		mFormatID = kAudioFormatLinearPCM;
-		UInt32 sampleSize = SizeOf32(AudioSampleType);
+		UInt32 sampleSize = SizeOf32(Float32);
 		mFormatFlags = kAudioFormatFlagsCanonical;
 		mBitsPerChannel = 8 * sampleSize;
 		mChannelsPerFrame = nChannels;
@@ -309,7 +309,7 @@ public:
 		UInt32 reqFormatFlags;
 		UInt32 flagsMask = (kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsBigEndian | kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kLinearPCMFormatFlagsSampleFractionMask);
 		bool interleaved = (mFormatFlags & kAudioFormatFlagIsNonInterleaved) == 0;
-		unsigned sampleSize = SizeOf32(AudioSampleType);
+		unsigned sampleSize = SizeOf32(Float32);
 		reqFormatFlags = kAudioFormatFlagsCanonical;
 		UInt32 reqFrameSize = interleaved ? (mChannelsPerFrame * sampleSize) : sampleSize;
 
@@ -330,11 +330,11 @@ public:
 #endif
 		mChannelsPerFrame = nChannels;
 		mFramesPerPacket = 1;
-		mBitsPerChannel = 8 * SizeOf32(AudioUnitSampleType);
+		mBitsPerChannel = 8 * SizeOf32(Float32);
 		if (interleaved)
-			mBytesPerPacket = mBytesPerFrame = nChannels * SizeOf32(AudioUnitSampleType);
+			mBytesPerPacket = mBytesPerFrame = nChannels * SizeOf32(Float32);
 		else {
-			mBytesPerPacket = mBytesPerFrame = SizeOf32(AudioUnitSampleType);
+			mBytesPerPacket = mBytesPerFrame = SizeOf32(Float32);
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}

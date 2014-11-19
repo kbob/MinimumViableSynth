@@ -78,7 +78,7 @@ void				AUBufferList::Allocate(const CAStreamBasicDescription &format, UInt32 nF
 	if (nStreams > mAllocatedStreams) {
 		size_t theHeaderSize = sizeof(AudioBufferList) - sizeof(AudioBuffer);
 		mPtrs = (AudioBufferList *)CA_realloc(mPtrs,
-									SafeMultiplyAddUInt32(nStreams, sizeof(AudioBuffer), theHeaderSize));
+									SafeMultiplyAddUInt32(nStreams, SizeOf32(AudioBuffer), theHeaderSize));
 		mAllocatedStreams = nStreams;
 	}
 	UInt32 bytesPerStream = SafeMultiplyAddUInt32(nFrames, format.mBytesPerFrame, 0xF) & ~0xF;

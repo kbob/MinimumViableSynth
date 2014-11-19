@@ -37,7 +37,24 @@
 		92717BD21A19A7DC00B87C38 /* CAXException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD11A19A7DC00B87C38 /* CAXException.cpp */; };
 		92717BD71A19A7DC00B87C38 /* MVS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD61A19A7DC00B87C38 /* MVS.cpp */; };
 		92717BDA1A19A7DC00B87C38 /* MVS_Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = 92717BD91A19A7DC00B87C38 /* MVS_Prefix.pch */; };
+		92717BE21A19B5DD00B87C38 /* Envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE01A19B5DD00B87C38 /* Envelope.cpp */; };
+		92717BE51A1A498100B87C38 /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
+		92717BED1A1B211600B87C38 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BEC1A1B211600B87C38 /* main.cpp */; };
+		92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE01A19B5DD00B87C38 /* Envelope.cpp */; };
+		92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		92717BE81A1B211600B87C38 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		92717B691A19A7DC00B87C38 /* MVS.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MVS.component; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,6 +130,12 @@
 		92717BD61A19A7DC00B87C38 /* MVS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MVS.cpp; sourceTree = "<group>"; };
 		92717BD81A19A7DC00B87C38 /* MVSVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVSVersion.h; sourceTree = "<group>"; };
 		92717BD91A19A7DC00B87C38 /* MVS_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVS_Prefix.pch; sourceTree = "<group>"; };
+		92717BE01A19B5DD00B87C38 /* Envelope.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Envelope.cpp; sourceTree = "<group>"; };
+		92717BE11A19B5DD00B87C38 /* Envelope.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Envelope.h; sourceTree = "<group>"; };
+		92717BE31A1A498100B87C38 /* Oscillator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Oscillator.cpp; sourceTree = "<group>"; };
+		92717BE41A1A498100B87C38 /* Oscillator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Oscillator.h; sourceTree = "<group>"; };
+		92717BEA1A1B211600B87C38 /* One Note */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "One Note"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92717BEC1A1B211600B87C38 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +157,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		92717BE71A1B211600B87C38 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -141,6 +171,7 @@
 			isa = PBXGroup;
 			children = (
 				92717B741A19A7DC00B87C38 /* MVS */,
+				92717BEB1A1B211600B87C38 /* One Note */,
 				92717B6B1A19A7DC00B87C38 /* Frameworks */,
 				92717B6A1A19A7DC00B87C38 /* Products */,
 			);
@@ -150,6 +181,7 @@
 			isa = PBXGroup;
 			children = (
 				92717B691A19A7DC00B87C38 /* MVS.component */,
+				92717BEA1A1B211600B87C38 /* One Note */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,10 +200,10 @@
 		92717B741A19A7DC00B87C38 /* MVS */ = {
 			isa = PBXGroup;
 			children = (
+				92717BD41A19A7DC00B87C38 /* AU Source */,
 				92717BD91A19A7DC00B87C38 /* MVS_Prefix.pch */,
 				92717B771A19A7DC00B87C38 /* AUPublic */,
 				92717BAB1A19A7DC00B87C38 /* PublicUtility */,
-				92717BD41A19A7DC00B87C38 /* AU Source */,
 				92717B751A19A7DC00B87C38 /* Supporting Files */,
 			);
 			path = MVS;
@@ -299,9 +331,21 @@
 			children = (
 				92717BD51A19A7DC00B87C38 /* MVS.h */,
 				92717BD61A19A7DC00B87C38 /* MVS.cpp */,
+				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
+				92717BE11A19B5DD00B87C38 /* Envelope.h */,
+				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
+				92717BE41A1A498100B87C38 /* Oscillator.h */,
 				92717BD81A19A7DC00B87C38 /* MVSVersion.h */,
 			);
 			name = "AU Source";
+			sourceTree = "<group>";
+		};
+		92717BEB1A1B211600B87C38 /* One Note */ = {
+			isa = PBXGroup;
+			children = (
+				92717BEC1A1B211600B87C38 /* main.cpp */,
+			);
+			path = "One Note";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -327,6 +371,23 @@
 			productReference = 92717B691A19A7DC00B87C38 /* MVS.component */;
 			productType = "com.apple.product-type.bundle";
 		};
+		92717BE91A1B211600B87C38 /* One Note */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92717BEE1A1B211600B87C38 /* Build configuration list for PBXNativeTarget "One Note" */;
+			buildPhases = (
+				92717BE61A1B211600B87C38 /* Sources */,
+				92717BE71A1B211600B87C38 /* Frameworks */,
+				92717BE81A1B211600B87C38 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "One Note";
+			productName = "One Note";
+			productReference = 92717BEA1A1B211600B87C38 /* One Note */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -337,6 +398,9 @@
 				ORGANIZATIONNAME = kbobsoft.com;
 				TargetAttributes = {
 					92717B681A19A7DC00B87C38 = {
+						CreatedOnToolsVersion = 6.1;
+					};
+					92717BE91A1B211600B87C38 = {
 						CreatedOnToolsVersion = 6.1;
 					};
 				};
@@ -354,6 +418,7 @@
 			projectRoot = "";
 			targets = (
 				92717B681A19A7DC00B87C38 /* MVS */,
+				92717BE91A1B211600B87C38 /* One Note */,
 			);
 		};
 /* End PBXProject section */
@@ -392,8 +457,10 @@
 				92717BB61A19A7DC00B87C38 /* CAAudioChannelLayout.cpp in Sources */,
 				92717B9E1A19A7DC00B87C38 /* SynthNoteList.cpp in Sources */,
 				92717B971A19A7DC00B87C38 /* SynthElement.cpp in Sources */,
+				92717BE21A19B5DD00B87C38 /* Envelope.cpp in Sources */,
 				92717BAD1A19A7DC00B87C38 /* CAAUMIDIMap.cpp in Sources */,
 				92717B7A1A19A7DC00B87C38 /* AUBase.cpp in Sources */,
+				92717BE51A1A498100B87C38 /* Oscillator.cpp in Sources */,
 				92717BD21A19A7DC00B87C38 /* CAXException.cpp in Sources */,
 				92717B841A19A7DC00B87C38 /* AUPluginDispatch.cpp in Sources */,
 				92717B7E1A19A7DC00B87C38 /* AUInputElement.cpp in Sources */,
@@ -413,6 +480,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92717BE61A1B211600B87C38 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92717BED1A1B211600B87C38 /* main.cpp in Sources */,
+				92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */,
+				92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -531,6 +608,28 @@
 			};
 			name = Release;
 		};
+		92717BEF1A1B211600B87C38 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = MVS/MVS_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		92717BF01A1B211600B87C38 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = MVS/MVS_Prefix.pch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -548,6 +647,14 @@
 			buildConfigurations = (
 				92717BDE1A19A7DC00B87C38 /* Debug */,
 				92717BDF1A19A7DC00B87C38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		92717BEE1A1B211600B87C38 /* Build configuration list for PBXNativeTarget "One Note" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92717BEF1A1B211600B87C38 /* Debug */,
+				92717BF01A1B211600B87C38 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
