@@ -25,7 +25,7 @@ private:
 OneNote::OneNote()
 {
     mOsc1.initialize(44100.0, Oscillator::OT_Saw);
-    mAmpEnv.initialize(44100.0, 0.1, 0.2, 0.1, 0.3);
+    mAmpEnv.initialize(44100.0, 0.6, 0.1, 0.2, 0.1, 0.3);
 }
 
 size_t OneNote::render(Float32 *outbuf, size_t count)

@@ -14,6 +14,7 @@ Envelope::Envelope()
 {}
 
 void Envelope::initialize(Float64      sampleRate,
+                          float        maxLevel,
                           float        attackTime,
                           float        decayTime,
                           float        sustainLevel,
@@ -21,12 +22,13 @@ void Envelope::initialize(Float64      sampleRate,
                           EnvelopeType type)
 {
     mType          = type;
+    mMaxLevel      = maxLevel;
     mAttackSamples = attackTime * sampleRate;
     mDecaySamples  = decayTime * sampleRate;
-    mSustainLevel  = sustainLevel;
-    mAttackDelta   = 1.0 / mAttackSamples;
-    mDecayDelta    = -(1.0 - mSustainLevel) / mDecaySamples;
-    mReleaseDelta  = -mSustainLevel / (releaseTime * sampleRate);
+    mSustainLevel  = maxLevel * sustainLevel;
+    mAttackDelta   = maxLevel / mAttackSamples;
+    mDecayDelta    = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
+    mReleaseDelta  = -maxLevel / (releaseTime * sampleRate);
     mSegment       = ES_Attack;
     mSamplesDone   = 0;
     mLevel         = 0;
@@ -67,7 +69,7 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
             }
             samplesDone += n;
             if (mSegment == ES_Decay)
-                level = 1.0;
+                level = mMaxLevel;
             continue;
 
         case ES_Decay:

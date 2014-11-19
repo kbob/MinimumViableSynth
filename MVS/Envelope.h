@@ -20,6 +20,7 @@ public:
     Envelope();
 
     void    initialize(Float64      sampleRate,
+                       Float32      maxLevel,
                        Float32      attackTime,
                        Float32      decayTime,
                        Float32      sustainLevel,
@@ -28,10 +29,7 @@ public:
 
     void    release();
 
-    Float32 amplitude() const
-    {
-        return mLevel;
-    }
+    Float32 amplitude() const { return mLevel; }
 
     UInt32  generate(float *sampBuf, UInt32 count);
 
@@ -44,6 +42,7 @@ private:
     };
 
     EnvelopeType    mType;
+    Float32         mMaxLevel;
     UInt32          mAttackSamples;
     UInt32          mDecaySamples;
     Float32         mSustainLevel;

@@ -58,8 +58,8 @@ MVS::MVS(AudioUnit inComponentInstance)
 	CreateElements();
 
 	Globals()->UseIndexedParameters(kNumberOfParameters);
-    Globals()->SetParameter(kParameter_AmpAttackTime,   0.05);
-    Globals()->SetParameter(kParameter_AmpDecayTime,    0.05);
+    Globals()->SetParameter(kParameter_AmpAttackTime,   0.001);
+    Globals()->SetParameter(kParameter_AmpDecayTime,    0.100);
     Globals()->SetParameter(kParameter_AmpSustainLevel, 1.00);
     Globals()->SetParameter(kParameter_AmpReleaseTime,  0.05);
 }
@@ -123,39 +123,39 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope		   inScope,
         case kParameter_AmpAttackTime:
             AUBase::FillInParameterName(info, kParamName_AmpAttackTime, false);
             info.unit         = kAudioUnitParameterUnit_Seconds;
-            info.minValue     = 0.0;
+            info.minValue     = 0.001;
             info.maxValue     = 2.00;
-            info.defaultValue = 0.05;
-            info.flags       |= kAudioUnitParameterFlag_DisplayExponential;
+            info.defaultValue = 0.001;
+//            info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
             break;
 
         case kParameter_AmpDecayTime:
             AUBase::FillInParameterName(info, kParamName_AmpDecayTime, false);
             info.unit         = kAudioUnitParameterUnit_Seconds;
-            info.minValue     = 0.00;
+            info.minValue     = 0.001;
             info.maxValue     = 2.00;
-            info.defaultValue = 0.05;
-            info.flags       |= kAudioUnitParameterFlag_DisplayExponential;
+            info.defaultValue = 0.10;
+//            info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
             break;
 
         case kParameter_AmpSustainLevel:
             AUBase::FillInParameterName(info,
                                         kParamName_AmpSustainLevel,
                                         false);
-            info.unit         = kAudioUnitParameterUnit_Decibels;
-            info.minValue     = -20.0;
-            info.maxValue     =   0.0;
-            info.defaultValue =   0.0;
-            info.flags       |=     0;
+            info.unit         = kAudioUnitParameterUnit_LinearGain;
+            info.minValue     = 0.0;
+            info.maxValue     = 1.0;
+            info.defaultValue = 1.0;
+            info.flags       |= 0;
             break;
 
         case kParameter_AmpReleaseTime:
             AUBase::FillInParameterName(info, kParamName_AmpReleaseTime, false);
             info.unit         = kAudioUnitParameterUnit_Seconds;
-            info.minValue     = 0.0;
-            info.maxValue     = 2.0;
-            info.defaultValue = 0.05;
-            info.flags |= kAudioUnitParameterFlag_DisplayExponential;
+            info.minValue     = 0.001;
+            info.maxValue     = 2.000;
+            info.defaultValue = 0.050;
+//            info.flags |= kAudioUnitParameterFlag_DisplayLogarithmic;
             break;
 
         default:

@@ -51,16 +51,17 @@ public:
 #if DEBUG_PRINT
         printf("MVSNote::Attack %p %d\n", this, GetState());
 #endif
-        double sampleRate = SampleRate();
+        double sampleRate  = SampleRate();
+        Float32 maxLevel   = powf(inParams.mVelocity/127.0, 3.0);
 
         float attackTime   = GetGlobalParameter(kParameter_AmpAttackTime);
         float decayTime    = GetGlobalParameter(kParameter_AmpDecayTime);
         float sustainLevel = GetGlobalParameter(kParameter_AmpSustainLevel);
         float releaseTime  = GetGlobalParameter(kParameter_AmpReleaseTime);
 
-        sustainLevel = powf(10.0f, sustainLevel / 20);
         mOsc1.initialize(sampleRate);
         mAmpEnv.initialize(sampleRate,
+                           maxLevel,
                            attackTime, decayTime, sustainLevel, releaseTime);
         return true;
     }
