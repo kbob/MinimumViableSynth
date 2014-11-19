@@ -30,14 +30,12 @@ enum {
 // Define constants to identify factory presets.
 enum {
     kPreset_Default = 0,
-    // kPreset_Example2 = 1,
     kNumberOfPresets
 };
 
 // Define the presets.
 static AUPreset kPresets [kNumberOfPresets] = {
     { kPreset_Default, CFSTR("Factory Default") },
-    // { kPreset_Example2, CFSTR("Example 2") },
 };
 
 
@@ -81,12 +79,6 @@ public:
                                AudioUnitParameterID    inParameterID,
                                AudioUnitParameterInfo &outParameterInfo);
 
-    MidiControls      *GetControls(MusicDeviceGroupID inChannel)
-    {
-        SynthGroupElement *group = GetElForGroupID(inChannel);
-        return (MidiControls *) group->GetMIDIControlHandler();
-    }
-        
 private:
     MVSNote mNotes[kNumNotes];
 

@@ -6,30 +6,10 @@
 //  Copyright (c) 2014 kbobsoft.com. All rights reserved.
 //
 
-/*
-    This is a test implementation of a sin wave synth using
-    AUInstrumentBase classes
-        
-    It illustrates a basic usage of these classes
-        
-    It artificially limits the number of notes at one time to 12, so
-    the note-stealing algorithm is used - you should know how this
-    works!
-        
-    Most of the work you need to do is defining a Note class (see
-    MVSNote).  AUInstrument manages the creation and destruction of
-    notes, the various stages of a note's lifetime.
-
-    Alot of printfs have been left in (but are if'def out).  These can
-    be useful as you figure out how this all fits together. This is
-    true in the AUInstrumentBase classes as well; simply define
-    DEBUG_PRINT to 1 and this turns all this on.
-
-    The project also defines CA_AUTO_MIDI_MAP (OTHER_C_FLAGS). This
-    adds all the code that is needed to map MIDI messages to specific
-    parameter changes.  This can be seen in AU Lab's MIDI Editor
-    window.  CA_AUTO_MIDI_MAP is implemented in AUMIDIBase.cpp/.h
-*/
+//  This is the Minimum Viable Synth.  It has a single sawtooth
+//  oscillator and an ADSR envelope generator.  The ADSR parameters
+//  are available as AudioUnitParameters and can also be mapped to
+//  MIDI controls.
 
 #include "MVS.h"
  
@@ -54,11 +34,11 @@ AUDIOCOMPONENT_ENTRY(AUMusicDeviceFactory, MVS)
 // This synth has No inputs, One output
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 MVS::MVS(AudioUnit inComponentInstance)
-        : AUMonotimbralInstrumentBase(inComponentInstance, 0, 1)
+: AUMonotimbralInstrumentBase(inComponentInstance, 0, 1)
 {
-        CreateElements();
+    CreateElements();
 
-        Globals()->UseIndexedParameters(kNumberOfParameters);
+    Globals()->UseIndexedParameters(kNumberOfParameters);
     Globals()->SetParameter(kParameter_AmpAttackTime,   0.001);
     Globals()->SetParameter(kParameter_AmpDecayTime,    0.100);
     Globals()->SetParameter(kParameter_AmpSustainLevel, 1.00);
@@ -129,7 +109,7 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.minValue     = 0.001;
         info.maxValue     = 2.00;
         info.defaultValue = 0.001;
-//            info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+//        info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
         break;
 
     case kParameter_AmpDecayTime:
@@ -138,7 +118,7 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.minValue     = 0.001;
         info.maxValue     = 2.00;
         info.defaultValue = 0.10;
-//            info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+//        info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
         break;
 
     case kParameter_AmpSustainLevel:
@@ -158,7 +138,7 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.minValue     = 0.001;
         info.maxValue     = 2.000;
         info.defaultValue = 0.050;
-//            info.flags |= kAudioUnitParameterFlag_DisplayLogarithmic;
+//        info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
         break;
 
     default:
@@ -169,9 +149,8 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
 }
 
 
-#pragma mark MVSNote Methods
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#pragma mark MVSNote Methods
 
 bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 {
