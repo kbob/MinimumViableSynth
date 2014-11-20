@@ -46,7 +46,6 @@ public:
 
     virtual bool     Attack(const MusicDeviceNoteParams &inParams);
 
-    virtual void     Kill(UInt32 inFrame); // voice is being stolen.
     virtual void     Release(UInt32 inFrame);
     virtual void     FastRelease(UInt32 inFrame);
     virtual Float32  Amplitude();
@@ -64,7 +63,7 @@ private:
 class MVS : public AUMonotimbralInstrumentBase {
 
 public:
-    MVS(AudioUnit inComponentInstance);
+                       MVS(AudioUnit inComponentInstance);
     virtual           ~MVS();
                                 
     virtual OSStatus   Initialize();

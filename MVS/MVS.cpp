@@ -53,24 +53,14 @@ MVS::~MVS()
 {}
 
 void MVS::Cleanup()
-{
-#if DEBUG_PRINT
-    printf("MVS::Cleanup\n");
-#endif
-}
+{}
 
 OSStatus MVS::Initialize()
 {       
-#if DEBUG_PRINT
-    printf("->MVS::Initialize\n");
-#endif
     AUMonotimbralInstrumentBase::Initialize();
         
     SetNotes(kNumNotes, kMaxActiveNotes, mNotes, sizeof(MVSNote));
-#if DEBUG_PRINT
-    printf("<-MVS::Initialize\n");
-#endif
-        
+
     return noErr;
 }
 
@@ -154,9 +144,6 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
 
 bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 {
-#if DEBUG_PRINT
-    printf("MVSNote::Attack %p %d\n", this, GetState());
-#endif
     double sampleRate  = SampleRate();
     Float32 maxLevel   = powf(inParams.mVelocity/127.0, 3.0);
 
@@ -174,26 +161,14 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 
 void MVSNote::Release(UInt32 inFrame)
 {
+    mAmpEnv.release();
     SynthNote::Release(inFrame);
-#if DEBUG_PRINT
-    printf("MVSNote::Release %p %d\n", this, GetState());
-#endif
 }
 
 void MVSNote::FastRelease(UInt32 inFrame) // voice is being stolen.
 {
+    mAmpEnv.release();
     SynthNote::Release(inFrame);
-#if DEBUG_PRINT
-    printf("MVSNote::Release %p %d\n", this, GetState());
-#endif
-}
-
-void MVSNote::Kill(UInt32 inFrame) // voice is being stolen.
-{
-    SynthNote::Kill(inFrame);
-#if DEBUG_PRINT
-    printf("MVSNote::Kill %p %d\n", this, GetState());
-#endif
 }
 
 Float32 MVSNote::Amplitude()
@@ -218,18 +193,13 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     left = (float*)inBufferList[bus0]->mBuffers[0].mData;
     right = numChans == 2 ? (float*)inBufferList[bus0]->mBuffers[1].mData : 0;
 
-    Float32 osc1buf[inNumFrames], ampbuf[inNumFrames];
-    for (size_t i = 0; i < inNumFrames; i++)
-        osc1buf[i] = ampbuf[i] = 0;
-    SynthNoteState state = GetState();
-    if (state == kNoteState_Released || state == kNoteState_FastReleased)
-        mAmpEnv.release();
-    UInt32 end = mAmpEnv.generate(ampbuf, inNumFrames);
     UInt32 frameCount = inNumFrames;
+    Float32 osc1buf[frameCount], ampbuf[frameCount];
+    UInt32 end = mAmpEnv.generate(ampbuf, frameCount);
     if (end != 0xFFFFFFFF)
         frameCount = end;
-    assert(frameCount <= inNumFrames);
     mOsc1.generate(Frequency(), osc1buf, frameCount);
+
     if (right) {
         for (UInt32 i = 0; i < frameCount; i++) {
             Float32 out = osc1buf[i] * ampbuf[i];
