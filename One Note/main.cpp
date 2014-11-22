@@ -47,7 +47,7 @@ size_t OneNote::render(Float32 *outbuf, size_t count)
             mAmpEnv.release();
             released = true;
         }
-        mOsc1.generate(440.0, osc1buf, (UInt32)chunk_count);
+        mOsc1.generate(440.0, 0.0, osc1buf, (UInt32)chunk_count);
         for (size_t i = 0; i < chunk_count; i++)
             outbuf[note_count + i] = osc1buf[i] * ampbuf[i];
 //        for (size_t i = 0; i < chunk_count; i++)
