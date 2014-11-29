@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "92717B681A19A7DC00B87C38"
-               BuildableName = "MVS 2.component"
-               BlueprintName = "MVS 2"
-               ReferencedContainer = "container:MVS 2.xcodeproj">
+               BuildableName = "MVS 3.component"
+               BlueprintName = "MVS 3"
+               ReferencedContainer = "container:MVS 3.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -43,9 +43,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "92717B681A19A7DC00B87C38"
-            BuildableName = "MVS 2.component"
-            BlueprintName = "MVS 2"
-            ReferencedContainer = "container:MVS 2.xcodeproj">
+            BuildableName = "MVS 3.component"
+            BlueprintName = "MVS 3"
+            ReferencedContainer = "container:MVS 3.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -61,9 +61,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "92717B681A19A7DC00B87C38"
-            BuildableName = "MVS 2.component"
-            BlueprintName = "MVS 2"
-            ReferencedContainer = "container:MVS 2.xcodeproj">
+            BuildableName = "MVS 3.component"
+            BlueprintName = "MVS 3"
+            ReferencedContainer = "container:MVS 3.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

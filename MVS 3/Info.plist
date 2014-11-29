@@ -10,17 +10,17 @@
 			<key>New item - 2</key>
 			<string></string>
 			<key>description</key>
-			<string>Minimum Viable Synth, V2</string>
+			<string>Minimum Viable Synth, V3</string>
 			<key>factoryFunction</key>
 			<string>MVSFactory</string>
 			<key>manufacturer</key>
 			<string>sbiL</string>
 			<key>name</key>
-			<string>MVS 2</string>
+			<string>MVS 3</string>
 			<key>sandboxSafe</key>
 			<true/>
 			<key>subtype</key>
-			<string>mvs2</string>
+			<string>mvs3</string>
 			<key>type</key>
 			<string>aumu</string>
 			<key>version</key>
