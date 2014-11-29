@@ -40,6 +40,7 @@ private:
     Type    mType;
     Float32 mPhase;
     Float32 mZm2, mZm1, mZ0, mZp1;
+    Float32 mLevel;
 
     void    generate_saw                (Float64        freq,
                                          Float32        modifier,

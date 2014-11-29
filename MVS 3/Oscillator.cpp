@@ -73,6 +73,7 @@ void Oscillator::initialize(Float64 sampleRate, Type type)
     mType = type;
     mInverseSampleRate = 1.0 / sampleRate;
     mPhase = 0.0;
+    mLevel = +1.0;
 
     Float32 zm2 = 0, zm1 = 0, z0 = 0, zp1 = 0;
     switch (type) {
@@ -218,8 +219,9 @@ void Oscillator::generate_square(Float64  freq,
     Float32 thresh       = (1 - 0.9 * modifier) / 2;
     Float32 high         = 1.0;
     Float32 low          = thresh / (thresh - 1);
-    Float32 level        = phase < thresh ? high : low;
-    Float32 fall_trigger = phase < thresh ? thresh : 9999;
+    low = -1;
+    Float32 level        = mLevel;
+    Float32 fall_trigger = level > 0 ? thresh : 9999;
     Float32 inc          = freq * mInverseSampleRate;
     Float32 inv_inc      = 1 / inc;
     for (size_t i = 0; i < count; i++) {
@@ -245,6 +247,7 @@ void Oscillator::generate_square(Float64  freq,
     mZ0    = z0;
     mZp1   = zp1;
     mPhase = phase;
+    mLevel = level;
 }
 
 void Oscillator::generate_modulated_square(Float32        modifier,
@@ -260,8 +263,8 @@ void Oscillator::generate_modulated_square(Float32        modifier,
     Float32 thresh       = (1 - 0.9 * modifier) / 2;
     Float32 high         = 1.0;
     Float32 low          = thresh / (thresh - 1);
-    Float32 level        = phase < thresh ? high : low;
-    Float32 fall_trigger = phase < thresh ? thresh : 9999;
+    Float32 level        = mLevel;
+    Float32 fall_trigger = level > 0 ? thresh : 9999;
     for (size_t i = 0; i < count; i++) {
         Float32 inc = phaseIncrements[i];
         phase += inc;
@@ -286,6 +289,7 @@ void Oscillator::generate_modulated_square(Float32        modifier,
     mZ0    = z0;
     mZp1   = zp1;
     mPhase = phase;
+    mLevel = level;
 }
 
 void Oscillator::generate_triangle(Float64  freq,
