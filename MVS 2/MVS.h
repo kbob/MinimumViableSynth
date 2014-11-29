@@ -87,7 +87,7 @@ public:
                                 AudioUnitParameterID    inParameterID,
                                 AudioUnitParameterInfo &outParameterInfo);
 
-    virtual	OSStatus   GetParameterValueStrings(
+    virtual OSStatus   GetParameterValueStrings(
                                 AudioUnitScope       inScope,
                                 AudioUnitParameterID inParameterID,
                                 CFArrayRef          *outStrings);

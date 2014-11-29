@@ -13,7 +13,7 @@
 
 #include "MVS.h"
  
-static const UInt32 kMaxActiveNotes = 8;
+static const UInt32 kMaxActiveNotes = 18;
 
 static CFStringRef kParamName_Osc1Waveform   = CFSTR("Oscillator 1 Waveform");
 static CFStringRef kParamName_Osc1WaveMod    = CFSTR("Oscillator 1 Modifier");
@@ -51,6 +51,8 @@ MVS::MVS(AudioUnit inComponentInstance)
     Globals()->SetParameter(kParameter_AmpDecayTime,    0.100);
     Globals()->SetParameter(kParameter_AmpSustainLevel, 1.000);
     Globals()->SetParameter(kParameter_AmpReleaseTime,  0.050);
+
+    SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -175,14 +177,14 @@ OSStatus MVS::GetParameterValueStrings(AudioUnitScope       inScope,
             return noErr;
 
         // Defines an array that contains the pop-up menu item names.
-        CFStringRef	strings [] = {
+        CFStringRef strings [] = {
             kMenuItem_Waveform_Sine,
             kMenuItem_Waveform_Saw,
             kMenuItem_Waveform_Pulse,
         };
 
-        // Creates a new immutable array containing the menu item names, and places the array
-        // in the outStrings output parameter.
+        // Create a new immutable array containing the menu item names
+        // and place the array in the outStrings output parameter.
         *outStrings = CFArrayCreate (
                                      NULL,
                                      (const void **) strings,
