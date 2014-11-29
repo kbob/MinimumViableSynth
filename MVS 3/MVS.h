@@ -31,9 +31,10 @@ enum Parameter {
 };
 
 enum Waveform {
-    kWaveform_Sine,
     kWaveform_Saw,
-    kWaveform_Pulse,
+    kWaveform_Square,
+    kWaveform_Triangle,
+    kWaveform_Sine,
     kNumberOfWaveforms
 };
 

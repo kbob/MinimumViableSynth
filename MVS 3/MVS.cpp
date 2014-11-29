@@ -24,9 +24,10 @@ static CFStringRef kParamName_AmpDecayTime   = CFSTR("Amplitude Decay Time");
 static CFStringRef kParamName_AmpSustainLevel= CFSTR("Amplitude Sustain Level");
 static CFStringRef kParamName_AmpReleaseTime = CFSTR("Amplitude Release Time");
 
-static CFStringRef kMenuItem_Waveform_Sine   = CFSTR ("Sine");
-static CFStringRef kMenuItem_Waveform_Saw    = CFSTR ("Sawtooth");
-static CFStringRef kMenuItem_Waveform_Pulse  = CFSTR ("Pulse");
+static CFStringRef kMenuItem_Waveform_Saw      = CFSTR ("Sawtooth");
+static CFStringRef kMenuItem_Waveform_Square   = CFSTR ("Square/Pulse");
+static CFStringRef kMenuItem_Waveform_Triangle = CFSTR ("Triangle");
+static CFStringRef kMenuItem_Waveform_Sine     = CFSTR ("Sine");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +49,6 @@ MVS::MVS(AudioUnit inComponentInstance)
     CreateElements();
 
     Globals()->UseIndexedParameters(kNumberOfParameters);
-    Globals()->SetParameter(kParameter_Osc1Waveform,    0.000);
     Globals()->SetParameter(kParameter_Osc1Waveform,    kWaveform_Saw);
     Globals()->SetParameter(kParameter_AmpAttackTime,   0.001);
     Globals()->SetParameter(kParameter_AmpDecayTime,    0.100);
@@ -187,9 +187,10 @@ OSStatus MVS::GetParameterValueStrings(AudioUnitScope       inScope,
 
         // Defines an array that contains the pop-up menu item names.
         CFStringRef strings [] = {
-            kMenuItem_Waveform_Sine,
             kMenuItem_Waveform_Saw,
-            kMenuItem_Waveform_Pulse,
+            kMenuItem_Waveform_Square,
+            kMenuItem_Waveform_Triangle,
+            kMenuItem_Waveform_Sine,
         };
 
         // Create a new immutable array containing the menu item names
@@ -293,16 +294,20 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     Oscillator::Type otype = Oscillator::Saw;
     switch ((Waveform)(int)(waveform + 0.5f)) {
 
-        case kWaveform_Sine:
-            otype = Oscillator::Sine;
-            break;
-
         case kWaveform_Saw:
             otype = Oscillator::Saw;
             break;
 
-        case kWaveform_Pulse:
+        case kWaveform_Square:
             otype = Oscillator::Square;
+            break;
+
+        case kWaveform_Triangle:
+            otype = Oscillator::Triangle;
+            break;
+
+        case kWaveform_Sine:
+            otype = Oscillator::Sine;
             break;
 
         default:

@@ -298,7 +298,7 @@ void Oscillator::generate_triangle(Float64  freq,
     Float32 z0           = mZ0;
     Float32 zp1          = mZp1;
     Float32 phase        = mPhase;
-    Float32 thresh       = (1 - 0.49 * modifier) / 2; // maximum skew is 98%.
+    Float32 thresh       = 0.5 + 0.49 * modifier; // maximum skew is 98%.
     Float32 up_slope     = 2 / thresh;
     Float32 dn_slope     = -2 / (1 - thresh);
     Float32 m            = phase < thresh ? up_slope : dn_slope;
@@ -346,7 +346,7 @@ void Oscillator::generate_modulated_triangle(Float32        modifier,
     Float32 z0           = mZ0;
     Float32 zp1          = mZp1;
     Float32 phase        = mPhase;
-    Float32 thresh       = (1 - 0.49 * modifier) / 2; // maximum skew is 98%.
+    Float32 thresh       = 0.5 + 0.49 * modifier; // maximum skew is 98%.
     Float32 up_slope     = 2 / thresh;
     Float32 dn_slope     = -2 / (1 - thresh);
     Float32 m            = phase < thresh ? up_slope : dn_slope;
