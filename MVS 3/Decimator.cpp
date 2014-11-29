@@ -40,15 +40,6 @@ void Decimator::initialize(Float64  decimatedSampleRate,
 
     // DSP Guide uses approx. values.  Got these from Wikipedia.
     Float64 a0 = 7938. / 18608., a1 = 9240. / 18608., a2 = 1430. / 18608.;
-    fprintf(stderr, "decimated sample rate = %g\n", mDecimatedSampleRate);
-    fprintf(stderr, "oversample rate       = %g\n", mOversampleRate);
-    fprintf(stderr, "Nyquist frequency     = %g\n", NyquistFreq);
-    fprintf(stderr, "Fc                    = %g\n", Fc);
-    fprintf(stderr, "BW                    = %g\n", BW);
-    fprintf(stderr, "M                     = %d\n", M);
-    fprintf(stderr, "kernel size           = %zu\n", activeKernelSize);
-    fprintf(stderr, "kernel size rounded   = %zu\n", mKernelSize);
-    fprintf(stderr, "a0, a1, a2            = %g %g %g\n", a0, a1, a2);
 
     // Allocate and initialize the FIR filter kernel.
     delete [] mKernel;
@@ -104,7 +95,6 @@ void Decimator::initialize(Float64  decimatedSampleRate,
 
 void Decimator::decimate(Float32 *in, Float32 *out, size_t outCount)
 {
-    fprintf(stderr, "Decimator::decimate\n");
     assert(!(mCursor % mRatio));
     assert(mCursor < mKernelSize);
     size_t cursor = mCursor;

@@ -13,32 +13,73 @@ class Oscillator {
 
 public:
     enum Type {
-        OT_Sine,
-        OT_Saw,
-        OT_Pulse,
+        Saw,
+        Square,
+        Triangle,
+        Sine,
     };
 
-    Oscillator();
+            Oscillator();
 
-    void initialize(Float64 sampleRate,
-                    Type    type = OT_Saw);
+    void    initialize                  (Float64        sampleRate,
+                                         Type           type = Saw);
 
-    void generate(Float64  freq,
-                  Float32  modifier,
-                  Float32 *sampBuf,
-                  UInt32   count);
-    void generate_modulated(Float32  modifier,
-                            Float32 *sampBuf,
-                            Float64 *freqs,
-                            UInt32   count);
+    void    generate                    (Float64        freq,
+                                         Float32        modifier,
+                                         Float32       *sampBuf,
+                                         UInt32         count);
+
+    void    generate_modulated          (Float32        modifier,
+                                         Float32       *sampBuf,
+                                         Float32 const *phaseIncrements,
+                                         UInt32         count);
 
 private:
     Float64 mSampleRate;
-    Type    mType;
-
     Float64 mInverseSampleRate;
+    Type    mType;
+    Float32 mPhase;
+    Float32 mZm2, mZm1, mZ0, mZp1;
 
-    Float64 mPhase;
+    void    generate_saw                (Float64        freq,
+                                         Float32        modifier,
+                                         Float32       *sampBuf,
+                                         UInt32         count);
+
+    void    generate_modulated_saw      (Float32        modifier,
+                                         Float32       *sampBuf,
+                                         Float32 const *phaseIncrements,
+                                         UInt32         count);
+
+    void    generate_square             (Float64        freq,
+                                         Float32        modifier,
+                                         Float32       *sampBuf,
+                                         UInt32         count);
+
+    void    generate_modulated_square   (Float32        modifier,
+                                         Float32       *sampBuf,
+                                         Float32 const *phaseIncrements,
+                                         UInt32         count);
+
+    void    generate_triangle           (Float64        freq,
+                                         Float32        modifier,
+                                         Float32       *sampBuf,
+                                         UInt32         count);
+
+    void    generate_modulated_triangle (Float32        modifier,
+                                         Float32       *sampBuf,
+                                         Float32 const *phaseIncrements,
+                                         UInt32         count);
+
+    void    generate_sine               (Float64        freq,
+                                         Float32        modifier,
+                                         Float32       *sampBuf,
+                                         UInt32         count);
+
+    void    generate_modulated_sine     (Float32        modifier,
+                                         Float32       *sampBuf,
+                                         Float32 const *phaseIncrements,
+                                         UInt32         count);
     
 };
 

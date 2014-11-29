@@ -227,7 +227,6 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
                      const AudioTimeStamp       &inTimeStamp,
                      UInt32                      inNumberFrames)
 {
-    fprintf(stderr, "MVS::Render\n");
     PerformEvents(inTimeStamp);
 
     AUScope &outputs = Outputs();
@@ -291,19 +290,23 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 
     Float32 waveform   = GetGlobalParameter(kParameter_Osc1Waveform);
 
-    Oscillator::Type otype = Oscillator::OT_Saw;;
-    switch ((Oscillator::Type)(int)(waveform + 0.5f)) {
+    Oscillator::Type otype = Oscillator::Saw;
+    switch ((Waveform)(int)(waveform + 0.5f)) {
 
         case kWaveform_Sine:
-            otype = Oscillator::OT_Sine;
+            otype = Oscillator::Sine;
             break;
 
         case kWaveform_Saw:
-            otype = Oscillator::OT_Saw;
+            otype = Oscillator::Saw;
             break;
 
         case kWaveform_Pulse:
-            otype = Oscillator::OT_Pulse;
+            otype = Oscillator::Square;
+            break;
+
+        default:
+            // ???
             break;
     }
 
@@ -346,8 +349,6 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                          AudioBufferList **inBufferList,
                          UInt32            inOutBusCount)
 {
-    fprintf(stderr, "MVSNote::Render\n");
-
     Float32 *outBuf     = *mOversampleBufPtr;
     UInt32   frameCount = inNumFrames * mOversampleRatio;
 
@@ -358,6 +359,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     UInt32 end = mAmpEnv.generate(ampbuf, frameCount);
     if (end != 0xFFFFFFFF)
         frameCount = end;
+    memset(osc1buf, 0, frameCount * sizeof *osc1buf);
     mOsc1.generate(Frequency(), osc1mod, osc1buf, frameCount);
 
     for (UInt32 i = 0; i < frameCount; i++) {
