@@ -13,7 +13,9 @@
 
 #include "MVS.h"
  
-static const UInt32 kMaxActiveNotes = 18;
+static const UInt32  kMaxActiveNotes = 18;
+static const UInt32  kOversampleRatio = 4;
+static const Float64 kDecimatorPassFreq = 20000.0;
 
 static CFStringRef kParamName_Osc1Waveform   = CFSTR("Oscillator 1 Waveform");
 static CFStringRef kParamName_Osc1WaveMod    = CFSTR("Oscillator 1 Modifier");
@@ -40,7 +42,8 @@ AUDIOCOMPONENT_ENTRY(AUMusicDeviceFactory, MVS)
 // This synth has No inputs, One output
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 MVS::MVS(AudioUnit inComponentInstance)
-: AUMonotimbralInstrumentBase(inComponentInstance, 0, 1)
+: AUMonotimbralInstrumentBase(inComponentInstance, 0, 1),
+  mOversampleBufPtr(NULL)
 {
     CreateElements();
 
@@ -53,6 +56,9 @@ MVS::MVS(AudioUnit inComponentInstance)
     Globals()->SetParameter(kParameter_AmpReleaseTime,  0.050);
 
     SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
+
+    for (size_t i = 0; i < kNumNotes; i++)
+        mNotes[i].SetOversampleParams(kOversampleRatio, &mOversampleBufPtr);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,6 +76,9 @@ OSStatus MVS::Initialize()
     AUMonotimbralInstrumentBase::Initialize();
         
     SetNotes(kNumNotes, kMaxActiveNotes, mNotes, sizeof(MVSNote));
+
+    Float64 sampleRate = GetOutput(0)->GetStreamFormat().mSampleRate;
+    mDecimator.initialize(sampleRate, kDecimatorPassFreq, kOversampleRatio);
 
     return noErr;
 }
@@ -214,9 +223,66 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
                                                      inBufferOffsetInFrames);
 }
 
+OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
+                     const AudioTimeStamp       &inTimeStamp,
+                     UInt32                      inNumberFrames)
+{
+    fprintf(stderr, "MVS::Render\n");
+    PerformEvents(inTimeStamp);
+
+    AUScope &outputs = Outputs();
+    UInt32 numOutputs = outputs.GetNumberOfElements();
+    for (UInt32 j = 0; j < numOutputs; j++)
+        GetOutput(j)->PrepareBuffer(inNumberFrames);	// AUBase::DoRenderBus() only does this for the first output element
+
+    // Allocate and clear oversampleBuf.
+    UInt32 oversampleFrameCount = kOversampleRatio * inNumberFrames;
+    Float32 oversampleBuf[oversampleFrameCount];
+    memset(&oversampleBuf, 0, sizeof oversampleBuf);
+    mOversampleBufPtr = oversampleBuf;
+
+    UInt32 numGroups = Groups().GetNumberOfElements();
+    for (UInt32 j = 0; j < numGroups; j++) {
+        SynthGroupElement *group = (SynthGroupElement*)Groups().GetElement(j);
+        OSStatus err = group->Render((SInt64)inTimeStamp.mSampleTime, inNumberFrames, outputs);
+        if (err) return err;
+    }
+    mOversampleBufPtr = NULL;
+
+    // Decimate oversampleBuf into each bus's output buf.
+    Float32 *firstOutputBuf = NULL;
+    for (UInt32 j = 0; j < numOutputs; j++) {
+        AudioBufferList& bufferList = GetOutput(j)->GetBufferList();
+        for (UInt32 k = 0; k < bufferList.mNumberBuffers; k++) {
+            if (!firstOutputBuf) {
+                firstOutputBuf = (Float32 *)bufferList.mBuffers[k].mData;
+                mDecimator.decimate(oversampleBuf,
+                                    firstOutputBuf,
+                                    inNumberFrames);
+            } else
+                memcpy(bufferList.mBuffers[k].mData,
+                       firstOutputBuf,
+                       bufferList.mBuffers[k].mDataByteSize);
+        }
+    }
+    mAbsoluteSampleFrame += inNumberFrames;
+    return noErr;
+}
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #pragma mark MVSNote Methods
+
+MVSNote::MVSNote()
+: mOversampleRatio(0),
+  mOversampleBufPtr(NULL)
+{}
+
+void MVSNote::SetOversampleParams(UInt32 ratio, Float32 **bufPtr)
+{
+    mOversampleRatio  = ratio;
+    mOversampleBufPtr = bufPtr;
+}
 
 bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 {
@@ -270,43 +336,33 @@ Float32 MVSNote::Amplitude()
     return mAmpEnv.amplitude();
 }
 
+Float64 MVSNote::SampleRate()
+{
+    return mOversampleRatio * SynthNote::SampleRate();
+}
+
 OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                          UInt32            inNumFrames,
                          AudioBufferList **inBufferList,
                          UInt32            inOutBusCount)
 {
-    float *left, *right;
+    fprintf(stderr, "MVSNote::Render\n");
 
-    // MVSNote only writes into the first bus regardless of what is
-    // handed to us.
-    const int bus0 = 0;
-    int numChans = inBufferList[bus0]->mNumberBuffers;
-    if (numChans > 2)
-        return -1;
+    Float32 *outBuf     = *mOversampleBufPtr;
+    UInt32   frameCount = inNumFrames * mOversampleRatio;
 
-    left = (float*)inBufferList[bus0]->mBuffers[0].mData;
-    right = numChans == 2 ? (float*)inBufferList[bus0]->mBuffers[1].mData : 0;
+    // Get parameters.
+    Float32 osc1mod    = GetGlobalParameter(kParameter_Osc1WaveMod) / 100.0;
 
-    Float32 osc1mod = GetGlobalParameter(kParameter_Osc1WaveMod) / 100.0;
-
-    UInt32 frameCount = inNumFrames;
     Float32 osc1buf[frameCount], ampbuf[frameCount];
     UInt32 end = mAmpEnv.generate(ampbuf, frameCount);
     if (end != 0xFFFFFFFF)
         frameCount = end;
     mOsc1.generate(Frequency(), osc1mod, osc1buf, frameCount);
 
-    if (right) {
-        for (UInt32 i = 0; i < frameCount; i++) {
-            Float32 out = osc1buf[i] * ampbuf[i];
-            left[i] += out;
-            right[i] += out;
-        }
-    } else {
-        for (UInt32 i = 0; i < frameCount; i++) {
-            Float32 out = osc1buf[i] * ampbuf[i];
-            left[i] += out;
-        }
+    for (UInt32 i = 0; i < frameCount; i++) {
+        Float32 out = osc1buf[i] * ampbuf[i];
+        outBuf[i] += out;
     }
 
     if (end != 0xFFFFFFFF)

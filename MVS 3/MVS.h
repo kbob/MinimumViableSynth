@@ -12,6 +12,7 @@
 #include "AUInstrumentBase.h"
 #include "MVSVersion.h"
 
+#include "Decimator.h"
 #include "Oscillator.h"
 #include "Envelope.h"
 
@@ -51,36 +52,45 @@ static AUPreset kPresets [kNumberOfPresets] = {
 class MVSNote : public SynthNote {
 
 public:
+                     MVSNote();
     virtual         ~MVSNote() {}
 
-    virtual bool     Attack(const MusicDeviceNoteParams &inParams);
+            void     SetOversampleParams(
+                                UInt32 ratio,
+                                Float32 **bufPtr);
 
-    virtual void     Release(UInt32 inFrame);
+    virtual bool     Attack    (const MusicDeviceNoteParams &inParams);
+
+    virtual void     Release   (UInt32 inFrame);
     virtual void     FastRelease(UInt32 inFrame);
-    virtual Float32  Amplitude();
-    virtual OSStatus Render(UInt64            inAbsoluteSampleFrame,
-                            UInt32            inNumFrames,
-                            AudioBufferList **nBufferList,
-                            UInt32            inOutBusCount);
+    virtual Float32  Amplitude ();
+    virtual OSStatus Render    (UInt64            inAbsoluteSampleFrame,
+                                UInt32            inNumFrames,
+                                AudioBufferList **inBufferList,
+                                UInt32            inOutBusCount);
+    virtual Float64  SampleRate();
 
 private:
-    Oscillator mOsc1;
-    Envelope   mAmpEnv;
+    UInt32           mOversampleRatio;
+    Float32        **mOversampleBufPtr;
+    Oscillator       mOsc1;
+    Envelope         mAmpEnv;
 
 };
 
 class MVS : public AUMonotimbralInstrumentBase {
 
 public:
-                       MVS(AudioUnit inComponentInstance);
-    virtual           ~MVS();
+                       MVS     (AudioUnit inComponentInstance);
+    virtual           ~MVS     ();
                                 
     virtual OSStatus   Initialize();
-    virtual void       Cleanup();
-    virtual OSStatus   Version() { return kMVSVersion; }
+    virtual void       Cleanup ();
+    virtual OSStatus   Version () { return kMVSVersion; }
 
-    virtual AUElement *CreateElement(AudioUnitScope  scope,
-                                     AudioUnitElement element);
+    virtual AUElement *CreateElement(
+                                AudioUnitScope          scope,
+                                AudioUnitElement        element);
 
     virtual OSStatus   GetParameterInfo(
                                 AudioUnitScope          inScope,
@@ -88,9 +98,9 @@ public:
                                 AudioUnitParameterInfo &outParameterInfo);
 
     virtual OSStatus   GetParameterValueStrings(
-                                AudioUnitScope       inScope,
-                                AudioUnitParameterID inParameterID,
-                                CFArrayRef          *outStrings);
+                                AudioUnitScope          inScope,
+                                AudioUnitParameterID    inParameterID,
+                                CFArrayRef             *outStrings);
 
     virtual OSStatus   SetParameter(
                                 AudioUnitParameterID    inID,
@@ -99,8 +109,14 @@ public:
                                 AudioUnitParameterValue inValue,
                                 UInt32                  inBufferOffsetInFrames);
 
+    virtual OSStatus   Render  (AudioUnitRenderActionFlags &ioActionFlags,
+                                const AudioTimeStamp       &inTimeStamp,
+                                UInt32                     inNumberFrames);
+
 private:
-    MVSNote mNotes[kNumNotes];
+    Float32           *mOversampleBufPtr;
+    Decimator          mDecimator;
+    MVSNote            mNotes[kNumNotes];
 
 };
 

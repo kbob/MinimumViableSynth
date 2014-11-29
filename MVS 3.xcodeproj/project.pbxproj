@@ -42,6 +42,8 @@
 		92717BED1A1B211600B87C38 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BEC1A1B211600B87C38 /* main.cpp */; };
 		92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE01A19B5DD00B87C38 /* Envelope.cpp */; };
 		92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
+		929D3C391A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
+		929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -136,6 +138,8 @@
 		92717BE41A1A498100B87C38 /* Oscillator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Oscillator.h; sourceTree = "<group>"; };
 		92717BEA1A1B211600B87C38 /* One Note */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "One Note"; sourceTree = BUILT_PRODUCTS_DIR; };
 		92717BEC1A1B211600B87C38 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		929D3C371A2A3DDC0049102A /* Decimator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decimator.cpp; sourceTree = "<group>"; };
+		929D3C381A2A3DDC0049102A /* Decimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decimator.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -331,6 +335,8 @@
 			children = (
 				92717BD51A19A7DC00B87C38 /* MVS.h */,
 				92717BD61A19A7DC00B87C38 /* MVS.cpp */,
+				929D3C371A2A3DDC0049102A /* Decimator.cpp */,
+				929D3C381A2A3DDC0049102A /* Decimator.h */,
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
 				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
@@ -472,6 +478,7 @@
 				92717BB01A19A7DC00B87C38 /* CAAUMIDIMapManager.cpp in Sources */,
 				92717BBE1A19A7DC00B87C38 /* CADebugPrintf.cpp in Sources */,
 				92717BA81A19A7DC00B87C38 /* AUBaseHelper.cpp in Sources */,
+				929D3C391A2A3DDC0049102A /* Decimator.cpp in Sources */,
 				92717BA21A19A7DC00B87C38 /* AUMIDIBase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -489,6 +496,7 @@
 			files = (
 				92717BED1A1B211600B87C38 /* main.cpp in Sources */,
 				92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */,
+				929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */,
 				92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
