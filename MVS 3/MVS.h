@@ -21,12 +21,15 @@ static const UInt32 kNumNotes = 12;
 // Define constants to identify the parameters;
 // define the total number of parameters.
 enum Parameter {
-    kParameter_Osc1Waveform    = 0,
-    kParameter_Osc1WaveMod     = 1,
-    kParameter_AmpAttackTime   = 3,
-    kParameter_AmpDecayTime    = 4,
-    kParameter_AmpSustainLevel = 5,
-    kParameter_AmpReleaseTime  = 6,
+    kParameter_Osc1Waveform        = 0,
+    kParameter_Osc1WaveMod         = 1,
+    kParameter_Osc1VibratoDepth    = 2,
+    kParameter_Osc1VibratoSpeed    = 3,
+    kParameter_Osc1VibratoWaveform = 4,
+    kParameter_AmpAttackTime       = 5,
+    kParameter_AmpDecayTime        = 6,
+    kParameter_AmpSustainLevel     = 7,
+    kParameter_AmpReleaseTime      = 8,
     kNumberOfParameters
 };
 
@@ -75,7 +78,23 @@ private:
     UInt32           mOversampleRatio;
     Float32        **mOversampleBufPtr;
     Oscillator       mOsc1;
+    Oscillator       mOsc1LFO;
     Envelope         mAmpEnv;
+
+    void             FillWithConstant(
+                                Float32           k,
+                                Float32          *buf,
+                                UInt32            count);
+
+    void             CVtoPhase (Float64           baseFreq,
+                                Float32           cvDepth,
+                                Float32          *buf,
+                                UInt32            count);
+
+    Oscillator::Type OscillatorType(
+                                    Waveform waveform);
+
+
 
 };
 

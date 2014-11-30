@@ -17,17 +17,24 @@ static const UInt32  kMaxActiveNotes = 18;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
-static CFStringRef kParamName_Osc1Waveform   = CFSTR("Oscillator 1 Waveform");
-static CFStringRef kParamName_Osc1WaveMod    = CFSTR("Oscillator 1 Modifier");
-static CFStringRef kParamName_AmpAttackTime  = CFSTR("Amplitude Attack Time");
-static CFStringRef kParamName_AmpDecayTime   = CFSTR("Amplitude Decay Time");
-static CFStringRef kParamName_AmpSustainLevel= CFSTR("Amplitude Sustain Level");
-static CFStringRef kParamName_AmpReleaseTime = CFSTR("Amplitude Release Time");
+#define DEFPNAME(param, name) \
+    static CFStringRef kParamName_##param = CFSTR(name);
 
-static CFStringRef kMenuItem_Waveform_Saw      = CFSTR ("Sawtooth");
-static CFStringRef kMenuItem_Waveform_Square   = CFSTR ("Square/Pulse");
-static CFStringRef kMenuItem_Waveform_Triangle = CFSTR ("Triangle");
-static CFStringRef kMenuItem_Waveform_Sine     = CFSTR ("Sine");
+DEFPNAME(Osc1Waveform,        "Oscillator 1 Waveform");
+DEFPNAME(Osc1WaveMod,         "Oscillator 1 Modifier");
+DEFPNAME(Osc1VibratoDepth,    "Oscillator 1 Vibrato Depth");
+DEFPNAME(Osc1VibratoSpeed,    "Oscillator 1 Vibrato Speed");
+DEFPNAME(Osc1VibratoWaveform, "Oscillator 1 Vibrato Waveform");
+
+DEFPNAME(AmpAttackTime  , "Amplitude Attack Time");
+DEFPNAME(AmpDecayTime   , "Amplitude Decay Time");
+DEFPNAME(AmpSustainLevel, "Amplitude Sustain Level");
+DEFPNAME(AmpReleaseTime , "Amplitude Release Time");
+
+static CFStringRef kMenuItem_Waveform_Saw      = CFSTR("Sawtooth");
+static CFStringRef kMenuItem_Waveform_Square   = CFSTR("Square/Pulse");
+static CFStringRef kMenuItem_Waveform_Triangle = CFSTR("Triangle");
+static CFStringRef kMenuItem_Waveform_Sine     = CFSTR("Sine");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -49,11 +56,14 @@ MVS::MVS(AudioUnit inComponentInstance)
     CreateElements();
 
     Globals()->UseIndexedParameters(kNumberOfParameters);
-    Globals()->SetParameter(kParameter_Osc1Waveform,    kWaveform_Saw);
-    Globals()->SetParameter(kParameter_AmpAttackTime,   0.001);
-    Globals()->SetParameter(kParameter_AmpDecayTime,    0.100);
-    Globals()->SetParameter(kParameter_AmpSustainLevel, 1.000);
-    Globals()->SetParameter(kParameter_AmpReleaseTime,  0.050);
+    Globals()->SetParameter(kParameter_Osc1Waveform,        kWaveform_Saw);
+    Globals()->SetParameter(kParameter_Osc1VibratoDepth,    0.000);
+    Globals()->SetParameter(kParameter_Osc1VibratoSpeed,    3.000);
+    Globals()->SetParameter(kParameter_Osc1VibratoWaveform, kWaveform_Sine);
+    Globals()->SetParameter(kParameter_AmpAttackTime,       0.001);
+    Globals()->SetParameter(kParameter_AmpDecayTime,        0.100);
+    Globals()->SetParameter(kParameter_AmpSustainLevel,     1.000);
+    Globals()->SetParameter(kParameter_AmpReleaseTime,      0.050);
 
     SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
 
@@ -129,10 +139,40 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
 //      info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
         break;
 
+    case kParameter_Osc1VibratoDepth:
+        AUBase::FillInParameterName(info, kParamName_Osc1VibratoDepth, false);
+        info.unit         = kAudioUnitParameterUnit_Cents;
+        info.minValue     = 0;
+        info.maxValue     = 600;
+        info.defaultValue = 0;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
+
+        break;
+        
+    case kParameter_Osc1VibratoSpeed:
+        AUBase::FillInParameterName(info, kParamName_Osc1VibratoSpeed, false);
+        info.unit         = kAudioUnitParameterUnit_Hertz;
+        info.minValue     =  0.1;
+        info.maxValue     = 25.0;
+        info.defaultValue =  3.0;
+        info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+
+        break;
+        
+    case kParameter_Osc1VibratoWaveform:
+        AUBase::FillInParameterName(info,
+                                    kParamName_Osc1VibratoWaveform,
+                                    false);
+        info.unit         = kAudioUnitParameterUnit_Indexed;
+        info.minValue     = 0;
+        info.maxValue     = kNumberOfWaveforms - 1;
+        info.defaultValue = kWaveform_Sine;
+        break;
+
     case kParameter_AmpAttackTime:
         AUBase::FillInParameterName(info, kParamName_AmpAttackTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     = 0.001;
+        info.minValue     = 0.000;
         info.maxValue     = 2.00;
         info.defaultValue = 0.001;
 //      info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
@@ -181,7 +221,8 @@ OSStatus MVS::GetParameterValueStrings(AudioUnitScope       inScope,
     if (inScope != kAudioUnitScope_Global)
         return kAudioUnitErr_InvalidScope;
 
-    if (inParameterID == kParameter_Osc1Waveform) {
+    if (inParameterID == kParameter_Osc1Waveform ||
+        inParameterID == kParameter_Osc1VibratoWaveform) {
         if (outStrings == NULL)
             return noErr;
 
@@ -215,6 +256,8 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
 {
     // Controller sends CC values 0/127, 1/127, 2/127.  We map those to [0..2].
     if (inID == kParameter_Osc1Waveform && inValue < 1.0)
+        inValue *= 127.0 / (kNumberOfWaveforms - 1);
+    if (inID == kParameter_Osc1VibratoWaveform && inValue < 1.0)
         inValue *= 127.0 / (kNumberOfWaveforms - 1);
 
     return AUMonotimbralInstrumentBase::SetParameter(inID,
@@ -289,38 +332,20 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     double sampleRate  = SampleRate();
     Float32 maxLevel   = powf(inParams.mVelocity/127.0, 3.0);
 
-    Float32 waveform   = GetGlobalParameter(kParameter_Osc1Waveform);
-
-    Oscillator::Type otype = Oscillator::Saw;
-    switch ((Waveform)(int)(waveform + 0.5f)) {
-
-        case kWaveform_Saw:
-            otype = Oscillator::Saw;
-            break;
-
-        case kWaveform_Square:
-            otype = Oscillator::Square;
-            break;
-
-        case kWaveform_Triangle:
-            otype = Oscillator::Triangle;
-            break;
-
-        case kWaveform_Sine:
-            otype = Oscillator::Sine;
-            break;
-
-        default:
-            // ???
-            break;
-    }
+    Float32 o1wf       = GetGlobalParameter(kParameter_Osc1Waveform);
+    Float32 o1vwf      = GetGlobalParameter(kParameter_Osc1VibratoWaveform);
 
     float attackTime   = GetGlobalParameter(kParameter_AmpAttackTime);
     float decayTime    = GetGlobalParameter(kParameter_AmpDecayTime);
     float sustainLevel = GetGlobalParameter(kParameter_AmpSustainLevel);
     float releaseTime  = GetGlobalParameter(kParameter_AmpReleaseTime);
 
-    mOsc1.initialize(sampleRate, otype);
+    Oscillator::Type o1type    = OscillatorType((Waveform)(o1wf + 0.5));
+    Oscillator::Type o1LFOtype = OscillatorType((Waveform)(o1vwf + 0.5));
+
+
+    mOsc1LFO.initialize(sampleRate, o1LFOtype);
+    mOsc1.initialize(sampleRate, o1type);
     mAmpEnv.initialize(sampleRate,
                        maxLevel,
                        attackTime, decayTime, sustainLevel, releaseTime);
@@ -359,13 +384,27 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
 
     // Get parameters.
     Float32 osc1mod    = GetGlobalParameter(kParameter_Osc1WaveMod) / 100.0;
+    Float32 osc1vibdep = GetGlobalParameter(kParameter_Osc1VibratoDepth) / 1200;
+    Float32 osc1vibspd = GetGlobalParameter(kParameter_Osc1VibratoSpeed);
 
-    Float32 osc1buf[frameCount], ampbuf[frameCount];
+    // Generate envelope.  If note terminates, truncate frame count.
+    Float32 ampbuf[frameCount];
     UInt32 end = mAmpEnv.generate(ampbuf, frameCount);
     if (end != 0xFFFFFFFF)
         frameCount = end;
-    memset(osc1buf, 0, frameCount * sizeof *osc1buf);
-    mOsc1.generate(Frequency(), osc1mod, osc1buf, frameCount);
+
+    // Generate Oscillator 1.
+    Float32 osc1buf[frameCount];
+    memset(osc1buf, 0, sizeof osc1buf);
+    if (osc1vibdep) {
+        Float32 osc1CVbuf[frameCount];
+        memset(osc1CVbuf, 0, frameCount * sizeof *osc1buf);
+        mOsc1LFO.generate(osc1vibspd, 0, osc1CVbuf, frameCount);
+        CVtoPhase(Frequency(), osc1vibdep, osc1CVbuf, frameCount);
+        mOsc1.generate_modulated(osc1mod, osc1buf, osc1CVbuf, frameCount);
+    } else {
+        mOsc1.generate(Frequency(), osc1mod, osc1buf, frameCount);
+    }
 
     for (UInt32 i = 0; i < frameCount; i++) {
         Float32 out = osc1buf[i] * ampbuf[i];
@@ -376,5 +415,50 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         NoteEnded(end);
 
     return noErr;
+}
+
+void MVSNote::FillWithConstant(Float32 k, Float32 *buf, UInt32 count)
+{
+    for (UInt32 i = 0; i < count; i++)
+        buf[i] = k;
+}
+
+void MVSNote::CVtoPhase(Float64  baseFreq,
+                        Float32  cvDepth,
+                        Float32 *buf,
+                        UInt32   count)
+{
+    Float32 baseInc = baseFreq / SampleRate();
+    for (UInt32 i = 0; i < count; i++) {
+        Float32 cv = buf[i];
+        Float32 inc = baseInc * (1 + cvDepth * cv);
+        buf[i] = inc;
+    }
+}
+
+Oscillator::Type MVSNote::OscillatorType(Waveform waveform)
+{
+    switch (waveform) {
+
+        case kWaveform_Saw:
+            return Oscillator::Saw;
+            break;
+
+        case kWaveform_Square:
+            return Oscillator::Square;
+            break;
+
+        case kWaveform_Triangle:
+            return Oscillator::Triangle;
+            break;
+
+        case kWaveform_Sine:
+            return Oscillator::Sine;
+            break;
+
+        default:
+            return Oscillator::Saw;     // ???
+            break;
+    }
 }
 
