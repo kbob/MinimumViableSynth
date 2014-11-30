@@ -13,7 +13,7 @@
 
 #include "MVS.h"
  
-static const UInt32  kMaxActiveNotes = 18;
+static const UInt32  kMaxActiveNotes = 500;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
@@ -136,7 +136,6 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.minValue     =   0.0;
         info.maxValue     = 100.0;
         info.defaultValue =   0.0;
-//      info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
         break;
 
     case kParameter_Osc1VibratoDepth:
@@ -172,19 +171,19 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
     case kParameter_AmpAttackTime:
         AUBase::FillInParameterName(info, kParamName_AmpAttackTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     = 0.000;
-        info.maxValue     = 2.00;
-        info.defaultValue = 0.001;
-//      info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+        info.minValue     =  0.000;
+        info.maxValue     = 10.00;
+        info.defaultValue =  0.001;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
 
     case kParameter_AmpDecayTime:
         AUBase::FillInParameterName(info, kParamName_AmpDecayTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     = 0.001;
-        info.maxValue     = 2.00;
-        info.defaultValue = 0.10;
-//      info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+        info.minValue     =  0.0;
+        info.maxValue     = 10.000;
+        info.defaultValue =  0.100;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
 
     case kParameter_AmpSustainLevel:
@@ -201,10 +200,10 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
     case kParameter_AmpReleaseTime:
         AUBase::FillInParameterName(info, kParamName_AmpReleaseTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     = 0.001;
-        info.maxValue     = 2.000;
-        info.defaultValue = 0.050;
-//        info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+        info.minValue     =  0.000;
+        info.maxValue     = 10.000;
+        info.defaultValue =  0.050;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
 
     default:
