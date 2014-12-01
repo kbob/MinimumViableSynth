@@ -24,8 +24,8 @@ private:
 
 OneNote::OneNote()
 {
-    mOsc1.initialize(44100.0, Oscillator::Saw);
-    mAmpEnv.initialize(44100.0, 0.6, 0.1, 0.2, 0.1, 0.3);
+    mOsc1.initialize(44100.0, Oscillator::Square);
+    mAmpEnv.initialize(44100.0, 0.6, 0.1, 0.2, 0.1, 0.3, Envelope::ET_Exponential);
 }
 
 size_t OneNote::render(Float32 *outbuf, size_t count)
@@ -65,9 +65,9 @@ size_t OneNote::render(Float32 *outbuf, size_t count)
 void save_to_foo(Float32 *buf, size_t count)
 {
     FILE *f = fopen("/tmp/foo", "w");
-//    for (size_t i = 0; i < 5000; i++) {
-//        fprintf(f, "0\n");
-//    }
+    for (size_t i = 0; i < 5000; i++) {
+        fprintf(f, "0\n");
+    }
     for (size_t i = 0; i < count; i++) {
         Float32 x = buf[i];
         if (isnan(x) || isinf(x))
@@ -83,7 +83,7 @@ int main(int argc, const char * argv[]) {
     // insert code here...
     std::cout << "Hello, World!\n";
     OneNote a;
-    size_t count = 4410;
+    size_t count = 44100;
     Float32 note[count];
     count = a.render(note, count);
     save_to_foo(note, count);

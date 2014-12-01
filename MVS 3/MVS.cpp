@@ -171,17 +171,17 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
     case kParameter_AmpAttackTime:
         AUBase::FillInParameterName(info, kParamName_AmpAttackTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     =  0.000;
-        info.maxValue     = 10.00;
-        info.defaultValue =  0.001;
+        info.minValue     = 0.000;
+        info.maxValue     = 9.999;
+        info.defaultValue = 0.001;
         info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
 
     case kParameter_AmpDecayTime:
         AUBase::FillInParameterName(info, kParamName_AmpDecayTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     =  0.0;
-        info.maxValue     = 10.000;
+        info.minValue     =  0.000;
+        info.maxValue     =  9.999;
         info.defaultValue =  0.100;
         info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
@@ -200,9 +200,9 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
     case kParameter_AmpReleaseTime:
         AUBase::FillInParameterName(info, kParamName_AmpReleaseTime, false);
         info.unit         = kAudioUnitParameterUnit_Seconds;
-        info.minValue     =  0.000;
-        info.maxValue     = 10.000;
-        info.defaultValue =  0.050;
+        info.minValue     = 0.000;
+        info.maxValue     = 9.999;
+        info.defaultValue = 0.050;
         info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
 
@@ -347,7 +347,8 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     mOsc1.initialize(sampleRate, o1type);
     mAmpEnv.initialize(sampleRate,
                        maxLevel,
-                       attackTime, decayTime, sustainLevel, releaseTime);
+                       attackTime, decayTime, sustainLevel, releaseTime,
+                       Envelope::ET_Exponential);
     return true;
 }
 

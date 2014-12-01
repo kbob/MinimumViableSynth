@@ -10,8 +10,22 @@
 
 #include <cmath>
 
+static const Float32 kInaudibleLevel = 0.0001;
+
 Envelope::Envelope()
 {}
+
+static Float32 expDelta(Float32 start, Float32 end, size_t samples)
+{
+    if (!samples)
+        return start < end ? 1.0 : 0.0;
+
+    if (start < kInaudibleLevel)
+        start = kInaudibleLevel;
+    if (end < kInaudibleLevel)
+        end = kInaudibleLevel;
+    return 1.0 + (log(end) - log(start)) / samples;
+}
 
 void Envelope::initialize(Float64      sampleRate,
                           float        maxLevel,
@@ -26,12 +40,25 @@ void Envelope::initialize(Float64      sampleRate,
     mAttackSamples = attackTime * sampleRate;
     mDecaySamples  = decayTime * sampleRate;
     mSustainLevel  = maxLevel * sustainLevel;
-    mAttackDelta   = maxLevel / mAttackSamples;
-    mDecayDelta    = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
-    mReleaseDelta  = -maxLevel / (releaseTime * sampleRate);
     mSegment       = ES_Attack;
     mSamplesDone   = 0;
     mLevel         = 0;
+    switch (type) {
+
+        case ET_Linear:
+            mAttackDelta  = maxLevel / mAttackSamples;
+            mDecayDelta   = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
+            mReleaseDelta = -maxLevel / (releaseTime * sampleRate);
+            mLevel = 0;
+            break;
+
+        case ET_Exponential:
+            mAttackDelta = expDelta(0, maxLevel, mAttackSamples);
+            mDecayDelta = expDelta(1.0001, sustainLevel, mDecaySamples);
+            mReleaseDelta = expDelta(maxLevel, 0, releaseTime * sampleRate);
+            mLevel = kInaudibleLevel;
+            break;
+    }
 }
 
 void Envelope::release()
@@ -47,8 +74,6 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
     Float32 level = mLevel;
     Float32 delta;
 
-    assert(mType == ET_Linear);
-
     while (i < count) {
         switch (mSegment) {
 
@@ -60,7 +85,10 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
             else
                 mSegment = ES_Decay;
             if (mType == ET_Exponential) {
-                // ???
+                for ( ; i < n; i++) {
+                    level *= delta;
+                    sampBuf[i] = level;
+                }
             } else { // mType == ET_Linear
                 for ( ; i < n; i++) {
                     level += delta;
@@ -80,7 +108,10 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
             else
                 mSegment = ES_Sustain;
             if (mType == ET_Exponential) {
-                // ???
+                for ( ; i < n; i++) {
+                    level *= delta;
+                    sampBuf[i] = level;
+                }
             } else { // mType == ET_Linear
                 for ( ; i < n; i++) {
                     level += delta;
@@ -99,7 +130,15 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
         case ES_Release:
             delta = mReleaseDelta;
             if (mType == ET_Exponential) {
-                // ???
+                for ( ; i < count; i++) {
+                    level *= delta;
+                    if (level < 1.0 / (1 << 16)) {
+                        level = 0;
+                        endFrame = i;
+                        break;
+                    }
+                    sampBuf[i] = level;
+                }
             } else { // mType == ET_Linear
                 for ( ; i < count; i++) {
                     level += delta;
@@ -113,6 +152,7 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
             }
             for ( ; i < count; i++)
                 sampBuf[i] = 0;
+            samplesDone += count;
             break;
         }
     }
