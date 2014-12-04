@@ -43,26 +43,26 @@ enum Parameter {
 //    kParameter_Osc1VibratoSkew     =  ?,
 
 //    // Oscillator 2 (coming soon)
-//    kParameter_Osc2Detune          =  ?,
-//    kParameter_Osc2Waveform        =  ?,
-//    kParameter_Osc2WaveSkew        =  ?,
-//    kParameter_Osc2VibratoDepth    =  ?,
-//    kParameter_Osc2VibratoSpeed    = ??,
-//    kParameter_Osc2VibratoWaveform = ??,
+    kParameter_Osc2Detune          =  5,
+    kParameter_Osc2Waveform        =  6,
+    kParameter_Osc2WaveSkew        =  7,
+    kParameter_Osc2VibratoDepth    =  8,
+    kParameter_Osc2VibratoSpeed    =  9,
+    kParameter_Osc2VibratoWaveform = 10,
 //    kParameter_Osc2VibratoSkew     = ??,
 
     // Noise Source
-    kParameter_NoiseType           =  5,
-    kParameter_NoiseAttackTime     =  6,
-    kParameter_NoiseDecayTime      =  7,
-    kParameter_NoiseSustainLevel   =  8,
-    kParameter_NoiseReleaseTime    =  9,
+    kParameter_NoiseType           = 11,
+    kParameter_NoiseAttackTime     = 12,
+    kParameter_NoiseDecayTime      = 13,
+    kParameter_NoiseSustainLevel   = 14,
+    kParameter_NoiseReleaseTime    = 15,
 
     // Mixer
     //    kParameter_MixType             = ??,  // Mix, RingMod, HardSync
-    kParameter_Osc1Level           = 10,
-    kParameter_Osc2Level           = 11,
-    kParameter_NoiseLevel          = 12,
+    kParameter_Osc1Level           = 16,
+    kParameter_Osc2Level           = 17,
+    kParameter_NoiseLevel          = 18,
 
 
 //    // Filter (coming soon)
@@ -88,10 +88,10 @@ enum Parameter {
 //    kParameter_FiltLFOSkew         = ??,
 
     // Amplitude
-    kParameter_AmpAttackTime       = 13,
-    kParameter_AmpDecayTime        = 14,
-    kParameter_AmpSustainLevel     = 15,
-    kParameter_AmpReleaseTime      = 16,
+    kParameter_AmpAttackTime       = 19,
+    kParameter_AmpDecayTime        = 20,
+    kParameter_AmpSustainLevel     = 21,
+    kParameter_AmpReleaseTime      = 22,
     kNumberOfParameters
 };
 
@@ -148,6 +148,8 @@ private:
     Float32        **mOversampleBufPtr;
     Oscillator       mOsc1;
     Oscillator       mOsc1LFO;
+    Oscillator       mOsc2;
+    Oscillator       mOsc2LFO;
     NoiseSource      mNoise;
     Envelope         mNoiseEnv;
     Envelope         mAmpEnv;

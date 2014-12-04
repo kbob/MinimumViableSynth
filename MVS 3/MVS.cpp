@@ -33,6 +33,13 @@ DEFPNAME(Osc1VibratoDepth,    "Oscillator 1 Vibrato Depth");
 DEFPNAME(Osc1VibratoSpeed,    "Oscillator 1 Vibrato Speed");
 DEFPNAME(Osc1VibratoWaveform, "Oscillator 1 Vibrato Waveform");
 
+DEFPNAME(Osc2Detune,          "Oscillator 2 Detune");
+DEFPNAME(Osc2Waveform,        "Oscillator 2 Waveform");
+DEFPNAME(Osc2WaveSkew,        "Oscillator 2 Skew");
+DEFPNAME(Osc2VibratoDepth,    "Oscillator 2 Vibrato Depth");
+DEFPNAME(Osc2VibratoSpeed,    "Oscillator 2 Vibrato Speed");
+DEFPNAME(Osc2VibratoWaveform, "Oscillator 2 Vibrato Waveform");
+
 DEFPNAME(NoiseType,           "Noise Type");
 DEFPNAME(NoiseAttackTime,     "Noise Attack Time");
 DEFPNAME(NoiseDecayTime,      "Noise Decay Time");
@@ -84,6 +91,13 @@ MVS::MVS(AudioUnit inComponentInstance)
     gp->SetParameter(kParameter_Osc1VibratoDepth,    0.000);
     gp->SetParameter(kParameter_Osc1VibratoSpeed,    3.000);
     gp->SetParameter(kParameter_Osc1VibratoWaveform, kWaveform_Sine);
+
+    // Oscillator 2
+    gp->SetParameter(kParameter_Osc2Detune,          0.000);
+    gp->SetParameter(kParameter_Osc2Waveform,        kWaveform_Square);
+    gp->SetParameter(kParameter_Osc2VibratoDepth,    0.000);
+    gp->SetParameter(kParameter_Osc2VibratoSpeed,    3.000);
+    gp->SetParameter(kParameter_Osc2VibratoWaveform, kWaveform_Sine);
 
     // Noise Source
     gp->SetParameter(kParameter_NoiseType,           kNoiseType_White);
@@ -189,7 +203,7 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.defaultValue = 0;
         info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
         break;
-        
+
     case kParameter_Osc1VibratoSpeed:
         FillInParameterName(info, kParamName_Osc1VibratoSpeed, false);
         HasClump(info, kParamClump_Osc1);
@@ -199,7 +213,7 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.defaultValue =  3.0;
         info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
         break;
-        
+
     case kParameter_Osc1VibratoWaveform:
         FillInParameterName(info, kParamName_Osc1VibratoWaveform, false);
         HasClump(info, kParamClump_Osc1);
@@ -210,6 +224,66 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.flags       |= 0;
         break;
 
+    case kParameter_Osc2Detune:
+        FillInParameterName(info, kParamName_Osc2Detune, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_RelativeSemiTones;
+        info.minValue     = -127;
+        info.maxValue     = +127;
+        info.defaultValue = 0;
+        info.flags       |= 0;
+        break;
+
+    case kParameter_Osc2Waveform:
+        FillInParameterName(info, kParamName_Osc2Waveform, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_Indexed;
+        info.minValue     = 0;
+        info.maxValue     = kNumberOfWaveforms - 1;
+        info.defaultValue = kWaveform_Square;
+        info.flags       |= 0;
+        break;
+
+    case kParameter_Osc2WaveSkew:
+        FillInParameterName(info, kParamName_Osc2WaveSkew, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_Percent;
+        info.minValue     =   0.0;
+        info.maxValue     = 100.0;
+        info.defaultValue =   0.0;
+        info.flags       |= 0;
+        break;
+
+    case kParameter_Osc2VibratoDepth:
+        FillInParameterName(info, kParamName_Osc2VibratoDepth, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_Cents;
+        info.minValue     = 0;
+        info.maxValue     = 600;
+        info.defaultValue = 0;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
+        break;
+
+    case kParameter_Osc2VibratoSpeed:
+        FillInParameterName(info, kParamName_Osc2VibratoSpeed, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_Hertz;
+        info.minValue     =  0.1;
+        info.maxValue     = 25.0;
+        info.defaultValue =  3.0;
+        info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
+        break;
+
+    case kParameter_Osc2VibratoWaveform:
+        FillInParameterName(info, kParamName_Osc2VibratoWaveform, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_Indexed;
+        info.minValue     = 0;
+        info.maxValue     = kNumberOfWaveforms - 1;
+        info.defaultValue = kWaveform_Sine;
+        info.flags       |= 0;
+        break;
+        
     case kParameter_NoiseType:
         FillInParameterName(info, kParamName_NoiseType, false);
         HasClump(info, kParamClump_Noise);
@@ -345,7 +419,9 @@ OSStatus MVS::GetParameterValueStrings(AudioUnitScope       inScope,
         return kAudioUnitErr_InvalidScope;
 
     if (inParameterID == kParameter_Osc1Waveform ||
-        inParameterID == kParameter_Osc1VibratoWaveform) {
+        inParameterID == kParameter_Osc1VibratoWaveform ||
+        inParameterID == kParameter_Osc2Waveform ||
+        inParameterID == kParameter_Osc2VibratoWaveform) {
         if (outStrings == NULL)
             return noErr;
 
@@ -441,6 +517,10 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
         inValue *= 127.0 / (kNumberOfWaveforms - 1);
     if (inID == kParameter_Osc1VibratoWaveform && inValue < 1.0)
         inValue *= 127.0 / (kNumberOfWaveforms - 1);
+    if (inID == kParameter_Osc2Waveform && inValue < 1.0)
+        inValue *= 127.0 / (kNumberOfWaveforms - 1);
+    if (inID == kParameter_Osc2VibratoWaveform && inValue < 1.0)
+        inValue *= 127.0 / (kNumberOfWaveforms - 1);
     if (inID == kParameter_NoiseType && inValue < 1.0)
         inValue *= 127.0 / (kNumberOfNoiseTypes - 1);
 
@@ -521,7 +601,8 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 
     Float32 o1wf         = GetGlobalParameter(kParameter_Osc1Waveform);
     Float32 o1vwf        = GetGlobalParameter(kParameter_Osc1VibratoWaveform);
-
+    Float32 o2wf         = GetGlobalParameter(kParameter_Osc2Waveform);
+    Float32 o2vwf        = GetGlobalParameter(kParameter_Osc2VibratoWaveform);
     Float32 noiseAttack  = GetGlobalParameter(kParameter_NoiseAttackTime);
     Float32 noiseDecay   = GetGlobalParameter(kParameter_NoiseDecayTime);
     Float32 noiseSustain = GetGlobalParameter(kParameter_NoiseSustainLevel);
@@ -534,10 +615,14 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 
     Oscillator::Type o1type    = OscillatorType((Waveform)(o1wf + 0.5));
     Oscillator::Type o1LFOtype = OscillatorType((Waveform)(o1vwf + 0.5));
+    Oscillator::Type o2type    = OscillatorType((Waveform)(o2wf + 0.5));
+    Oscillator::Type o2LFOtype = OscillatorType((Waveform)(o2vwf + 0.5));
 
 
     mOsc1LFO.initialize(sampleRate, o1LFOtype);
     mOsc1.initialize(sampleRate, o1type);
+    mOsc2LFO.initialize(sampleRate, o2LFOtype);
+    mOsc2.initialize(sampleRate, o2type);
     mNoise.initialize(sampleRate);
     mNoiseEnv.initialize(sampleRate,
                          1.0,
@@ -584,13 +669,19 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     Float32 osc1skew   = GetGlobalParameter(kParameter_Osc1WaveSkew) / 100.0;
     Float32 osc1vibdep = GetGlobalParameter(kParameter_Osc1VibratoDepth) / 1200;
     Float32 osc1vibspd = GetGlobalParameter(kParameter_Osc1VibratoSpeed);
+    Float32 osc2detune = GetGlobalParameter(kParameter_Osc2Detune);
+    Float32 osc2skew   = GetGlobalParameter(kParameter_Osc2WaveSkew) / 100.0;
+    Float32 osc2vibdep = GetGlobalParameter(kParameter_Osc2VibratoDepth) / 1200;
+    Float32 osc2vibspd = GetGlobalParameter(kParameter_Osc2VibratoSpeed);
     Float32 ntyp       = GetGlobalParameter(kParameter_NoiseType);
     Float32 o1level    = GetGlobalParameter(kParameter_Osc1Level);
+    Float32 o2level    = GetGlobalParameter(kParameter_Osc2Level);
     Float32 nlevel     = GetGlobalParameter(kParameter_NoiseLevel);
 
     // Convert parameters.
     NoiseSource::Type ntype = NoiseType((enum NoiseType)ntyp);
     o1level = o1level <= -40 ? 0 : powf(10.0, o1level / 20.0);
+    o2level = o2level <= -40 ? 0 : powf(10.0, o2level / 20.0);
     nlevel  = nlevel  <= -40 ? 0 : powf(10.0, nlevel / 20.0);
 
     // Generate envelope.  If note terminates, truncate frame count.
@@ -602,7 +693,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
 
     // Generate Oscillator 1.
     Float32 osc1buf[frameCount];
-    memset(osc1buf, 0, sizeof osc1buf);
+    memset(osc1buf, 0, toneFrameCount * sizeof osc1buf[0]);
     if (osc1vibdep) {
         Float32 osc1CVbuf[toneFrameCount];
         memset(osc1CVbuf, 0, sizeof osc1CVbuf);
@@ -611,6 +702,20 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         mOsc1.generate_modulated(osc1skew, osc1buf, osc1CVbuf, toneFrameCount);
     } else if (o1level) {
         mOsc1.generate(Frequency(), osc1skew, osc1buf, toneFrameCount);
+    }
+
+    // Generate Oscillator 2.
+    Float32 osc2buf[frameCount];
+    memset(osc2buf, 0, toneFrameCount * sizeof osc2buf[0]);
+    Float64 o2freq = Frequency() * pow(2.0, osc2detune / 12.0);
+    if (osc2vibdep) {
+        Float32 osc2CVbuf[toneFrameCount];
+        memset(osc2CVbuf, 0, sizeof osc2CVbuf);
+        mOsc2LFO.generate(osc2vibspd, 0, osc2CVbuf, toneFrameCount);
+        CVtoPhase(o2freq, osc2vibdep, osc2CVbuf, toneFrameCount);
+        mOsc2.generate_modulated(osc2skew, osc2buf, osc2CVbuf, toneFrameCount);
+    } else if (o2level) {
+        mOsc2.generate(o2freq, osc2skew, osc2buf, toneFrameCount);
     }
 
     // Generate noise.
@@ -628,19 +733,20 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     // Mix.
     Float32 mixbuf[frameCount];
     UInt32 n1 = frameCount;
-    if (n1 < toneFrameCount)
+    if (n1 > toneFrameCount)
         n1 = toneFrameCount;
     UInt32 n0 = n1;
-    if (n0 < noiseFrameCount)
+    if (n0 > noiseFrameCount)
         n0 = noiseFrameCount;
     for (UInt32 i = 0; i < n0; i++) {
         Float32 out = o1level * osc1buf[i];
-//        out += o2level * osc2buf[i];
+        out += o2level * osc2buf[i];
         out += nlevel * noiseBuf[i] * noiseEnv[i];
         mixbuf[i] = out;
     }
     for (UInt32 i = n0; i < n1; i++) {
         Float32 out = o1level * osc1buf[i];
+        out += o2level * osc2buf[i];
         mixbuf[i] = out;
     }
 
