@@ -25,11 +25,11 @@ public:
                                          Type           type = Saw);
 
     void    generate                    (Float64        freq,
-                                         Float32        modifier,
+                                         Float32        skew,
                                          Float32       *sampBuf,
                                          UInt32         count);
 
-    void    generate_modulated          (Float32        modifier,
+    void    generate_modulated          (Float32        skew,
                                          Float32       *sampBuf,
                                          Float32 const *phaseIncrements,
                                          UInt32         count);
@@ -43,41 +43,41 @@ private:
     Float32 mLevel;
 
     void    generate_saw                (Float64        freq,
-                                         Float32        modifier,
+                                         Float32        skew,
                                          Float32       *sampBuf,
                                          UInt32         count);
 
-    void    generate_modulated_saw      (Float32        modifier,
+    void    generate_modulated_saw      (Float32        skew,
                                          Float32       *sampBuf,
                                          Float32 const *phaseIncrements,
                                          UInt32         count);
 
     void    generate_square             (Float64        freq,
-                                         Float32        modifier,
+                                         Float32        skew,
                                          Float32       *sampBuf,
                                          UInt32         count);
 
-    void    generate_modulated_square   (Float32        modifier,
+    void    generate_modulated_square   (Float32        skew,
                                          Float32       *sampBuf,
                                          Float32 const *phaseIncrements,
                                          UInt32         count);
 
     void    generate_triangle           (Float64        freq,
-                                         Float32        modifier,
+                                         Float32        skew,
                                          Float32       *sampBuf,
                                          UInt32         count);
 
-    void    generate_modulated_triangle (Float32        modifier,
+    void    generate_modulated_triangle (Float32        skew,
                                          Float32       *sampBuf,
                                          Float32 const *phaseIncrements,
                                          UInt32         count);
 
     void    generate_sine               (Float64        freq,
-                                         Float32        modifier,
+                                         Float32        skew,
                                          Float32       *sampBuf,
                                          UInt32         count);
 
-    void    generate_modulated_sine     (Float32        modifier,
+    void    generate_modulated_sine     (Float32        skew,
                                          Float32       *sampBuf,
                                          Float32 const *phaseIncrements,
                                          UInt32         count);

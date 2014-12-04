@@ -17,24 +17,45 @@ static const UInt32  kMaxActiveNotes = 500;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
+static CFStringRef kClumpName_Osc1   = CFSTR("Oscillator 1");
+static CFStringRef kClumpName_Osc2   = CFSTR("Oscillator 2");
+static CFStringRef kClumpName_Noise  = CFSTR("Noise Source");
+static CFStringRef kClumpName_Mixer  = CFSTR("Mixer");
+static CFStringRef kClumpName_Filter = CFSTR("Filter");
+static CFStringRef kClumpName_Amp    = CFSTR("Amplitude");
+
 #define DEFPNAME(param, name) \
     static CFStringRef kParamName_##param = CFSTR(name);
 
 DEFPNAME(Osc1Waveform,        "Oscillator 1 Waveform");
-DEFPNAME(Osc1WaveMod,         "Oscillator 1 Modifier");
+DEFPNAME(Osc1WaveSkew,        "Oscillator 1 Skew");
 DEFPNAME(Osc1VibratoDepth,    "Oscillator 1 Vibrato Depth");
 DEFPNAME(Osc1VibratoSpeed,    "Oscillator 1 Vibrato Speed");
 DEFPNAME(Osc1VibratoWaveform, "Oscillator 1 Vibrato Waveform");
 
-DEFPNAME(AmpAttackTime  , "Amplitude Attack Time");
-DEFPNAME(AmpDecayTime   , "Amplitude Decay Time");
-DEFPNAME(AmpSustainLevel, "Amplitude Sustain Level");
-DEFPNAME(AmpReleaseTime , "Amplitude Release Time");
+DEFPNAME(NoiseType,           "Noise Type");
+DEFPNAME(NoiseAttackTime,     "Noise Attack Time");
+DEFPNAME(NoiseDecayTime,      "Noise Decay Time");
+DEFPNAME(NoiseSustainLevel,   "Noise Sustain Level");
+DEFPNAME(NoiseReleaseTime,    "Noise Release Time");
+
+DEFPNAME(Osc1Level,           "Oscillator 1 Level");
+DEFPNAME(Osc2Level,           "Oscillator 2 Level");
+DEFPNAME(NoiseLevel,          "Noise Level");
+
+DEFPNAME(AmpAttackTime,       "Amplitude Attack Time");
+DEFPNAME(AmpDecayTime,        "Amplitude Decay Time");
+DEFPNAME(AmpSustainLevel,     "Amplitude Sustain Level");
+DEFPNAME(AmpReleaseTime,      "Amplitude Release Time");
 
 static CFStringRef kMenuItem_Waveform_Saw      = CFSTR("Sawtooth");
 static CFStringRef kMenuItem_Waveform_Square   = CFSTR("Square/Pulse");
 static CFStringRef kMenuItem_Waveform_Triangle = CFSTR("Triangle");
 static CFStringRef kMenuItem_Waveform_Sine     = CFSTR("Sine");
+
+static CFStringRef kMenuItem_Noise_White       = CFSTR("White");
+static CFStringRef kMenuItem_Noise_Pink        = CFSTR("Pink");
+static CFStringRef kMenuItem_Noise_Red         = CFSTR("Red");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,15 +76,32 @@ MVS::MVS(AudioUnit inComponentInstance)
 {
     CreateElements();
 
-    Globals()->UseIndexedParameters(kNumberOfParameters);
-    Globals()->SetParameter(kParameter_Osc1Waveform,        kWaveform_Saw);
-    Globals()->SetParameter(kParameter_Osc1VibratoDepth,    0.000);
-    Globals()->SetParameter(kParameter_Osc1VibratoSpeed,    3.000);
-    Globals()->SetParameter(kParameter_Osc1VibratoWaveform, kWaveform_Sine);
-    Globals()->SetParameter(kParameter_AmpAttackTime,       0.001);
-    Globals()->SetParameter(kParameter_AmpDecayTime,        0.100);
-    Globals()->SetParameter(kParameter_AmpSustainLevel,     1.000);
-    Globals()->SetParameter(kParameter_AmpReleaseTime,      0.050);
+    AUElement *gp = Globals();
+    gp->UseIndexedParameters(kNumberOfParameters);
+
+    // Oscillator 1
+    gp->SetParameter(kParameter_Osc1Waveform,        kWaveform_Saw);
+    gp->SetParameter(kParameter_Osc1VibratoDepth,    0.000);
+    gp->SetParameter(kParameter_Osc1VibratoSpeed,    3.000);
+    gp->SetParameter(kParameter_Osc1VibratoWaveform, kWaveform_Sine);
+
+    // Noise Source
+    gp->SetParameter(kParameter_NoiseType,           kNoiseType_White);
+    gp->SetParameter(kParameter_NoiseAttackTime,     0.001);
+    gp->SetParameter(kParameter_NoiseDecayTime,      0.100);
+    gp->SetParameter(kParameter_NoiseSustainLevel,   0.040);
+    gp->SetParameter(kParameter_NoiseReleaseTime,    0.050);
+
+    // Mixer
+    gp->SetParameter(kParameter_Osc1Level,           0.000);
+    gp->SetParameter(kParameter_Osc2Level,         -40.000);
+    gp->SetParameter(kParameter_NoiseLevel,        -40.000);
+
+    // Amplitude Envelope
+    gp->SetParameter(kParameter_AmpAttackTime,       0.001);
+    gp->SetParameter(kParameter_AmpDecayTime,        0.100);
+    gp->SetParameter(kParameter_AmpSustainLevel,     1.000);
+    gp->SetParameter(kParameter_AmpReleaseTime,      0.050);
 
     SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
 
@@ -123,53 +161,138 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
     switch (inParameterID) {
 
     case kParameter_Osc1Waveform:
-        AUBase::FillInParameterName(info, kParamName_Osc1Waveform, false);
+        FillInParameterName(info, kParamName_Osc1Waveform, false);
+        HasClump(info, kParamClump_Osc1);
         info.unit         = kAudioUnitParameterUnit_Indexed;
         info.minValue     = 0;
         info.maxValue     = kNumberOfWaveforms - 1;
         info.defaultValue = kWaveform_Saw;
+        info.flags       |= 0;
         break;
 
-    case kParameter_Osc1WaveMod:
-        AUBase::FillInParameterName(info, kParamName_Osc1WaveMod, false);
+    case kParameter_Osc1WaveSkew:
+        FillInParameterName(info, kParamName_Osc1WaveSkew, false);
+        HasClump(info, kParamClump_Osc1);
         info.unit         = kAudioUnitParameterUnit_Percent;
         info.minValue     =   0.0;
         info.maxValue     = 100.0;
         info.defaultValue =   0.0;
+        info.flags       |= 0;
         break;
 
     case kParameter_Osc1VibratoDepth:
-        AUBase::FillInParameterName(info, kParamName_Osc1VibratoDepth, false);
+        FillInParameterName(info, kParamName_Osc1VibratoDepth, false);
+        HasClump(info, kParamClump_Osc1);
         info.unit         = kAudioUnitParameterUnit_Cents;
         info.minValue     = 0;
         info.maxValue     = 600;
         info.defaultValue = 0;
         info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
-
         break;
         
     case kParameter_Osc1VibratoSpeed:
-        AUBase::FillInParameterName(info, kParamName_Osc1VibratoSpeed, false);
+        FillInParameterName(info, kParamName_Osc1VibratoSpeed, false);
+        HasClump(info, kParamClump_Osc1);
         info.unit         = kAudioUnitParameterUnit_Hertz;
         info.minValue     =  0.1;
         info.maxValue     = 25.0;
         info.defaultValue =  3.0;
         info.flags       |= kAudioUnitParameterFlag_DisplayLogarithmic;
-
         break;
         
     case kParameter_Osc1VibratoWaveform:
-        AUBase::FillInParameterName(info,
-                                    kParamName_Osc1VibratoWaveform,
-                                    false);
+        FillInParameterName(info, kParamName_Osc1VibratoWaveform, false);
+        HasClump(info, kParamClump_Osc1);
         info.unit         = kAudioUnitParameterUnit_Indexed;
         info.minValue     = 0;
         info.maxValue     = kNumberOfWaveforms - 1;
         info.defaultValue = kWaveform_Sine;
+        info.flags       |= 0;
+        break;
+
+    case kParameter_NoiseType:
+        FillInParameterName(info, kParamName_NoiseType, false);
+        HasClump(info, kParamClump_Noise);
+        info.unit         = kAudioUnitParameterUnit_Indexed;
+        info.minValue     = 0;
+        info.maxValue     = kNumberOfNoiseTypes;
+        info.defaultValue = kNoiseType_White;
+        info.flags       |= 0;
+        break;
+
+    case kParameter_NoiseAttackTime:
+        FillInParameterName(info, kParamName_NoiseAttackTime, false);
+        HasClump(info, kParamClump_Noise);
+        info.unit         = kAudioUnitParameterUnit_Seconds;
+        info.minValue     = 0.000;
+        info.maxValue     = 9.999;
+        info.defaultValue = 0.001;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
+        break;
+
+    case kParameter_NoiseDecayTime:
+        FillInParameterName(info, kParamName_NoiseDecayTime, false);
+        HasClump(info, kParamClump_Noise);
+        info.unit         = kAudioUnitParameterUnit_Seconds;
+        info.minValue     =  0.000;
+        info.maxValue     =  9.999;
+        info.defaultValue =  0.100;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
+        break;
+
+    case kParameter_NoiseSustainLevel:
+        FillInParameterName(info, kParamName_NoiseSustainLevel, false);
+        HasClump(info, kParamClump_Noise);
+        info.unit         = kAudioUnitParameterUnit_LinearGain;
+        info.minValue     = 0.0;
+        info.maxValue     = 1.0;
+        info.defaultValue = 1.0;
+        info.flags       |= 0;
+        break;
+
+    case kParameter_NoiseReleaseTime:
+        FillInParameterName(info, kParamName_NoiseReleaseTime, false);
+        HasClump(info, kParamClump_Noise);
+        info.unit         = kAudioUnitParameterUnit_Seconds;
+        info.minValue     = 0.000;
+        info.maxValue     = 9.999;
+        info.defaultValue = 0.050;
+        info.flags       |= kAudioUnitParameterFlag_DisplayCubeRoot;
+        break;
+
+    case kParameter_Osc1Level:
+        FillInParameterName(info, kParamName_Osc1Level, false);
+        HasClump(info, kParamClump_Mixer);
+        info.unit         = kAudioUnitParameterUnit_Decibels;
+        info.minValue     = -40;
+        info.maxValue     =   0;
+        info.defaultValue =   0;
+        info.flags       |= 0;
+       break;
+
+    case kParameter_Osc2Level:
+        FillInParameterName(info, kParamName_Osc2Level, false);
+        HasClump(info, kParamClump_Mixer);
+        info.unit         = kAudioUnitParameterUnit_Decibels;
+        info.minValue     = -40;
+        info.maxValue     =   0;
+        info.defaultValue = -40;
+        info.flags       |= 0;
+       break;
+
+    case kParameter_NoiseLevel:
+        FillInParameterName(info, kParamName_NoiseLevel, false);
+        HasClump(info, kParamClump_Mixer);
+        info.unit         = kAudioUnitParameterUnit_Decibels;
+        info.minValue     = -40;
+        info.maxValue     =   0;
+        info.defaultValue = -40;
+        info.flags       |= 0;
         break;
 
     case kParameter_AmpAttackTime:
-        AUBase::FillInParameterName(info, kParamName_AmpAttackTime, false);
+        FillInParameterName(info, kParamName_AmpAttackTime, false);
+        HasClump(info, kParamClump_Amplitude);
         info.unit         = kAudioUnitParameterUnit_Seconds;
         info.minValue     = 0.000;
         info.maxValue     = 9.999;
@@ -178,7 +301,8 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         break;
 
     case kParameter_AmpDecayTime:
-        AUBase::FillInParameterName(info, kParamName_AmpDecayTime, false);
+        FillInParameterName(info, kParamName_AmpDecayTime, false);
+        HasClump(info, kParamClump_Amplitude);
         info.unit         = kAudioUnitParameterUnit_Seconds;
         info.minValue     =  0.000;
         info.maxValue     =  9.999;
@@ -187,9 +311,8 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         break;
 
     case kParameter_AmpSustainLevel:
-        AUBase::FillInParameterName(info,
-                                    kParamName_AmpSustainLevel,
-                                    false);
+        FillInParameterName(info, kParamName_AmpSustainLevel, false);
+        HasClump(info, kParamClump_Amplitude);
         info.unit         = kAudioUnitParameterUnit_LinearGain;
         info.minValue     = 0.0;
         info.maxValue     = 1.0;
@@ -198,7 +321,8 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         break;
 
     case kParameter_AmpReleaseTime:
-        AUBase::FillInParameterName(info, kParamName_AmpReleaseTime, false);
+        FillInParameterName(info, kParamName_AmpReleaseTime, false);
+        HasClump(info, kParamClump_Amplitude);
         info.unit         = kAudioUnitParameterUnit_Seconds;
         info.minValue     = 0.000;
         info.maxValue     = 9.999;
@@ -243,8 +367,67 @@ OSStatus MVS::GetParameterValueStrings(AudioUnitScope       inScope,
                                      );
         return noErr;
     }
-    return kAudioUnitErr_InvalidParameter;
+    if (inParameterID == kParameter_NoiseType) {
+        if (outStrings == NULL)
+            return noErr;
 
+        // Defines an array that contains the pop-up menu item names.
+        CFStringRef strings [] = {
+            kMenuItem_Noise_White,
+            kMenuItem_Noise_Pink,
+            kMenuItem_Noise_Red,
+        };
+
+        // Create a new immutable array containing the menu item names
+        // and place the array in the outStrings output parameter.
+        *outStrings = CFArrayCreate (
+                                     NULL,
+                                     (const void **) strings,
+                                     sizeof strings / sizeof strings[0],
+                                     NULL
+                                     );
+        return noErr;
+    }
+    return kAudioUnitErr_InvalidParameter;
+}
+
+OSStatus MVS::CopyClumpName(AudioUnitScope          inScope,
+                            UInt32                  inClumpID,
+                            UInt32                  inDesiredNameLength,
+                            CFStringRef            *outClumpName)
+{
+    if (inScope != kAudioUnitScope_Global)
+        return kAudioUnitErr_InvalidScope;
+
+    switch (inClumpID) {
+       case kParamClump_Osc1:
+            *outClumpName = kClumpName_Osc1;
+            break;
+
+        case kParamClump_Osc2:
+            *outClumpName = kClumpName_Osc2;
+            break;
+
+        case kParamClump_Noise:
+            *outClumpName = kClumpName_Noise;
+            break;
+
+        case kParamClump_Mixer:
+            *outClumpName = kClumpName_Mixer;
+            break;
+
+        case kParamClump_Filter:
+            *outClumpName = kClumpName_Filter;
+            break;
+
+        case kParamClump_Amplitude:
+            *outClumpName = kClumpName_Amp;
+            break;
+
+        default:
+            return kAudioUnitErr_InvalidPropertyValue;
+    }
+    return noErr;
 }
 
 OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
@@ -258,6 +441,8 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
         inValue *= 127.0 / (kNumberOfWaveforms - 1);
     if (inID == kParameter_Osc1VibratoWaveform && inValue < 1.0)
         inValue *= 127.0 / (kNumberOfWaveforms - 1);
+    if (inID == kParameter_NoiseType && inValue < 1.0)
+        inValue *= 127.0 / (kNumberOfNoiseTypes - 1);
 
     return AUMonotimbralInstrumentBase::SetParameter(inID,
                                                      inScope,
@@ -275,7 +460,8 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     AUScope &outputs = Outputs();
     UInt32 numOutputs = outputs.GetNumberOfElements();
     for (UInt32 j = 0; j < numOutputs; j++)
-        GetOutput(j)->PrepareBuffer(inNumberFrames);	// AUBase::DoRenderBus() only does this for the first output element
+        GetOutput(j)->PrepareBuffer(inNumberFrames); // AUBase::DoRenderBus()
+                                // only does this for the first output element
 
     // Allocate and clear oversampleBuf.
     UInt32 oversampleFrameCount = kOversampleRatio * inNumberFrames;
@@ -286,7 +472,9 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     UInt32 numGroups = Groups().GetNumberOfElements();
     for (UInt32 j = 0; j < numGroups; j++) {
         SynthGroupElement *group = (SynthGroupElement*)Groups().GetElement(j);
-        OSStatus err = group->Render((SInt64)inTimeStamp.mSampleTime, inNumberFrames, outputs);
+        OSStatus err = group->Render((SInt64)inTimeStamp.mSampleTime,
+                                     inNumberFrames,
+                                     outputs);
         if (err) return err;
     }
     mOversampleBufPtr = NULL;
@@ -328,16 +516,21 @@ void MVSNote::SetOversampleParams(UInt32 ratio, Float32 **bufPtr)
 
 bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 {
-    double sampleRate  = SampleRate();
-    Float32 maxLevel   = powf(inParams.mVelocity/127.0, 3.0);
+    Float64 sampleRate   = SampleRate();
+    Float32 maxLevel     = powf(inParams.mVelocity/127.0, 3.0);
 
-    Float32 o1wf       = GetGlobalParameter(kParameter_Osc1Waveform);
-    Float32 o1vwf      = GetGlobalParameter(kParameter_Osc1VibratoWaveform);
+    Float32 o1wf         = GetGlobalParameter(kParameter_Osc1Waveform);
+    Float32 o1vwf        = GetGlobalParameter(kParameter_Osc1VibratoWaveform);
 
-    float attackTime   = GetGlobalParameter(kParameter_AmpAttackTime);
-    float decayTime    = GetGlobalParameter(kParameter_AmpDecayTime);
-    float sustainLevel = GetGlobalParameter(kParameter_AmpSustainLevel);
-    float releaseTime  = GetGlobalParameter(kParameter_AmpReleaseTime);
+    Float32 noiseAttack  = GetGlobalParameter(kParameter_NoiseAttackTime);
+    Float32 noiseDecay   = GetGlobalParameter(kParameter_NoiseDecayTime);
+    Float32 noiseSustain = GetGlobalParameter(kParameter_NoiseSustainLevel);
+    Float32 noiseRelease = GetGlobalParameter(kParameter_NoiseReleaseTime);
+
+    Float32 attackTime   = GetGlobalParameter(kParameter_AmpAttackTime);
+    Float32 decayTime    = GetGlobalParameter(kParameter_AmpDecayTime);
+    Float32 sustainLevel = GetGlobalParameter(kParameter_AmpSustainLevel);
+    Float32 releaseTime  = GetGlobalParameter(kParameter_AmpReleaseTime);
 
     Oscillator::Type o1type    = OscillatorType((Waveform)(o1wf + 0.5));
     Oscillator::Type o1LFOtype = OscillatorType((Waveform)(o1vwf + 0.5));
@@ -345,10 +538,15 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 
     mOsc1LFO.initialize(sampleRate, o1LFOtype);
     mOsc1.initialize(sampleRate, o1type);
+    mNoise.initialize(sampleRate);
+    mNoiseEnv.initialize(sampleRate,
+                         1.0,
+                         noiseAttack, noiseDecay, noiseSustain, noiseRelease,
+                         Envelope::Exponential);
     mAmpEnv.initialize(sampleRate,
                        maxLevel,
                        attackTime, decayTime, sustainLevel, releaseTime,
-                       Envelope::ET_Exponential);
+                       Envelope::Exponential);
     return true;
 }
 
@@ -383,31 +581,72 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     UInt32   frameCount = inNumFrames * mOversampleRatio;
 
     // Get parameters.
-    Float32 osc1mod    = GetGlobalParameter(kParameter_Osc1WaveMod) / 100.0;
+    Float32 osc1skew   = GetGlobalParameter(kParameter_Osc1WaveSkew) / 100.0;
     Float32 osc1vibdep = GetGlobalParameter(kParameter_Osc1VibratoDepth) / 1200;
     Float32 osc1vibspd = GetGlobalParameter(kParameter_Osc1VibratoSpeed);
+    Float32 ntyp       = GetGlobalParameter(kParameter_NoiseType);
+    Float32 o1level    = GetGlobalParameter(kParameter_Osc1Level);
+    Float32 nlevel     = GetGlobalParameter(kParameter_NoiseLevel);
+
+    // Convert parameters.
+    NoiseSource::Type ntype = NoiseType((enum NoiseType)ntyp);
+    o1level = o1level <= -40 ? 0 : powf(10.0, o1level / 20.0);
+    nlevel  = nlevel  <= -40 ? 0 : powf(10.0, nlevel / 20.0);
 
     // Generate envelope.  If note terminates, truncate frame count.
+    UInt32 toneFrameCount = frameCount;
     Float32 ampbuf[frameCount];
     UInt32 end = mAmpEnv.generate(ampbuf, frameCount);
     if (end != 0xFFFFFFFF)
-        frameCount = end;
+        toneFrameCount = end;
 
     // Generate Oscillator 1.
     Float32 osc1buf[frameCount];
     memset(osc1buf, 0, sizeof osc1buf);
     if (osc1vibdep) {
-        Float32 osc1CVbuf[frameCount];
-        memset(osc1CVbuf, 0, frameCount * sizeof *osc1buf);
-        mOsc1LFO.generate(osc1vibspd, 0, osc1CVbuf, frameCount);
-        CVtoPhase(Frequency(), osc1vibdep, osc1CVbuf, frameCount);
-        mOsc1.generate_modulated(osc1mod, osc1buf, osc1CVbuf, frameCount);
-    } else {
-        mOsc1.generate(Frequency(), osc1mod, osc1buf, frameCount);
+        Float32 osc1CVbuf[toneFrameCount];
+        memset(osc1CVbuf, 0, sizeof osc1CVbuf);
+        mOsc1LFO.generate(osc1vibspd, 0, osc1CVbuf, toneFrameCount);
+        CVtoPhase(Frequency(), osc1vibdep, osc1CVbuf, toneFrameCount);
+        mOsc1.generate_modulated(osc1skew, osc1buf, osc1CVbuf, toneFrameCount);
+    } else if (o1level) {
+        mOsc1.generate(Frequency(), osc1skew, osc1buf, toneFrameCount);
     }
 
-    for (UInt32 i = 0; i < frameCount; i++) {
-        Float32 out = osc1buf[i] * ampbuf[i];
+    // Generate noise.
+    Float32 noiseBuf[frameCount];
+    Float32 noiseEnv[frameCount];
+    UInt32 noiseFrameCount = 0;
+    if (nlevel) {
+        noiseFrameCount = frameCount;
+        UInt32 noiseEnd = mNoiseEnv.generate(noiseEnv, frameCount);
+        if (noiseEnd != 0xFFFFFFFF)
+            noiseFrameCount = noiseEnd;
+        mNoise.generate(ntype, noiseBuf, noiseFrameCount);
+    }
+
+    // Mix.
+    Float32 mixbuf[frameCount];
+    UInt32 n1 = frameCount;
+    if (n1 < toneFrameCount)
+        n1 = toneFrameCount;
+    UInt32 n0 = n1;
+    if (n0 < noiseFrameCount)
+        n0 = noiseFrameCount;
+    for (UInt32 i = 0; i < n0; i++) {
+        Float32 out = o1level * osc1buf[i];
+//        out += o2level * osc2buf[i];
+        out += nlevel * noiseBuf[i] * noiseEnv[i];
+        mixbuf[i] = out;
+    }
+    for (UInt32 i = n0; i < n1; i++) {
+        Float32 out = o1level * osc1buf[i];
+        mixbuf[i] = out;
+    }
+
+    // Amplitude
+    for (UInt32 i = 0; i < n1; i++) {
+        Float32 out = mixbuf[i] * ampbuf[i];
         outBuf[i] += out;
     }
 
@@ -440,25 +679,45 @@ Oscillator::Type MVSNote::OscillatorType(Waveform waveform)
 {
     switch (waveform) {
 
-        case kWaveform_Saw:
-            return Oscillator::Saw;
-            break;
+    case kWaveform_Saw:
+        return Oscillator::Saw;
+        break;
 
-        case kWaveform_Square:
-            return Oscillator::Square;
-            break;
+    case kWaveform_Square:
+        return Oscillator::Square;
+        break;
 
-        case kWaveform_Triangle:
-            return Oscillator::Triangle;
-            break;
+    case kWaveform_Triangle:
+        return Oscillator::Triangle;
+        break;
 
-        case kWaveform_Sine:
-            return Oscillator::Sine;
-            break;
+    case kWaveform_Sine:
+        return Oscillator::Sine;
+        break;
 
-        default:
-            return Oscillator::Saw;     // ???
-            break;
+    default:
+        return Oscillator::Saw;
+        break;
     }
 }
 
+NoiseSource::Type MVSNote::NoiseType(enum NoiseType ntype)
+{
+    switch (ntype) {
+
+    case kNoiseType_White:
+        return NoiseSource::White;
+        break;
+
+    case kNoiseType_Pink:
+        return NoiseSource::Pink;
+        break;
+
+    case kNoiseType_Red:
+        return NoiseSource::Red;
+        break;
+
+    default:
+        return NoiseSource::White;
+    }
+}

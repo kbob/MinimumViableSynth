@@ -13,23 +13,85 @@
 #include "MVSVersion.h"
 
 #include "Decimator.h"
+#include "NoiseSource.h"
 #include "Oscillator.h"
 #include "Envelope.h"
 
 static const UInt32 kNumNotes = 12;
 
+enum ParameterClump {
+    kParamClump_Osc1 = kAudioUnitClumpID_System + 1,
+    kParamClump_Osc2,
+    kParamClump_Noise,
+    kParamClump_Mixer,
+    kParamClump_Filter,
+    kParamClump_Amplitude,
+    kNumberOfParamClumps
+};
+
 // Define constants to identify the parameters;
 // define the total number of parameters.
+
 enum Parameter {
-    kParameter_Osc1Waveform        = 0,
-    kParameter_Osc1WaveMod         = 1,
-    kParameter_Osc1VibratoDepth    = 2,
-    kParameter_Osc1VibratoSpeed    = 3,
-    kParameter_Osc1VibratoWaveform = 4,
-    kParameter_AmpAttackTime       = 5,
-    kParameter_AmpDecayTime        = 6,
-    kParameter_AmpSustainLevel     = 7,
-    kParameter_AmpReleaseTime      = 8,
+
+    // Oscillator 1
+    kParameter_Osc1Waveform        =  0,
+    kParameter_Osc1WaveSkew        =  1,
+    kParameter_Osc1VibratoDepth    =  2,
+    kParameter_Osc1VibratoSpeed    =  3,
+    kParameter_Osc1VibratoWaveform =  4,
+//    kParameter_Osc1VibratoSkew     =  ?,
+
+//    // Oscillator 2 (coming soon)
+//    kParameter_Osc2Detune          =  ?,
+//    kParameter_Osc2Waveform        =  ?,
+//    kParameter_Osc2WaveSkew        =  ?,
+//    kParameter_Osc2VibratoDepth    =  ?,
+//    kParameter_Osc2VibratoSpeed    = ??,
+//    kParameter_Osc2VibratoWaveform = ??,
+//    kParameter_Osc2VibratoSkew     = ??,
+
+    // Noise Source
+    kParameter_NoiseType           =  5,
+    kParameter_NoiseAttackTime     =  6,
+    kParameter_NoiseDecayTime      =  7,
+    kParameter_NoiseSustainLevel   =  8,
+    kParameter_NoiseReleaseTime    =  9,
+
+    // Mixer
+    //    kParameter_MixType             = ??,  // Mix, RingMod, HardSync
+    kParameter_Osc1Level           = 10,
+    kParameter_Osc2Level           = 11,
+    kParameter_NoiseLevel          = 12,
+
+
+//    // Filter (coming soon)
+//    kParameter_FilterType          = ??;
+//    kParameter_FiltCutoff          = ??,
+//    kParameter_FiltResonance       = ??,
+//    kParameter_FiltDrive           = ??,
+//    kParameter_FiltKeytrack        = ??,
+
+//    kParameter_FiltEnvCutoffDepth  = ??,
+//    kParameter_FiltEnvResDepth     = ??,
+//    kParameter_FiltEnvDriveDepth   = ??,
+//    kParameter_FiltAttackTime      = ??,
+//    kParameter_FiltDecayTime       = ??,
+//    kParameter_FiltSustainlevel    = ??,
+//    kParameter_FiltReleaseTime     = ??,
+
+//    kParameter_FiltLFOCutoffDepth  = ??,
+//    kParameter_FiltLFOResDepth     = ??,
+//    kParameter_FiltLFODriveDepth   = ??,
+//    kParameter_FiltLFOSpeed        = ??,
+//    kParameter_FiltLFOWaveform     = ??,
+//    kParameter_FiltLFOSkew         = ??,
+
+    // Amplitude
+    kParameter_AmpAttackTime       = 13,
+    kParameter_AmpDecayTime        = 14,
+    kParameter_AmpSustainLevel     = 15,
+    kParameter_AmpReleaseTime      = 16,
     kNumberOfParameters
 };
 
@@ -39,6 +101,13 @@ enum Waveform {
     kWaveform_Triangle,
     kWaveform_Sine,
     kNumberOfWaveforms
+};
+
+enum NoiseType {
+    kNoiseType_White,
+    kNoiseType_Pink,
+    kNoiseType_Red,
+    kNumberOfNoiseTypes
 };
 
 // Define constants to identify factory presets.
@@ -79,6 +148,8 @@ private:
     Float32        **mOversampleBufPtr;
     Oscillator       mOsc1;
     Oscillator       mOsc1LFO;
+    NoiseSource      mNoise;
+    Envelope         mNoiseEnv;
     Envelope         mAmpEnv;
 
     void             FillWithConstant(
@@ -91,9 +162,10 @@ private:
                                 Float32          *buf,
                                 UInt32            count);
 
+    // enum converters
     Oscillator::Type OscillatorType(
-                                    Waveform waveform);
-
+                                Waveform          waveform);
+    NoiseSource::Type NoiseType(NoiseType         ntype);
 
 
 };
@@ -121,6 +193,12 @@ public:
                                 AudioUnitScope          inScope,
                                 AudioUnitParameterID    inParameterID,
                                 CFArrayRef             *outStrings);
+
+    virtual OSStatus   CopyClumpName(
+                                AudioUnitScope          inScope,
+                                UInt32                  inClumpID,
+                                UInt32                  inDesiredNameLength,
+                                CFStringRef            *outClumpName);
 
     virtual OSStatus   SetParameter(
                                 AudioUnitParameterID    inID,

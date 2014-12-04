@@ -45,14 +45,14 @@ void Envelope::initialize(Float64      sampleRate,
     mLevel         = 0;
     switch (type) {
 
-        case ET_Linear:
+        case Linear:
             mAttackDelta  = maxLevel / mAttackSamples;
             mDecayDelta   = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
             mReleaseDelta = -maxLevel / (releaseTime * sampleRate);
             mLevel = 0;
             break;
 
-        case ET_Exponential:
+        case Exponential:
             mAttackDelta = expDelta(0, maxLevel, mAttackSamples);
             mDecayDelta = expDelta(1.0001, sustainLevel, mDecaySamples);
             mReleaseDelta = expDelta(maxLevel, 0, releaseTime * sampleRate);
@@ -84,12 +84,12 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
                 n = count;
             else
                 mSegment = ES_Decay;
-            if (mType == ET_Exponential) {
+            if (mType == Exponential) {
                 for ( ; i < n; i++) {
                     level *= delta;
                     sampBuf[i] = level;
                 }
-            } else { // mType == ET_Linear
+            } else { // mType == Linear
                 for ( ; i < n; i++) {
                     level += delta;
                     sampBuf[i] = level;
@@ -107,12 +107,12 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
                 n = count;
             else
                 mSegment = ES_Sustain;
-            if (mType == ET_Exponential) {
+            if (mType == Exponential) {
                 for ( ; i < n; i++) {
                     level *= delta;
                     sampBuf[i] = level;
                 }
-            } else { // mType == ET_Linear
+            } else { // mType == Linear
                 for ( ; i < n; i++) {
                     level += delta;
                     sampBuf[i] = level;
@@ -129,7 +129,7 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
 
         case ES_Release:
             delta = mReleaseDelta;
-            if (mType == ET_Exponential) {
+            if (mType == Exponential) {
                 for ( ; i < count; i++) {
                     level *= delta;
                     if (level < 1.0 / (1 << 16)) {
@@ -139,7 +139,7 @@ UInt32 Envelope::generate(float *sampBuf, UInt32 count)
                     }
                     sampBuf[i] = level;
                 }
-            } else { // mType == ET_Linear
+            } else { // mType == Linear
                 for ( ; i < count; i++) {
                     level += delta;
                     if (level < 0) {

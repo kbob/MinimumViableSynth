@@ -13,8 +13,8 @@ class Envelope {
 
 public:
     enum EnvelopeType {
-        ET_Linear,
-        ET_Exponential
+        Linear,
+        Exponential
     };
 
     Envelope();
@@ -25,7 +25,7 @@ public:
                        Float32      decayTime,
                        Float32      sustainLevel,
                        Float32      releaseTime,
-                       EnvelopeType type = ET_Linear);
+                       EnvelopeType type = Linear);
 
     void    release();
 

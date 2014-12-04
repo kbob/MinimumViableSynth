@@ -100,55 +100,55 @@ void Oscillator::initialize(Float64 sampleRate, Type type)
 }
 
 void Oscillator::generate(Float64  freq,
-                          Float32  modifier,
+                          Float32  skew,
                           Float32 *sampBuf,
                           UInt32   count)
 {
     switch (mType) {
     case Saw:
-        generate_saw(freq, modifier, sampBuf, count);
+        generate_saw(freq, skew, sampBuf, count);
         break;
 
     case Square:
-        generate_square(freq, modifier, sampBuf, count);
+        generate_square(freq, skew, sampBuf, count);
         break;
 
     case Triangle:
-        generate_triangle(freq, modifier, sampBuf, count);
+        generate_triangle(freq, skew, sampBuf, count);
         break;
 
     case Sine:
-        generate_sine(freq, modifier, sampBuf, count);
+        generate_sine(freq, skew, sampBuf, count);
         break;
     }
 }
 
-void Oscillator::generate_modulated(Float32        modifier,
+void Oscillator::generate_modulated(Float32        skew,
                                     Float32       *sampBuf,
                                     Float32 const *phaseIncrements,
                                     UInt32         count)
 {
     switch (mType) {
     case Saw:
-        generate_modulated_saw(modifier, sampBuf, phaseIncrements, count);
+        generate_modulated_saw(skew, sampBuf, phaseIncrements, count);
         break;
 
     case Square:
-        generate_modulated_square(modifier, sampBuf, phaseIncrements, count);
+        generate_modulated_square(skew, sampBuf, phaseIncrements, count);
         break;
 
     case Triangle:
-        generate_modulated_triangle(modifier, sampBuf, phaseIncrements, count);
+        generate_modulated_triangle(skew, sampBuf, phaseIncrements, count);
         break;
 
     case Sine:
-        generate_modulated_sine(modifier, sampBuf, phaseIncrements, count);
+        generate_modulated_sine(skew, sampBuf, phaseIncrements, count);
         break;
     }
 }
 
 void Oscillator::generate_saw(Float64  freq,
-                              Float32  modifier,
+                              Float32  skew,
                               Float32 *sampBuf,
                               UInt32   count)
 {
@@ -177,7 +177,7 @@ void Oscillator::generate_saw(Float64  freq,
     mPhase = phase;
 }
 
-void Oscillator::generate_modulated_saw(Float32        modifier,
+void Oscillator::generate_modulated_saw(Float32        skew,
                                         Float32       *sampBuf,
                                         Float32 const *phaseIncrements,
                                         UInt32         count)
@@ -207,7 +207,7 @@ void Oscillator::generate_modulated_saw(Float32        modifier,
 }
 
 void Oscillator::generate_square(Float64  freq,
-                                 Float32  modifier,
+                                 Float32  skew,
                                  Float32 *sampBuf,
                                  UInt32   count)
 {
@@ -216,7 +216,7 @@ void Oscillator::generate_square(Float64  freq,
     Float32 z0           = mZ0;
     Float32 zp1          = mZp1;
     Float32 phase        = mPhase;
-    Float32 thresh       = (1 - 0.9 * modifier) / 2;
+    Float32 thresh       = (1 - 0.9 * skew) / 2;
     Float32 high         = 1.0;
     Float32 low          = thresh / (thresh - 1);
     low = -1;
@@ -250,7 +250,7 @@ void Oscillator::generate_square(Float64  freq,
     mLevel = level;
 }
 
-void Oscillator::generate_modulated_square(Float32        modifier,
+void Oscillator::generate_modulated_square(Float32        skew,
                                            Float32       *sampBuf,
                                            Float32 const *phaseIncrements,
                                            UInt32         count)
@@ -260,7 +260,7 @@ void Oscillator::generate_modulated_square(Float32        modifier,
     Float32 z0           = mZ0;
     Float32 zp1          = mZp1;
     Float32 phase        = mPhase;
-    Float32 thresh       = (1 - 0.9 * modifier) / 2;
+    Float32 thresh       = (1 - 0.9 * skew) / 2;
     Float32 high         = 1.0;
     Float32 low          = thresh / (thresh - 1);
     Float32 level        = mLevel;
@@ -293,7 +293,7 @@ void Oscillator::generate_modulated_square(Float32        modifier,
 }
 
 void Oscillator::generate_triangle(Float64  freq,
-                                   Float32  modifier,
+                                   Float32  skew,
                                    Float32 *sampBuf,
                                    UInt32   count)
 {
@@ -302,7 +302,7 @@ void Oscillator::generate_triangle(Float64  freq,
     Float32 z0           = mZ0;
     Float32 zp1          = mZp1;
     Float32 phase        = mPhase;
-    Float32 thresh       = 0.5 + 0.49 * modifier; // maximum skew is 98%.
+    Float32 thresh       = 0.5 + 0.49 * skew; // maximum skew is 98%.
     Float32 up_slope     = 2 / thresh;
     Float32 dn_slope     = -2 / (1 - thresh);
     Float32 m            = phase < thresh ? up_slope : dn_slope;
@@ -340,7 +340,7 @@ void Oscillator::generate_triangle(Float64  freq,
     mPhase = phase;
 }
 
-void Oscillator::generate_modulated_triangle(Float32        modifier,
+void Oscillator::generate_modulated_triangle(Float32        skew,
                                              Float32       *sampBuf,
                                              Float32 const *phaseIncrements,
                                              UInt32         count)
@@ -350,7 +350,7 @@ void Oscillator::generate_modulated_triangle(Float32        modifier,
     Float32 z0           = mZ0;
     Float32 zp1          = mZp1;
     Float32 phase        = mPhase;
-    Float32 thresh       = 0.5 + 0.49 * modifier; // maximum skew is 98%.
+    Float32 thresh       = 0.5 + 0.49 * skew; // maximum skew is 98%.
     Float32 up_slope     = 2 / thresh;
     Float32 dn_slope     = -2 / (1 - thresh);
     Float32 m            = phase < thresh ? up_slope : dn_slope;
@@ -389,7 +389,7 @@ void Oscillator::generate_modulated_triangle(Float32        modifier,
 
 
 void Oscillator::generate_sine(Float64  freq,
-                               Float32  modifier,
+                               Float32  skew,
                                Float32 *sampBuf,
                                UInt32   count)
 {
@@ -405,7 +405,7 @@ void Oscillator::generate_sine(Float64  freq,
     mPhase = phase;
 }
 
-void Oscillator::generate_modulated_sine(Float32        modifier,
+void Oscillator::generate_modulated_sine(Float32        skew,
                                          Float32       *sampBuf,
                                          Float32 const *phaseIncrements,
                                          UInt32         count)

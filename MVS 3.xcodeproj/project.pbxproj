@@ -44,6 +44,7 @@
 		92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
 		929D3C391A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
 		929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
+		92AC4F551A2F6F3500C9DB82 /* NoiseSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -140,6 +141,8 @@
 		92717BEC1A1B211600B87C38 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		929D3C371A2A3DDC0049102A /* Decimator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decimator.cpp; sourceTree = "<group>"; };
 		929D3C381A2A3DDC0049102A /* Decimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decimator.h; sourceTree = "<group>"; };
+		92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NoiseSource.cpp; sourceTree = "<group>"; };
+		92AC4F541A2F6F3500C9DB82 /* NoiseSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoiseSource.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -340,6 +343,8 @@
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
 				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
+				92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */,
+				92AC4F541A2F6F3500C9DB82 /* NoiseSource.h */,
 				92717BE41A1A498100B87C38 /* Oscillator.h */,
 				92717BD81A19A7DC00B87C38 /* MVSVersion.h */,
 			);
@@ -452,6 +457,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92AC4F551A2F6F3500C9DB82 /* NoiseSource.cpp in Sources */,
 				92717B9B1A19A7DC00B87C38 /* SynthNote.cpp in Sources */,
 				92717B871A19A7DC00B87C38 /* AUScopeElement.cpp in Sources */,
 				92717BD71A19A7DC00B87C38 /* MVS.cpp in Sources */,
