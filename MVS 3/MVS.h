@@ -43,26 +43,27 @@ enum Parameter {
 //    kParameter_Osc1VibratoSkew     =  ?,
 
 //    // Oscillator 2 (coming soon)
-    kParameter_Osc2Detune          =  5,
-    kParameter_Osc2Waveform        =  6,
-    kParameter_Osc2WaveSkew        =  7,
-    kParameter_Osc2VibratoDepth    =  8,
-    kParameter_Osc2VibratoSpeed    =  9,
-    kParameter_Osc2VibratoWaveform = 10,
+    kParameter_Osc2CoarseDetune    =  5,
+    kParameter_Osc2FineDetune      =  6,
+    kParameter_Osc2Waveform        =  7,
+    kParameter_Osc2WaveSkew        =  8,
+    kParameter_Osc2VibratoDepth    =  9,
+    kParameter_Osc2VibratoSpeed    = 10,
+    kParameter_Osc2VibratoWaveform = 11,
 //    kParameter_Osc2VibratoSkew     = ??,
 
     // Noise Source
-    kParameter_NoiseType           = 11,
-    kParameter_NoiseAttackTime     = 12,
-    kParameter_NoiseDecayTime      = 13,
-    kParameter_NoiseSustainLevel   = 14,
-    kParameter_NoiseReleaseTime    = 15,
+    kParameter_NoiseType           = 12,
+    kParameter_NoiseAttackTime     = 13,
+    kParameter_NoiseDecayTime      = 14,
+    kParameter_NoiseSustainLevel   = 15,
+    kParameter_NoiseReleaseTime    = 16,
 
     // Mixer
     //    kParameter_MixType             = ??,  // Mix, RingMod, HardSync
-    kParameter_Osc1Level           = 16,
-    kParameter_Osc2Level           = 17,
-    kParameter_NoiseLevel          = 18,
+    kParameter_Osc1Level           = 17,
+    kParameter_Osc2Level           = 18,
+    kParameter_NoiseLevel          = 19,
 
 
 //    // Filter (coming soon)
@@ -88,10 +89,10 @@ enum Parameter {
 //    kParameter_FiltLFOSkew         = ??,
 
     // Amplitude
-    kParameter_AmpAttackTime       = 19,
-    kParameter_AmpDecayTime        = 20,
-    kParameter_AmpSustainLevel     = 21,
-    kParameter_AmpReleaseTime      = 22,
+    kParameter_AmpAttackTime       = 20,
+    kParameter_AmpDecayTime        = 21,
+    kParameter_AmpSustainLevel     = 22,
+    kParameter_AmpReleaseTime      = 23,
     kNumberOfParameters
 };
 

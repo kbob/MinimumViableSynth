@@ -33,7 +33,8 @@ DEFPNAME(Osc1VibratoDepth,    "Oscillator 1 Vibrato Depth");
 DEFPNAME(Osc1VibratoSpeed,    "Oscillator 1 Vibrato Speed");
 DEFPNAME(Osc1VibratoWaveform, "Oscillator 1 Vibrato Waveform");
 
-DEFPNAME(Osc2Detune,          "Oscillator 2 Detune");
+DEFPNAME(Osc2CoarseDetune,    "Oscillator 2 Coarse Detune");
+DEFPNAME(Osc2FineDetune,      "Oscillator 2 Fine Detune");
 DEFPNAME(Osc2Waveform,        "Oscillator 2 Waveform");
 DEFPNAME(Osc2WaveSkew,        "Oscillator 2 Skew");
 DEFPNAME(Osc2VibratoDepth,    "Oscillator 2 Vibrato Depth");
@@ -93,7 +94,8 @@ MVS::MVS(AudioUnit inComponentInstance)
     gp->SetParameter(kParameter_Osc1VibratoWaveform, kWaveform_Sine);
 
     // Oscillator 2
-    gp->SetParameter(kParameter_Osc2Detune,          0.000);
+    gp->SetParameter(kParameter_Osc2CoarseDetune,    0.000);
+    gp->SetParameter(kParameter_Osc2FineDetune,      0.000);
     gp->SetParameter(kParameter_Osc2Waveform,        kWaveform_Square);
     gp->SetParameter(kParameter_Osc2VibratoDepth,    0.000);
     gp->SetParameter(kParameter_Osc2VibratoSpeed,    3.000);
@@ -224,16 +226,26 @@ OSStatus MVS::GetParameterInfo(AudioUnitScope          inScope,
         info.flags       |= 0;
         break;
 
-    case kParameter_Osc2Detune:
-        FillInParameterName(info, kParamName_Osc2Detune, false);
+    case kParameter_Osc2CoarseDetune:
+        FillInParameterName(info, kParamName_Osc2CoarseDetune, false);
         HasClump(info, kParamClump_Osc2);
-        info.unit         = kAudioUnitParameterUnit_RelativeSemiTones;
-        info.minValue     = -127;
-        info.maxValue     = +127;
+        info.unit         = kAudioUnitParameterUnit_MIDINoteNumber;
+            info.minValue     = -60;
+        info.maxValue     = +60;
         info.defaultValue = 0;
         info.flags       |= 0;
         break;
 
+    case kParameter_Osc2FineDetune:
+        FillInParameterName(info, kParamName_Osc2FineDetune, false);
+        HasClump(info, kParamClump_Osc2);
+        info.unit         = kAudioUnitParameterUnit_Cents;
+        info.minValue     = -100;
+        info.maxValue     = +100;
+        info.defaultValue = 0;
+        info.flags       |= 0;
+        break;
+        
     case kParameter_Osc2Waveform:
         FillInParameterName(info, kParamName_Osc2Waveform, false);
         HasClump(info, kParamClump_Osc2);
@@ -669,7 +681,8 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     Float32 osc1skew   = GetGlobalParameter(kParameter_Osc1WaveSkew) / 100.0;
     Float32 osc1vibdep = GetGlobalParameter(kParameter_Osc1VibratoDepth) / 1200;
     Float32 osc1vibspd = GetGlobalParameter(kParameter_Osc1VibratoSpeed);
-    Float32 osc2detune = GetGlobalParameter(kParameter_Osc2Detune);
+    Float32 o2coarsetune = GetGlobalParameter(kParameter_Osc2CoarseDetune);
+    Float32 o2finetune = GetGlobalParameter(kParameter_Osc2FineDetune);
     Float32 osc2skew   = GetGlobalParameter(kParameter_Osc2WaveSkew) / 100.0;
     Float32 osc2vibdep = GetGlobalParameter(kParameter_Osc2VibratoDepth) / 1200;
     Float32 osc2vibspd = GetGlobalParameter(kParameter_Osc2VibratoSpeed);
@@ -679,6 +692,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     Float32 nlevel     = GetGlobalParameter(kParameter_NoiseLevel);
 
     // Convert parameters.
+    Float32 osc2detune = o2coarsetune + o2finetune / 100.0;
     NoiseSource::Type ntype = NoiseType((enum NoiseType)ntyp);
     o1level = o1level <= -40 ? 0 : powf(10.0, o1level / 20.0);
     o2level = o2level <= -40 ? 0 : powf(10.0, o2level / 20.0);
