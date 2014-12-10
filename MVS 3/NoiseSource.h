@@ -19,22 +19,31 @@ public:
         Red
     };
 
-    NoiseSource();
+           NoiseSource();
 
-    void     initialize(Float64 sampleRate);
-    void     generate(Type type, Float32 *out, size_t n);
+    void   initialize(double sampleRate);
+    void   generate(Type type, float *out, size_t n);
 
 private:
-    Float64  mSampleRate;
-    Float32  mLeakage;
-    Float32  mScaling;
-    uint32_t mSeed;
-    Float32  mB0, mB1, mB2, mB3, mB4, mB5, mB6;
-    Float32  mY;
 
-    inline Float32  frandom();
+    // White state
+    uint32_t seed;
+
+    // Pink state
+    enum { Nf = 5 };
+    float  pink_xm1[Nf];
+    float  pink_ym1[Nf];
+    float  pink_a0[Nf], pink_a1[Nf], pink_b1[Nf];
+    float  pink_gain;
+
+    // Red state (e.g., Alabama)
+    float  red_ym1;
+    float  red_gain;
+    float  red_a0, red_b1;
+
+    inline float    frandom();
     inline uint32_t cartaRandom();
-    
+
 };
 
 #endif /* defined(__MVS_3__NoiseSource__) */
