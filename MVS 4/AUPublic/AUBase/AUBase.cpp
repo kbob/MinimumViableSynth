@@ -2353,8 +2353,8 @@ bool	AUBase::FormatIsCanonical(		const CAStreamBasicDescription &f)
 #else
 		&&	(f.mFormatFlags & kLinearPCMFormatFlagIsBigEndian) == 0
 #endif
-		&&	f.mBitsPerChannel == 8 * sizeof(AudioUnitSampleType)
-		&&	f.mBytesPerFrame == f.NumberInterleavedChannels() * sizeof(AudioUnitSampleType)
+		&&	f.mBitsPerChannel == 8 * sizeof(Float32)
+		&&	f.mBytesPerFrame == f.NumberInterleavedChannels() * sizeof(Float32)
 		);
 }
 

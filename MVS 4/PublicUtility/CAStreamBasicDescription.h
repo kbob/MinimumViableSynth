@@ -291,7 +291,7 @@ public:
 	{
 		mFormatID = kAudioFormatLinearPCM;
 		UInt32 sampleSize = SizeOf32(Float32);
-		mFormatFlags = kAudioFormatFlagsCanonical;
+		mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
 		mBitsPerChannel = 8 * sampleSize;
 		mChannelsPerFrame = nChannels;
 		mFramesPerPacket = 1;
@@ -310,7 +310,7 @@ public:
 		UInt32 flagsMask = (kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsBigEndian | kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kLinearPCMFormatFlagsSampleFractionMask);
 		bool interleaved = (mFormatFlags & kAudioFormatFlagIsNonInterleaved) == 0;
 		unsigned sampleSize = SizeOf32(Float32);
-		reqFormatFlags = kAudioFormatFlagsCanonical;
+		reqFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
 		UInt32 reqFrameSize = interleaved ? (mChannelsPerFrame * sampleSize) : sampleSize;
 
 		return ((mFormatFlags & flagsMask) == reqFormatFlags
@@ -326,7 +326,7 @@ public:
 #if CA_PREFER_FIXED_POINT
 		mFormatFlags = kAudioFormatFlagsCanonical | (kAudioUnitSampleFractionBits << kLinearPCMFormatFlagsSampleFractionShift);
 #else
-		mFormatFlags = kAudioFormatFlagsCanonical;
+		mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
 #endif
 		mChannelsPerFrame = nChannels;
 		mFramesPerPacket = 1;

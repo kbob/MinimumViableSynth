@@ -337,11 +337,11 @@ public:
 	AudioBufferList &			GetBufferList() const { return mIOBuffer.GetBufferList(); }
 
 /*! @method GetChannelData */
-	AudioUnitSampleType *		GetChannelData(int ch) const {
+	Float32 *                   GetChannelData(int ch) const {
 									if (mStreamFormat.IsInterleaved())
-										return static_cast<AudioUnitSampleType *>(mIOBuffer.GetBufferList().mBuffers[0].mData) + ch;
+										return static_cast<Float32 *>(mIOBuffer.GetBufferList().mBuffers[0].mData) + ch;
 									else
-										return static_cast<AudioUnitSampleType *>(mIOBuffer.GetBufferList().mBuffers[ch].mData);
+										return static_cast<Float32 *>(mIOBuffer.GetBufferList().mBuffers[ch].mData);
 								}
 	Float32 *					GetFloat32ChannelData(int ch) const {
 									if (mStreamFormat.IsInterleaved())
