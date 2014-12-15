@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "92717BE91A1B211600B87C38"
-               BuildableName = "One Note"
-               BlueprintName = "One Note"
-               ReferencedContainer = "container:MVS 3.xcodeproj">
+               BlueprintIdentifier = "92717B681A19A7DC00B87C38"
+               BuildableName = "MVS 4.component"
+               BlueprintName = "MVS 4"
+               ReferencedContainer = "container:MVS 4.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,34 +29,25 @@
       buildConfiguration = "Debug">
       <Testables>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "92717BE91A1B211600B87C38"
-            BuildableName = "One Note"
-            BlueprintName = "One Note"
-            ReferencedContainer = "container:MVS 3.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "92717BE91A1B211600B87C38"
-            BuildableName = "One Note"
-            BlueprintName = "One Note"
-            ReferencedContainer = "container:MVS 3.xcodeproj">
+            BlueprintIdentifier = "92717B681A19A7DC00B87C38"
+            BuildableName = "MVS 4.component"
+            BlueprintName = "MVS 4"
+            ReferencedContainer = "container:MVS 4.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -66,15 +57,15 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "92717BE91A1B211600B87C38"
-            BuildableName = "One Note"
-            BlueprintName = "One Note"
-            ReferencedContainer = "container:MVS 3.xcodeproj">
+            BlueprintIdentifier = "92717B681A19A7DC00B87C38"
+            BuildableName = "MVS 4.component"
+            BlueprintName = "MVS 4"
+            ReferencedContainer = "container:MVS 4.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

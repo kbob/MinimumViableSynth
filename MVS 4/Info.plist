@@ -16,11 +16,11 @@
 			<key>manufacturer</key>
 			<string>sbiL</string>
 			<key>name</key>
-			<string>MVS 3</string>
+			<string>MVS 4</string>
 			<key>sandboxSafe</key>
 			<true/>
 			<key>subtype</key>
-			<string>mvs3</string>
+			<string>mvs4</string>
 			<key>type</key>
 			<string>aumu</string>
 			<key>version</key>

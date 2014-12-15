@@ -36,7 +36,7 @@
 		92717BCE1A19A7DC00B87C38 /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BCD1A19A7DC00B87C38 /* CAVectorUnit.cpp */; };
 		92717BD21A19A7DC00B87C38 /* CAXException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD11A19A7DC00B87C38 /* CAXException.cpp */; };
 		92717BD71A19A7DC00B87C38 /* MVS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD61A19A7DC00B87C38 /* MVS.cpp */; };
-		92717BDA1A19A7DC00B87C38 /* MVS 3_Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = 92717BD91A19A7DC00B87C38 /* MVS 3_Prefix.pch */; };
+		92717BDA1A19A7DC00B87C38 /* MVS 4_Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = 92717BD91A19A7DC00B87C38 /* MVS 4_Prefix.pch */; };
 		92717BE21A19B5DD00B87C38 /* Envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE01A19B5DD00B87C38 /* Envelope.cpp */; };
 		92717BE51A1A498100B87C38 /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
 		92717BED1A1B211600B87C38 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BEC1A1B211600B87C38 /* main.cpp */; };
@@ -60,7 +60,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		92717B691A19A7DC00B87C38 /* MVS 3.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MVS 3.component"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92717B691A19A7DC00B87C38 /* MVS 4.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MVS 4.component"; sourceTree = BUILT_PRODUCTS_DIR; };
 		92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		92717B6E1A19A7DC00B87C38 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		92717B701A19A7DC00B87C38 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -132,7 +132,7 @@
 		92717BD51A19A7DC00B87C38 /* MVS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVS.h; sourceTree = "<group>"; };
 		92717BD61A19A7DC00B87C38 /* MVS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MVS.cpp; sourceTree = "<group>"; };
 		92717BD81A19A7DC00B87C38 /* MVSVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVSVersion.h; sourceTree = "<group>"; };
-		92717BD91A19A7DC00B87C38 /* MVS 3_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MVS 3_Prefix.pch"; sourceTree = "<group>"; };
+		92717BD91A19A7DC00B87C38 /* MVS 4_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MVS 4_Prefix.pch"; sourceTree = "<group>"; };
 		92717BE01A19B5DD00B87C38 /* Envelope.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Envelope.cpp; sourceTree = "<group>"; };
 		92717BE11A19B5DD00B87C38 /* Envelope.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Envelope.h; sourceTree = "<group>"; };
 		92717BE31A1A498100B87C38 /* Oscillator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Oscillator.cpp; sourceTree = "<group>"; };
@@ -177,7 +177,7 @@
 		92717B5D1A19A7DC00B87C38 = {
 			isa = PBXGroup;
 			children = (
-				92717B741A19A7DC00B87C38 /* MVS 3 */,
+				92717B741A19A7DC00B87C38 /* MVS 4 */,
 				92717BEB1A1B211600B87C38 /* One Note */,
 				92717B6B1A19A7DC00B87C38 /* Frameworks */,
 				92717B6A1A19A7DC00B87C38 /* Products */,
@@ -187,7 +187,7 @@
 		92717B6A1A19A7DC00B87C38 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				92717B691A19A7DC00B87C38 /* MVS 3.component */,
+				92717B691A19A7DC00B87C38 /* MVS 4.component */,
 				92717BEA1A1B211600B87C38 /* One Note */,
 			);
 			name = Products;
@@ -204,16 +204,16 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		92717B741A19A7DC00B87C38 /* MVS 3 */ = {
+		92717B741A19A7DC00B87C38 /* MVS 4 */ = {
 			isa = PBXGroup;
 			children = (
 				92717BD41A19A7DC00B87C38 /* AU Source */,
-				92717BD91A19A7DC00B87C38 /* MVS 3_Prefix.pch */,
+				92717BD91A19A7DC00B87C38 /* MVS 4_Prefix.pch */,
 				92717B771A19A7DC00B87C38 /* AUPublic */,
 				92717BAB1A19A7DC00B87C38 /* PublicUtility */,
 				92717B751A19A7DC00B87C38 /* Supporting Files */,
 			);
-			path = "MVS 3";
+			path = "MVS 4";
 			sourceTree = "<group>";
 		};
 		92717B751A19A7DC00B87C38 /* Supporting Files */ = {
@@ -362,9 +362,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		92717B681A19A7DC00B87C38 /* MVS 3 */ = {
+		92717B681A19A7DC00B87C38 /* MVS 4 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 92717BDD1A19A7DC00B87C38 /* Build configuration list for PBXNativeTarget "MVS 3" */;
+			buildConfigurationList = 92717BDD1A19A7DC00B87C38 /* Build configuration list for PBXNativeTarget "MVS 4" */;
 			buildPhases = (
 				92717B621A19A7DC00B87C38 /* Sources */,
 				92717B631A19A7DC00B87C38 /* Frameworks */,
@@ -377,9 +377,9 @@
 			);
 			dependencies = (
 			);
-			name = "MVS 3";
+			name = "MVS 4";
 			productName = MVS;
-			productReference = 92717B691A19A7DC00B87C38 /* MVS 3.component */;
+			productReference = 92717B691A19A7DC00B87C38 /* MVS 4.component */;
 			productType = "com.apple.product-type.bundle";
 		};
 		92717BE91A1B211600B87C38 /* One Note */ = {
@@ -416,7 +416,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 92717B611A19A7DC00B87C38 /* Build configuration list for PBXProject "MVS 3" */;
+			buildConfigurationList = 92717B611A19A7DC00B87C38 /* Build configuration list for PBXProject "MVS 4" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -428,7 +428,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				92717B681A19A7DC00B87C38 /* MVS 3 */,
+				92717B681A19A7DC00B87C38 /* MVS 4 */,
 				92717BE91A1B211600B87C38 /* One Note */,
 			);
 		};
@@ -439,7 +439,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92717BDA1A19A7DC00B87C38 /* MVS 3_Prefix.pch in Resources */,
+				92717BDA1A19A7DC00B87C38 /* MVS 4_Prefix.pch in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,15 +589,15 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MVS 3/MVS 3_Prefix.pch";
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					CA_USE_AUDIO_PLUGIN_ONLY,
 					CA_AUTO_MIDI_MAP,
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = "MVS 3/Info.plist";
+				INFOPLIST_FILE = "MVS 4/Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
-				PRODUCT_NAME = "MVS 3";
+				PRODUCT_NAME = "MVS 4";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
 			};
@@ -608,15 +608,15 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MVS 3/MVS 3_Prefix.pch";
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					CA_USE_AUDIO_PLUGIN_ONLY,
 					CA_AUTO_MIDI_MAP,
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = "MVS 3/Info.plist";
+				INFOPLIST_FILE = "MVS 4/Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
-				PRODUCT_NAME = "MVS 3";
+				PRODUCT_NAME = "MVS 4";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
 			};
@@ -626,7 +626,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MVS 3/MVS 3_Prefix.pch";
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -639,7 +639,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MVS 3/MVS 3_Prefix.pch";
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -647,7 +647,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		92717B611A19A7DC00B87C38 /* Build configuration list for PBXProject "MVS 3" */ = {
+		92717B611A19A7DC00B87C38 /* Build configuration list for PBXProject "MVS 4" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				92717BDB1A19A7DC00B87C38 /* Debug */,
@@ -656,7 +656,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		92717BDD1A19A7DC00B87C38 /* Build configuration list for PBXNativeTarget "MVS 3" */ = {
+		92717BDD1A19A7DC00B87C38 /* Build configuration list for PBXNativeTarget "MVS 4" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				92717BDE1A19A7DC00B87C38 /* Debug */,
