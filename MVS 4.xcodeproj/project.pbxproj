@@ -342,9 +342,9 @@
 				929D3C381A2A3DDC0049102A /* Decimator.h */,
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
-				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
 				92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */,
 				92AC4F541A2F6F3500C9DB82 /* NoiseSource.h */,
+				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
 				92717BE41A1A498100B87C38 /* Oscillator.h */,
 				92717BD81A19A7DC00B87C38 /* MVSVersion.h */,
 			);

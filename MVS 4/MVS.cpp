@@ -611,10 +611,6 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     Float64 sampleRate   = SampleRate();
     Float32 maxLevel     = powf(inParams.mVelocity/127.0, 3.0);
 
-    Float32 o1wf         = GetGlobalParameter(kParameter_Osc1Waveform);
-    Float32 o1vwf        = GetGlobalParameter(kParameter_Osc1VibratoWaveform);
-    Float32 o2wf         = GetGlobalParameter(kParameter_Osc2Waveform);
-    Float32 o2vwf        = GetGlobalParameter(kParameter_Osc2VibratoWaveform);
     Float32 noiseAttack  = GetGlobalParameter(kParameter_NoiseAttackTime);
     Float32 noiseDecay   = GetGlobalParameter(kParameter_NoiseDecayTime);
     Float32 noiseSustain = GetGlobalParameter(kParameter_NoiseSustainLevel);
@@ -625,16 +621,12 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     Float32 sustainLevel = GetGlobalParameter(kParameter_AmpSustainLevel);
     Float32 releaseTime  = GetGlobalParameter(kParameter_AmpReleaseTime);
 
-    Oscillator::Type o1type    = OscillatorType((Waveform)(o1wf + 0.5));
-    Oscillator::Type o1LFOtype = OscillatorType((Waveform)(o1vwf + 0.5));
-    Oscillator::Type o2type    = OscillatorType((Waveform)(o2wf + 0.5));
-    Oscillator::Type o2LFOtype = OscillatorType((Waveform)(o2vwf + 0.5));
 
 
-    mOsc1LFO.initialize(sampleRate, o1LFOtype);
-    mOsc1.initialize(sampleRate, o1type);
-    mOsc2LFO.initialize(sampleRate, o2LFOtype);
-    mOsc2.initialize(sampleRate, o2type);
+    mOsc1LFO.initialize(sampleRate);
+    mOsc1.initialize(sampleRate);
+    mOsc2LFO.initialize(sampleRate);
+    mOsc2.initialize(sampleRate);
     mNoise.initialize(sampleRate);
     mNoiseEnv.initialize(sampleRate,
                          1.0,
@@ -690,6 +682,15 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     Float32 o1level    = GetGlobalParameter(kParameter_Osc1Level);
     Float32 o2level    = GetGlobalParameter(kParameter_Osc2Level);
     Float32 nlevel     = GetGlobalParameter(kParameter_NoiseLevel);
+    Float32 o1wf       = GetGlobalParameter(kParameter_Osc1Waveform);
+    Float32 o1vwf      = GetGlobalParameter(kParameter_Osc1VibratoWaveform);
+    Float32 o2wf       = GetGlobalParameter(kParameter_Osc2Waveform);
+    Float32 o2vwf      = GetGlobalParameter(kParameter_Osc2VibratoWaveform);
+
+    Oscillator::Type o1type    = OscillatorType((Waveform)(o1wf + 0.5));
+    Oscillator::Type o1LFOtype = OscillatorType((Waveform)(o1vwf + 0.5));
+    Oscillator::Type o2type    = OscillatorType((Waveform)(o2wf + 0.5));
+    Oscillator::Type o2LFOtype = OscillatorType((Waveform)(o2vwf + 0.5));
 
     // Convert parameters.
     Float32 osc2detune = o2coarsetune + o2finetune / 100.0;
@@ -711,11 +712,11 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     if (osc1vibdep) {
         Float32 osc1CVbuf[toneFrameCount];
         memset(osc1CVbuf, 0, sizeof osc1CVbuf);
-        mOsc1LFO.generate(osc1vibspd, 0, osc1CVbuf, toneFrameCount);
+        mOsc1LFO.generate(o1LFOtype, osc1vibspd, 0, osc1CVbuf, toneFrameCount);
         CVtoPhase(Frequency(), osc1vibdep, osc1CVbuf, toneFrameCount);
-        mOsc1.generate_modulated(osc1skew, osc1buf, osc1CVbuf, toneFrameCount);
+        mOsc1.generate_modulated(o1type, osc1CVbuf, osc1skew, osc1buf, toneFrameCount);
     } else if (o1level) {
-        mOsc1.generate(Frequency(), osc1skew, osc1buf, toneFrameCount);
+        mOsc1.generate(o1type, Frequency(), osc1skew, osc1buf, toneFrameCount);
     }
 
     // Generate Oscillator 2.
@@ -725,11 +726,11 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     if (osc2vibdep) {
         Float32 osc2CVbuf[toneFrameCount];
         memset(osc2CVbuf, 0, sizeof osc2CVbuf);
-        mOsc2LFO.generate(osc2vibspd, 0, osc2CVbuf, toneFrameCount);
+        mOsc2LFO.generate(o2LFOtype, osc2vibspd, 0, osc2CVbuf, toneFrameCount);
         CVtoPhase(o2freq, osc2vibdep, osc2CVbuf, toneFrameCount);
-        mOsc2.generate_modulated(osc2skew, osc2buf, osc2CVbuf, toneFrameCount);
+        mOsc2.generate_modulated(o2type, osc2CVbuf, osc2skew, osc2buf, toneFrameCount);
     } else if (o2level) {
-        mOsc2.generate(o2freq, osc2skew, osc2buf, toneFrameCount);
+        mOsc2.generate(o2type, o2freq, osc2skew, osc2buf, toneFrameCount);
     }
 
     // Generate noise.

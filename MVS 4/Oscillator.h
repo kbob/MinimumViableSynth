@@ -12,75 +12,124 @@
 class Oscillator {
 
 public:
+
     enum Type {
+        None,
         Saw,
         Square,
         Triangle,
         Sine,
     };
 
-            Oscillator();
+    Oscillator();
 
-    void    initialize                  (Float64        sampleRate,
-                                         Type           type = Saw);
+    void   initialize                  (double       sampleRate);
 
-    void    generate                    (Float64        freq,
-                                         Float32        skew,
-                                         Float32       *sampBuf,
-                                         UInt32         count);
+    void   generate                    (Type         type,
+                                        double       freq,
+                                        float        modifier,
+                                        float       *samples_out,
+                                        size_t       count);
 
-    void    generate_modulated          (Float32        skew,
-                                         Float32       *sampBuf,
-                                         Float32 const *phaseIncrements,
-                                         UInt32         count);
+    void   generate_modulated          (Type         type,
+                                        float const *phaseIncrements,
+                                        float        modifier,
+                                        float       *samples_out,
+                                        size_t       count);
+
+    // sync_out and sync_in point to an array of waveform start times
+    // in units of samples.  They are float, so fractional sample times
+    // can be used.  The syncs are terminated by a number higher
+    // than count.
+    void   generate_with_sync          (Type         type,
+                                        float const *phaseIncrements,
+                                        float        modifier,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t       count);
 
 private:
-    Float64 mSampleRate;
-    Float64 mInverseSampleRate;
-    Type    mType;
-    Float32 mPhase;
-    Float32 mZm2, mZm1, mZ0, mZp1;
-    Float32 mLevel;
+    double mSampleRate;
+    double mInverseSampleRate;
+    Type   mType;
+    float  mPhase;
+    float  mNewThresh;
+    float  mThresh;
+    float  mShiftZ[4];
 
-    void    generate_saw                (Float64        freq,
-                                         Float32        skew,
-                                         Float32       *sampBuf,
-                                         UInt32         count);
+    void   generate_sync_only          (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t      count);
 
-    void    generate_modulated_saw      (Float32        skew,
-                                         Float32       *sampBuf,
-                                         Float32 const *phaseIncrements,
-                                         UInt32         count);
+    void   generate_saw                (double       freq,
+                                        float       *samples_out,
+                                        size_t       count);
 
-    void    generate_square             (Float64        freq,
-                                         Float32        skew,
-                                         Float32       *sampBuf,
-                                         UInt32         count);
+    void   generate_modulated_saw      (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        size_t       count);
 
-    void    generate_modulated_square   (Float32        skew,
-                                         Float32       *sampBuf,
-                                         Float32 const *phaseIncrements,
-                                         UInt32         count);
+    void   generate_sync_saw           (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t      count);
 
-    void    generate_triangle           (Float64        freq,
-                                         Float32        skew,
-                                         Float32       *sampBuf,
-                                         UInt32         count);
+    void   generate_square             (double       freq,
+                                        float       *samples_out,
+                                        size_t       count);
 
-    void    generate_modulated_triangle (Float32        skew,
-                                         Float32       *sampBuf,
-                                         Float32 const *phaseIncrements,
-                                         UInt32         count);
+    void   generate_modulated_square   (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        size_t       count);
 
-    void    generate_sine               (Float64        freq,
-                                         Float32        skew,
-                                         Float32       *sampBuf,
-                                         UInt32         count);
+    void   generate_sync_square        (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t      count);
 
-    void    generate_modulated_sine     (Float32        skew,
-                                         Float32       *sampBuf,
-                                         Float32 const *phaseIncrements,
-                                         UInt32         count);
+    void   generate_triangle           (double       freq,
+                                        float       *samples_out,
+                                        size_t       count);
+
+    void   generate_modulated_triangle (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        size_t       count);
+
+    void   generate_sync_triangle      (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t      count);
+
+    void   generate_sine               (double       freq,
+                                        float       *samples_out,
+                                        size_t       count);
+
+    void   generate_modulated_sine     (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        size_t       count);
+
+    void   generate_sync_sine          (float const *phaseIncrements,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t      count);
+
+    void   begin_chunk                 (Type         type,
+                                        float        freq,
+                                        float        modifier);
+
+    void   calc_h_m                    (Type         type,
+                                        float        freq,
+                                        float        phase,
+                                        float        thresh,
+                                        float       *h_out,
+                                        float       *m_out);
     
 };
 
