@@ -516,7 +516,9 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
 
     // This may change the value, so set the parameter's value, then
     // read it back.
-    mParams.set_param_value(inID, inValue);
+    OSStatus err = mParams.set_param_value(inID, inValue);
+    if (err != noErr)
+        return err;
 
     return AUMonotimbralInstrumentBase::SetParameter(inID,
                                                      inScope,

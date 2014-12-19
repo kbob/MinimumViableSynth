@@ -11,15 +11,6 @@
 
 #include <vector>
 
-#include <stdio.h>
-
-//#include "AUInstrumentBase.h"
-
-//class Clump;
-//class Param;
-//typedef std::vector<Clump> ClumpVector;
-//typedef std::vector<Param> ParamVector;
-
 struct ValueStringMap {
     int         value;
     const char *string;
@@ -30,37 +21,36 @@ class Param {
 public:
 
     // Initialization
-    Param&                 name          (const char *);
-    Param&                 min_max       (float, float);
-    Param&                 default_value (float);
-    Param&                 value_string  (int value, const char *string);
-    Param&                 value_strings (const ValueStringMap *);
-    Param&                 units         (AudioUnitParameterUnit);
-    Param&                 flag          (UInt32);
+            Param&         name          (const char *);
+            Param&         min_max       (float, float);
+    virtual Param&         default_value (float);
+            Param&         value_string  (int value, const char *string);
+            Param&         value_strings (const ValueStringMap *);
+            Param&         units         (AudioUnitParameterUnit);
+            Param&         flag          (UInt32);
 
-    virtual void           set_value     (float new_value) = 0;
+    // Get/Set
+    virtual float          get_value     () const = 0;
+    virtual OSStatus       set_value     (float new_value) = 0;
 
 protected:
 
-    enum Type {
-        Float,
-        Int,
-    };
+                           Param();
+    virtual               ~Param();
 
     typedef std::vector<ValueStringMap> ValueStrings;
 
-    float                  mValue;
     ValueStrings           mValueStrings;
-
-    Param(Type t);
 
 private:
 
     friend class           ParamSet;
 
-    Type                   mType;
     int                    mIndex;
     AudioUnitParameterInfo mInfo;
+
+    Param(const Param&);                // disallow copy/assign
+    void operator = (const Param&);
 
 };
 
@@ -68,24 +58,29 @@ class FloatParam : public Param {
 
 public:
 
-                 FloatParam     ();
+                     FloatParam     ();
 
-                 operator float () const { return mValue; }
+                     operator float () const { return mFloatValue; }
 
-    virtual void set_value      (float new_value);
+    virtual float    get_value      () const;
+    virtual OSStatus set_value      (float new_value);
 
+private:
+
+    float            mFloatValue;
 
 };
 
-class IntParam : public Param {
+class IntParam : public Param {     // XXX deprecated
 
 public:
 
-                 IntParam     ();
+                  IntParam     ();
 
-                 operator int () const { return mValue; }
+                  operator int () const { return mIntValue; }
 
-    virtual void set_value    (float new_value);
+    virtual float get_value    () const;
+    virtual OSStatus set_value    (float new_value);
 
 protected:
 
@@ -93,14 +88,28 @@ protected:
 
 };
 
-template <class E> class EnumParam : public IntParam {
+class EnumParamBase : public Param {
 
 public:
 
-    operator E () const
-    {
-        return (E)mValueStrings[mIntValue].value;
-    }
+    virtual Param&   default_value (float);
+
+    virtual float    get_value     () const;
+    virtual OSStatus set_value     (float new_value);
+
+protected:
+
+                     EnumParamBase ();
+
+    int              mUnmappedValue;
+    int              mMappedValue;
+};
+
+template <class E> class EnumParam : public EnumParamBase {
+
+public:
+
+    operator E () const { return (E)mMappedValue; }
     
 };
 
@@ -135,7 +144,7 @@ public:
     const char                   *clump_name             (UInt32 id)    const;
 
     void                          set_defaults    ();
-    void                          set_param_value (size_t index, float value);
+    OSStatus                      set_param_value (size_t index, float value);
 
 protected:
 
