@@ -29,7 +29,6 @@ Param::Param(Type t)
 
 Param& Param::name(const char *name)
 {
-    fprintf(stderr, "Param::name(\"%s\")\n", name);
     mIndex = next_param_index++;
     if (current_paramset->mIndex[mIndex] != this)
         fprintf(stderr, "Param::name(\"%s\"): expected \"%s %s\"\n",
@@ -120,9 +119,9 @@ void IntParam::set_value(float new_value)
     if (!mValueStrings.empty()) {
         if (new_value < 1.0 && mValueStrings.size() > 1)
             new_value *= 127.0 / (mValueStrings.size() - 1);
-        new_value = mValueStrings[(size_t)new_value].value;
     }
     mValue = new_value;
+    mIntValue = (int)(new_value + 0.5);
 }
 
 
@@ -133,8 +132,6 @@ ParamClump::ParamClump(const char *name, const char *abbrev)
       mName(name),
       mAbbrev(abbrev)
 {
-    fprintf(stderr, "Clump(\"%s\")\n", name);
-
     assert(!current_clump);
     current_clump = this;
     assert(current_paramset);

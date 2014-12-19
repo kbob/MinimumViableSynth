@@ -87,6 +87,21 @@ public:
 
     virtual void set_value    (float new_value);
 
+protected:
+
+    int mIntValue;
+
+};
+
+template <class E> class EnumParam : public IntParam {
+
+public:
+
+    operator E () const
+    {
+        return (E)mValueStrings[mIntValue].value;
+    }
+    
 };
 
 class ParamClump {
