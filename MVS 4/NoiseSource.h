@@ -1,13 +1,13 @@
 //
 //  NoiseSource.h
-//  MVS 4
+//  MVS
 //
 //  Created by Bob Miller on 12/3/14.
 //  Copyright (c) 2014 kbobsoft.com. All rights reserved.
 //
 
-#ifndef __MVS_4__NoiseSource__
-#define __MVS_4__NoiseSource__
+#ifndef __MVS__NoiseSource__
+#define __MVS__NoiseSource__
 
 class NoiseSource {
 
@@ -46,4 +46,4 @@ private:
 
 };
 
-#endif /* defined(__MVS_4__NoiseSource__) */
+#endif /* defined(__MVS__NoiseSource__) */

@@ -1,6 +1,6 @@
 //
 //  NoiseSource.cpp
-//  MVS 4
+//  MVS
 //
 //  Created by Bob Miller on 12/3/14.
 //  Copyright (c) 2014 kbobsoft.com. All rights reserved.
@@ -37,12 +37,6 @@ void NoiseSource::initialize(Float64 sampleRate)
     float  const delta_f   = (log_fk - log_f0) / (Nf - 0.5);
     float  const delta_f_2 = delta_f / 2;
 
-    fprintf(stderr, "log(%.5g) = %.5g\n", f_min, log_f0);
-    fprintf(stderr, "log(%.5g) = %.5g\n", f_knee, log_fk);
-    fprintf(stderr, "Nf = %u\n", Nf);
-    fprintf(stderr, "delta_f = %.5g\n", delta_f);
-    fprintf(stderr, "\n");
-
     for (size_t i = 0; i < Nf; i++) {
         float f_min = exp(log_f0 + i * delta_f);
         float f_knee = exp(log_f0 + i * delta_f + delta_f_2);
@@ -51,10 +45,6 @@ void NoiseSource::initialize(Float64 sampleRate)
         pink_a0[i] = (1 + xk) / (1 + x0);
         pink_a1[i] = -(1 - xk) / (1 + x0);
         pink_b1[i] = (1 - x0) / (1 + x0);
-        fprintf(stderr, "f_min = %.5g, f_knee = %.5g\n", f_min, f_knee);
-        fprintf(stderr, "xk = %.5g, x0 = %.5g\n", xk, x0);
-        fprintf(stderr, "a0 = %.5g, a1 = %.5g, b1 = %.5g\n",
-                pink_a0[i], pink_a1[i], pink_b1[i]);
         pink_xm1[i] = pink_ym1[i] = 0;
     }
     pink_gain = 0.44;
@@ -64,9 +54,6 @@ void NoiseSource::initialize(Float64 sampleRate)
     double x0 = M_PI * f_min / sampleRate;
     red_a0 = (1 + xk) / (1 + x0);
     red_b1 = (1 - x0) / (1 + x0);
-    fprintf(stderr, "f_min = %.5g\n", f_min);
-    fprintf(stderr, "xk = %.5g, x0 = %.5g\n", xk, x0);
-    fprintf(stderr, "a0 = %.5g, b1 = %.5g\n", red_a0, red_b1);
     red_ym1 = 0;
     red_gain = 0.016;           // sounds about right
 }

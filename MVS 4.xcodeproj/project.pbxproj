@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		926C8C0B1A4118050082B95A /* ParamSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 926C8C091A4118050082B95A /* ParamSet.cpp */; };
 		92717B6D1A19A7DC00B87C38 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */; };
 		92717B6F1A19A7DC00B87C38 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6E1A19A7DC00B87C38 /* AudioToolbox.framework */; };
 		92717B711A19A7DC00B87C38 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B701A19A7DC00B87C38 /* CoreServices.framework */; };
@@ -60,6 +61,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		926C8C091A4118050082B95A /* ParamSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParamSet.cpp; sourceTree = "<group>"; };
+		926C8C0A1A4118050082B95A /* ParamSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParamSet.h; sourceTree = "<group>"; };
 		92717B691A19A7DC00B87C38 /* MVS 4.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MVS 4.component"; sourceTree = BUILT_PRODUCTS_DIR; };
 		92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		92717B6E1A19A7DC00B87C38 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -344,6 +347,8 @@
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
 				92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */,
 				92AC4F541A2F6F3500C9DB82 /* NoiseSource.h */,
+				926C8C091A4118050082B95A /* ParamSet.cpp */,
+				926C8C0A1A4118050082B95A /* ParamSet.h */,
 				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
 				92717BE41A1A498100B87C38 /* Oscillator.h */,
 				92717BD81A19A7DC00B87C38 /* MVSVersion.h */,
@@ -461,6 +466,7 @@
 				92717B9B1A19A7DC00B87C38 /* SynthNote.cpp in Sources */,
 				92717B871A19A7DC00B87C38 /* AUScopeElement.cpp in Sources */,
 				92717BD71A19A7DC00B87C38 /* MVS.cpp in Sources */,
+				926C8C0B1A4118050082B95A /* ParamSet.cpp in Sources */,
 				92717B811A19A7DC00B87C38 /* AUOutputElement.cpp in Sources */,
 				92717B8A1A19A7DC00B87C38 /* ComponentBase.cpp in Sources */,
 				92717B8E1A19A7DC00B87C38 /* AUBuffer.cpp in Sources */,
