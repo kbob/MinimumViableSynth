@@ -12,10 +12,19 @@
 //  MIDI controls.
 
 #include "MVS.h"
+
+#include "AUMIDIDefs.h"
  
 static const UInt32  kMaxActiveNotes = 500;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
+
+struct ModBox {
+    size_t       oversample_count;
+    float const *wheel_values;
+    float const *LFO1_values;
+    float const *LFO2_values;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -326,17 +335,18 @@ MVS::MVS(AudioUnit inComponentInstance)
 {
     CreateElements();
 
-    AUElement *gp = Globals();
-    gp->UseIndexedParameters((int)mParams.size());
+    AUElement *glob = Globals();
+    glob->UseIndexedParameters((int)mParams.size());
     mParams.set_defaults();
     for (size_t i = 0; i < mParams.size(); i++)
-        gp->SetParameter((AudioUnitParameterID)i, mParams.param_value(i));
+        glob->SetParameter((AudioUnitParameterID)i, mParams.param_value(i));
 
     SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
 
     for (size_t i = 0; i < kNumNotes; i++) {
         mNotes[i].SetOversampleParams(kOversampleRatio, &mOversampleBufPtr);
         mNotes[i].AffixParams(&mParams);
+        mNotes[i].AffixModBox(&mModBoxPtr);
     }
 }
 
@@ -356,8 +366,9 @@ OSStatus MVS::Initialize()
 
     SetNotes(kNumNotes, kMaxActiveNotes, mNotes, sizeof(MVSNote));
 
-    Float64 sampleRate = GetOutput(0)->GetStreamFormat().mSampleRate;
-    mDecimator.initialize(sampleRate, kDecimatorPassFreq, kOversampleRatio);
+    Float64 baseSampleRate = GetOutput(0)->GetStreamFormat().mSampleRate;
+    mDecimator.initialize(baseSampleRate, kDecimatorPassFreq, kOversampleRatio);
+    mModWheel.initialize(mDecimator.oversampleRate());
 
     return noErr;
 }
@@ -452,6 +463,23 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
                                                      inBufferOffsetInFrames);
 }
 
+OSStatus MVS::HandleControlChange(UInt8	    inChannel,
+                                  UInt8 	inController,
+                                  UInt8 	inValue,
+                                  UInt32	inStartFrame)
+{
+    printf("HandleCC: CC=%u\n", inController);
+    if (inController == kMidiController_ModWheel)
+        mModWheel.set_raw_MSB(inValue);
+    else if (inController == kMidiController_ModWheel + 32)
+        mModWheel.set_raw_LSB(inValue);
+    return AUInstrumentBase::HandleControlChange(inChannel,
+                                                 inController,
+                                                 inValue,
+                                                 inStartFrame);
+}
+
+
 OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
                      const AudioTimeStamp       &inTimeStamp,
                      UInt32                      inNumberFrames)
@@ -470,6 +498,21 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     memset(&oversampleBuf, 0, sizeof oversampleBuf);
     mOversampleBufPtr = oversampleBuf;
 
+    // Allocate modulation buffers.
+    Float32 wheelBuf[oversampleFrameCount];
+    Float32 LFO1Buf[oversampleFrameCount];
+    Float32 LFO2Buf[oversampleFrameCount];
+
+    // Create the ModBox.
+    ModBox modbox = {
+        .wheel_values = wheelBuf,
+        .LFO1_values  = LFO1Buf,
+        .LFO2_values  = LFO2Buf,
+    };
+    mModBoxPtr = &modbox;
+
+    RunModulators(modbox);
+
     UInt32 numGroups = Groups().GetNumberOfElements();
     for (UInt32 j = 0; j < numGroups; j++) {
         SynthGroupElement *group = (SynthGroupElement*)Groups().GetElement(j);
@@ -479,6 +522,7 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
         if (err) return err;
     }
     mOversampleBufPtr = NULL;
+    mModBoxPtr = NULL;
 
     // Decimate oversampleBuf into each bus's output buf.
     Float32 *firstOutputBuf = NULL;
@@ -500,6 +544,12 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     return noErr;
 }
 
+void MVS::RunModulators(ModBox& ioWork)
+{
+    mModWheel.generate(const_cast<float *>(ioWork.wheel_values),
+                       ioWork.oversample_count);
+}
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #pragma mark MVSNote Methods
@@ -519,6 +569,11 @@ void MVSNote::SetOversampleParams(UInt32 ratio, Float32 **bufPtr)
 void MVSNote::AffixParams(const MVSParamSet *params)
 {
     mParams = params;
+}
+
+void MVSNote::AffixModBox(const ModBox **boxPtrPtr)
+{
+    mModBoxPtrPtr = boxPtrPtr;
 }
 
 bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
@@ -568,21 +623,24 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                          AudioBufferList **inBufferList,
                          UInt32            inOutBusCount)
 {
+    const ModBox *modbox = *mModBoxPtrPtr;
+
     Float32 *outBuf     = *mOversampleBufPtr;
     UInt32   frameCount = inNumFrames * mOversampleRatio;
 
     // Get parameters.
-    Float32 osc1skew     = mParams->o1_width / 100;
-    Float32 o2coarsetune = mParams->o2_coarse_detune;
-    Float32 o2finetune   = mParams->o2_fine_detune;
-    Float32 osc2skew     = mParams->o2_width / 100;
-    int ntyp             = mParams->noise_spectrum;
-    Float32 o1level      = mParams->mix_osc1_level;
-    Float32 o2level      = mParams->mix_osc2_level;
-    Float32 nlevel       = mParams->mix_noise_level;
+    const MVSParamSet *params = mParams;
+    Float32 osc1skew     = params->o1_width / 100;
+    Float32 o2coarsetune = params->o2_coarse_detune;
+    Float32 o2finetune   = params->o2_fine_detune;
+    Float32 osc2skew     = params->o2_width / 100;
+    int ntyp             = params->noise_spectrum;
+    Float32 o1level      = params->mix_osc1_level;
+    Float32 o2level      = params->mix_osc2_level;
+    Float32 nlevel       = params->mix_noise_level;
 
-    Oscillator::Waveform o1type = mParams->o1_waveform;
-    Oscillator::Waveform o2type = mParams->o2_waveform;
+    Oscillator::Waveform o1type = params->o1_waveform;
+    Oscillator::Waveform o2type = params->o2_waveform;
 
     // Convert parameters.
     Float32 osc2detune = o2coarsetune + o2finetune / 100.0;

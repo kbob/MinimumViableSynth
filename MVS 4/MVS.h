@@ -14,11 +14,14 @@
 
 #include "Decimator.h"
 #include "Envelope.h"
+#include "ModWheel.h"
 #include "NoiseSource.h"
 #include "Oscillator.h"
 #include "ParamSet.h"
 
 static const UInt32 kNumNotes = 500;
+
+class ModBox;    // container to pass modulator data from MVS to MVSNote.
 
 // Define constants to identify factory presets.
 enum Preset {
@@ -174,6 +177,7 @@ public:
                                   UInt32 ratio,
                                   Float32 **bufPtr);
             void       AffixParams(const MVSParamSet *params);
+            void       AffixModBox(const ModBox  **boxPtrPtr);
 
     virtual bool       Attack    (const MusicDeviceNoteParams &inParams);
 
@@ -190,6 +194,7 @@ private:
 
     UInt32             mOversampleRatio;
     Float32          **mOversampleBufPtr;
+    ModBox const    **mModBoxPtrPtr;
     MVSParamSet const *mParams;
     Oscillator         mOsc1;
     Oscillator         mOsc2;
@@ -245,17 +250,26 @@ public:
                                 AudioUnitParameterValue inValue,
                                 UInt32                  inBufferOffsetInFrames);
 
+    // override AUInstrumentBase to collect ModWheel changes.
+    virtual OSStatus   HandleControlChange(
+                                UInt8	                inChannel,
+                                UInt8 	                inController,
+                                UInt8 	                inValue,
+                                UInt32	                inStartFrame);
+
     virtual OSStatus   Render  (AudioUnitRenderActionFlags &ioActionFlags,
                                 const AudioTimeStamp       &inTimeStamp,
                                 UInt32                     inNumberFrames);
+
+    virtual void       RunModulators(ModBox&           ioModBox);
 
 private:
     MVSParamSet        mParams;
     Float32           *mOversampleBufPtr;
     Decimator          mDecimator;
+    ModWheel           mModWheel;
+    ModBox const     *mModBoxPtr;
     MVSNote            mNotes[kNumNotes];
-
-    void               CreateParameters();
 
 };
 
