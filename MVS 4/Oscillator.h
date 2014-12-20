@@ -13,7 +13,7 @@ class Oscillator {
 
 public:
 
-    enum Type {
+    enum Waveform {
         None,
         Saw,
         Square,
@@ -23,40 +23,40 @@ public:
 
     Oscillator();
 
-    void   initialize                  (double       sampleRate);
+    void     initialize                  (double       sampleRate);
 
-    void   generate                    (Type         type,
-                                        double       freq,
-                                        float        modifier,
-                                        float       *samples_out,
-                                        size_t       count);
+    void     generate                    (Waveform     waveform,
+                                          double       freq,
+                                          float        modifier,
+                                          float       *samples_out,
+                                          size_t       count);
 
-    void   generate_modulated          (Type         type,
-                                        float const *phaseIncrements,
-                                        float        modifier,
-                                        float       *samples_out,
-                                        size_t       count);
+    void     generate_modulated          (Waveform     waveform,
+                                          float const *phaseIncrements,
+                                          float        modifier,
+                                          float       *samples_out,
+                                          size_t       count);
 
     // sync_out and sync_in point to an array of waveform start times
     // in units of samples.  They are float, so fractional sample times
     // can be used.  The syncs are terminated by a number higher
     // than count.
-    void   generate_with_sync          (Type         type,
-                                        float const *phaseIncrements,
-                                        float        modifier,
-                                        float       *samples_out,
-                                        float const *sync_in,
-                                        float       *sync_out,
-                                        size_t       count);
+    void     generate_with_sync          (Waveform     waveform,
+                                          float const *phaseIncrements,
+                                          float        modifier,
+                                          float       *samples_out,
+                                          float const *sync_in,
+                                          float       *sync_out,
+                                          size_t       count);
 
 private:
-    double mSampleRate;
-    double mInverseSampleRate;
-    Type   mType;
-    float  mPhase;
-    float  mNewThresh;
-    float  mThresh;
-    float  mShiftZ[4];
+    double   mSampleRate;
+    double   mInverseSampleRate;
+    Waveform mWaveform;
+    float    mPhase;
+    float    mNewThresh;
+    float    mThresh;
+    float    mShiftZ[4];
 
     void   generate_sync_only          (float const *phaseIncrements,
                                         float       *samples_out,
@@ -120,11 +120,11 @@ private:
                                         float       *sync_out,
                                         size_t      count);
 
-    void   begin_chunk                 (Type         type,
+    void   begin_chunk                 (Waveform     waveform,
                                         float        freq,
                                         float        modifier);
 
-    void   calc_h_m                    (Type         type,
+    void   calc_h_m                    (Waveform     waveform,
                                         float        freq,
                                         float        phase,
                                         float        thresh,

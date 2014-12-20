@@ -19,19 +19,19 @@
 // code than if every access touched the object.
 
 #define BEGIN_Z                                                         \
-{                                                                   \
-float zm2 = mShiftZ[0],                                         \
-zm1 = mShiftZ[1],                                         \
-z0  = mShiftZ[2],                                         \
-zp1 = mShiftZ[3];
+    {                                                                   \
+        float zm2 = mShiftZ[0],                                         \
+              zm1 = mShiftZ[1],                                         \
+              z0  = mShiftZ[2],                                         \
+              zp1 = mShiftZ[3];
 
 #define END_Z                                                           \
-{                                                                   \
-mShiftZ[0] = zm2;                                               \
-mShiftZ[1] = zm1;                                               \
-mShiftZ[2] = z0;                                                \
-mShiftZ[3] = zp1;                                               \
-} }
+    {                                                                   \
+        mShiftZ[0] = zm2;                                               \
+        mShiftZ[1] = zm1;                                               \
+        mShiftZ[2] = z0;                                                \
+        mShiftZ[3] = zp1;                                               \
+    } }
 
 // Clear the whole delay line.
 #define CLEAR_Z() (mShiftZ[0] = mShiftZ[1] = mShiftZ[2] = mShiftZ[3] = 0)
@@ -56,54 +56,54 @@ mShiftZ[3] = zp1;                                               \
 
 #if BLEP_ORDER == 3
 
-#define BLEP_ME(d, h)                                               \
-((zm2 += (h) * (+ (d) * (d) * (d) * (d) / 24)),                 \
-(zm1 += (h) * (- (d) * (d) * (d) * (d) / 8                     \
-+ (d) * (d) * (d) / 6                           \
-+ (d) * (d) / 4                                 \
-+ (d) / 6                                       \
-+ 1 / 24.)),                                    \
-(z0  += (h) * (+ (d) * (d) * (d) * (d) / 8                     \
-- (d) * (d) * (d) / 3                           \
-+ (d) * 2 / 3                                   \
-- 1 / 2.)),                                     \
-(zp1 += (h) * (- (d) * (d) * (d) * (d) / 24                    \
-+ (d) * (d) * (d) / 6                           \
-- (d) * (d) / 4                                 \
-+ (d) / 6                                       \
-- 1 / 24.)))
+    #define BLEP_ME(d, h)                                               \
+        ((zm2 += (h) * (+ (d) * (d) * (d) * (d) / 24)),                 \
+         (zm1 += (h) * (- (d) * (d) * (d) * (d) / 8                     \
+                        + (d) * (d) * (d) / 6                           \
+                        + (d) * (d) / 4                                 \
+                        + (d) / 6                                       \
+                        + 1 / 24.)),                                    \
+         (z0  += (h) * (+ (d) * (d) * (d) * (d) / 8                     \
+                        - (d) * (d) * (d) / 3                           \
+                        + (d) * 2 / 3                                   \
+                        - 1 / 2.)),                                     \
+         (zp1 += (h) * (- (d) * (d) * (d) * (d) / 24                    \
+                        + (d) * (d) * (d) / 6                           \
+                        - (d) * (d) / 4                                 \
+                        + (d) / 6                                       \
+                        - 1 / 24.)))
 
 #elif BLEP_ORDER == 1
 
-#define BLEP_ME(d, h)                                               \
-((zm1 += (h) * (+ (d) * (d) / 2)),                            \
-(z0  += (h) * (- (d) * (d) / 2                               \
-+ (d)                                         \
-- 1 / 2.)))
-
+    #define BLEP_ME(d, h)                                               \
+          ((zm1 += (h) * (+ (d) * (d) / 2)),                            \
+           (z0  += (h) * (- (d) * (d) / 2                               \
+                          + (d)                                         \
+                          - 1 / 2.)))
+ 
 #elif BLEP_ORDER == 0
 
-#define BLEP_ME(d, h) ((void)0) /* La di da... */
+    #define BLEP_ME(d, h) ((void)0) /* La di da... */
 
 #else
 
-#error "unknown BLEP order"
+    #error "unknown BLEP order"
 
 #endif
 
 #if BLAM_ORDER == 1
 
-#define BLAM_ME(d, h)                                               \
-((zm1 += (h) * (+ (d) * (d) * (d) / 6)),                        \
-(z0  += (h) * (+ (1-(d)) * (1-(d)) * (1-(d)) / 6)))
+    #define BLAM_ME(d, h)                                               \
+        ((zm1 += (h) * (+ (d) * (d) * (d) / 6)),                        \
+         (z0  += (h) * (+ (1-(d)) * (1-(d)) * (1-(d)) / 6)))
 
 #elif BLAM_ORDER == 0
 
-#define BLAM_ME(d, h) ((void)0)
+    #define BLAM_ME(d, h) ((void)0)
 
 #else
 
-#error "unknown BLAM order"
+    #error "unknown BLAM order"
 
 #endif
 
@@ -114,7 +114,7 @@ void Oscillator::initialize(double sampleRate)
 {
     mSampleRate = sampleRate;
     mInverseSampleRate = 1.0 / sampleRate;
-    mType = None;
+    mWaveform = None;
     mPhase = 0.0;
     mNewThresh = 0.5;
     mThresh = -1;               // signal begin_chunk to initialize.
@@ -122,7 +122,7 @@ void Oscillator::initialize(double sampleRate)
     CLEAR_Z();
 }
 
-const char *OTname(Oscillator::Type t)
+const char *OTname(Oscillator::Waveform t)
 {
     switch (t) {
 
@@ -143,14 +143,14 @@ const char *OTname(Oscillator::Type t)
     }
 }
 
-void Oscillator::generate(Type   type,
-                          double freq,
-                          float  modifier,
-                          float *samples_out,
-                          size_t count)
+void Oscillator::generate(Waveform waveform,
+                          double   freq,
+                          float    modifier,
+                          float   *samples_out,
+                          size_t   count)
 {
-    begin_chunk(type, freq, modifier);
-    switch (type) {
+    begin_chunk(waveform, freq, modifier);
+    switch (waveform) {
 
         case None:
             break;
@@ -174,15 +174,15 @@ void Oscillator::generate(Type   type,
     mThresh = mNewThresh;
 }
 
-void Oscillator::generate_modulated(Type         type,
+void Oscillator::generate_modulated(Waveform     waveform,
                                     float const *phaseIncrements,
                                     float        modifier,
                                     float       *samples_out,
                                     size_t       count)
 {
     float freq = phaseIncrements[0] * mSampleRate;
-    begin_chunk(type, freq, modifier);
-    switch (type) {
+    begin_chunk(waveform, freq, modifier);
+    switch (waveform) {
 
         case None:
             break;
@@ -206,7 +206,7 @@ void Oscillator::generate_modulated(Type         type,
     mThresh = mNewThresh;
 }
 
-void Oscillator::generate_with_sync(Type         type,
+void Oscillator::generate_with_sync(Waveform     waveform,
                                     float const *phaseIncrements,
                                     float        modifier,
                                     float       *samples_out,
@@ -215,8 +215,8 @@ void Oscillator::generate_with_sync(Type         type,
                                     size_t       count)
 {
     float freq = phaseIncrements[0] * mSampleRate;
-    begin_chunk(type, freq, modifier);
-    switch (type) {
+    begin_chunk(waveform, freq, modifier);
+    switch (waveform) {
 
         case None:
             generate_sync_only     (phaseIncrements,
@@ -740,18 +740,18 @@ void Oscillator::generate_sync_sine(float const *phaseIncrements,
     END_Z;
 }
 
-void Oscillator::begin_chunk(Type type, float freq, float modifier)
+void Oscillator::begin_chunk(Waveform waveform, float freq, float modifier)
 {
     float thresh = 0.5 - 0.49 * modifier; // maximum skew is 99%.
     float phase = mPhase;
-    if (mType != type) {
+    if (mWaveform != waveform) {
         BEGIN_Z;
         float h0, h1, m0, m1;  // height and slope
         if (mThresh == -1)
             mThresh = thresh;
-        calc_h_m(mType, freq, mPhase, mThresh, &h0, &m0);
-        calc_h_m(type, freq, phase, mThresh, &h1, &m1);
-        // fprintf(stderr, "type %s -> %s\n", OTname(mType), OTname(type));
+        calc_h_m(mWaveform, freq, mPhase, mThresh, &h0, &m0);
+        calc_h_m(waveform, freq, phase, mThresh, &h1, &m1);
+        // fprintf(stderr, "waveform %s -> %s\n", OTname(mWaveform), OTname(waveform));
         if (h1 != h0) {
             BLEP_ME(0, h1 - h0);
             // fprintf(stderr, "BLEP h = %g - %g = %g\n", h1, h0, h1 - h0);
@@ -761,7 +761,7 @@ void Oscillator::begin_chunk(Type type, float freq, float modifier)
             // fprintf(stderr, "BLAM m = %g - %g = %g\n", m1, m0, m1 - m0);
         }
         // fprintf(stderr, "\n");
-        mType = type;
+        mWaveform = waveform;
         END_Z;
     }
     mPhase = phase;
@@ -770,14 +770,14 @@ void Oscillator::begin_chunk(Type type, float freq, float modifier)
 
 // h is the height of the waveform at the given phase.  m is its slope.
 // In other works, y and dy/dx.
-inline void Oscillator::calc_h_m(Type   type,
-                                 float  freq,
-                                 float  phase,
-                                 float  thresh,
-                                 float *h,
-                                 float *m)
+inline void Oscillator::calc_h_m(Waveform waveform,
+                                 float    freq,
+                                 float    phase,
+                                 float    thresh,
+                                 float   *h,
+                                 float   *m)
 {
-    switch (type) {
+    switch (waveform) {
 
         case None:
             *h = 0;

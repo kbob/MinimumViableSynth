@@ -31,6 +31,81 @@ static AUPreset kPresets [kNumberOfPresets] = {
     { kPreset_Default, CFSTR("Factory Default") },
 };
 
+// XXX temporary
+class Mixer {
+public:
+    enum Operator {
+        Mix,
+        RingMod,
+        HardSync
+    };
+};
+
+// XXX temporary
+class Filter {
+public:
+    enum Type {
+        LowPass,
+        HighPass,
+        BandPass,
+        BandReject
+    };
+};
+
+//XXX temporary
+class LFO {
+public:
+    enum Waveform {
+        Triangle,
+        UpSaw,
+        DnSaw,
+        Square,
+        Random,
+        SampleHold,
+    };
+};
+
+// XXX temporary
+class Assign {
+public:
+    enum Destination {
+        None,
+
+        Osc1Freq,
+        Osc1Width,
+
+        Osc2Freq,
+        Osc2Width,
+
+        Osc1Level,
+        Osc2Level,
+        NoiseLevel,
+
+//        FltCutoff,
+//        FltResonance,
+//        FltDrive,
+//        FltKeyTrack,
+
+        AmpLevel,
+        AmpAttack,
+        AmpDecay,
+        AmpSustain,
+        AmpRelease,
+
+        LFO1Amount,
+        LFO1Speed,
+
+        LFO2Amount,
+        LFO2Speed,
+
+//        Env2Attack,
+//        Env2Decay,
+//        Env2Sustain,
+//        Env2Release,
+//        Env2Amount,
+    };
+};
+
 class MVSParamSet : public ParamSet {
 
 public:
@@ -41,51 +116,51 @@ public:
 
     MVSParamSet();
 
-    EnumParam<Oscillator::Type>   o1_waveform;
-    FloatParam o1_width;
+    EnumParam<Oscillator::Waveform> o1_waveform;
+    FloatParam                      o1_width;
 
-    FloatParam o2_coarse_detune;
-    FloatParam o2_fine_detune;
-    IntParam   o2_waveform;
-    FloatParam o2_width;
+    FloatParam                      o2_coarse_detune;
+    FloatParam                      o2_fine_detune;
+    EnumParam<Oscillator::Waveform> o2_waveform;
+    FloatParam                      o2_width;
 
-    IntParam   noise_spectrum;
+    EnumParam<NoiseSource::Type>    noise_spectrum;
 
-    IntParam   mix_operator;
-    FloatParam mix_osc1_level;
-    FloatParam mix_osc2_level;
-    FloatParam mix_noise_level;
+//    EnumParam<Mixer::Operator>      mix_operator;
+    FloatParam                      mix_osc1_level;
+    FloatParam                      mix_osc2_level;
+    FloatParam                      mix_noise_level;
 
-    IntParam   flt_type;
-    FloatParam flt_cutoff;
-    FloatParam flt_resonance;
-    FloatParam flt_drive;
-    FloatParam flt_keytrack;
+//    EnumParam<Filter::Type>         flt_type;
+//    FloatParam                      flt_cutoff;
+//    FloatParam                      flt_resonance;
+//    FloatParam                      flt_drive;
+//    FloatParam                      flt_keytrack;
 
-    FloatParam amp_attack;
-    FloatParam amp_decay;
-    FloatParam amp_sustain;
-    FloatParam amp_release;
+    FloatParam                      amp_attack;
+    FloatParam                      amp_decay;
+    FloatParam                      amp_sustain;
+    FloatParam                      amp_release;
 
-    IntParam   mw_assign;
-    FloatParam mw_amount;
+//    EnumParam<Assign::Destination>  mw_assign;
+//    FloatParam                      mw_amount;
 
-    IntParam   lfo1_waveform;
-    FloatParam lfo1_speed;
-    FloatParam lfo1_amount;
-    IntParam   lfo1_assign;
+    EnumParam<LFO::Waveform>        lfo1_waveform;
+    FloatParam                      lfo1_speed;
+    FloatParam                      lfo1_amount;
+    EnumParam<Assign::Destination>  lfo1_assign;
 
-    IntParam   lfo2_waveform;
-    FloatParam lfo2_speed;
-    FloatParam lfo2_amount;
-    IntParam   lfo2_assign;
+    EnumParam<LFO::Waveform>        lfo2_waveform;
+    FloatParam                      lfo2_speed;
+    FloatParam                      lfo2_amount;
+    EnumParam<Assign::Destination>  lfo2_assign;
 
-    FloatParam env2_attack;
-    FloatParam env2_decay;
-    FloatParam env2_sustain;
-    FloatParam env2_release;
-    FloatParam env2_amount;
-    IntParam   env2_assign;
+//    FloatParam                      env2_attack;
+//    FloatParam                      env2_decay;
+//    FloatParam                      env2_sustain;
+//    FloatParam                      env2_release;
+//    FloatParam                      env2_amount;
+//    EnumParam<Assign::Destination>  env2_assign;
 };
 
 class MVSNote : public SynthNote {
