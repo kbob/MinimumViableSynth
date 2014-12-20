@@ -188,17 +188,17 @@ MVSParamSet::MVSParamSet()
 //    {
 //        ParamClump mw("Mod. Wheel", "MW");
 //
-//        mw_assign.name("Assign")
-//            .value_string(Assign::NoiseLevel,   "Noise Level")
-//            .value_string(Assign::FltCutoff,    "Flt Cutoff")
-//            .value_string(Assign::FltResonance, "Flt Resonance")
-//            .value_string(Assign::FltDrive,     "Flt Drive")
-//            .value_string(Assign::LFO1Amount,   "LFO 1 Amount")
-//            .value_string(Assign::LFO1Speed,    "LFO 1 Speed")
-//            .value_string(Assign::LFO2Amount,   "LFO 2 Amount")
-//            .value_string(Assign::LFO2Speed,    "LFO 2 Speed")
-//            .value_string(Assign::Env2Amount,   "Env 2 Amount")
-//            .default_value(Assign::LFO1Amount);
+//        mw_destination.name("Destination")
+//            .value_string(Mod::NoiseLevel,   "Noise Level")
+//            .value_string(Mod::FltCutoff,    "Flt Cutoff")
+//            .value_string(Mod::FltResonance, "Flt Resonance")
+//            .value_string(Mod::FltDrive,     "Flt Drive")
+//            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
+//            .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
+//            .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
+//            .value_string(Mod::LFO2Speed,    "LFO 2 Speed")
+//            .value_string(Mod::Env2Amount,   "Env 2 Amount")
+//            .default_value(Mod::LFO1Amount);
 //
 //        mw_amount.name("Amount")
 //            .min_max(0, 1)
@@ -224,18 +224,18 @@ MVSParamSet::MVSParamSet()
             .default_value(0.5)
             .units(kAudioUnitParameterUnit_Generic);
 
-        lfo1_assign.name("Assign")
-            .value_string(Assign::Osc1Freq,     "Osc 1 Frequency")
-//            .value_string(Assign::Osc2Width,    "Osc 1 Width")
-            .value_string(Assign::Osc2Freq,     "Osc 2 Frequency")
-//            .value_string(Assign::Osc2Width,    "Osc 2 Width")
-//            .value_string(Assign::NoiseLevel,   "Noise Level")
-//            .value_string(Assign::FltCutoff,    "Filt Cutoff")
-//            .value_string(Assign::FltResonance, "Filt Resonance")
-//            .value_string(Assign::FltDrive,     "Filt Drive")
-//            .value_string(Assign::Env2Amount,   "Env 2 Amount")
-            .value_string(Assign::None,         "Off")
-            .default_value(Assign::Osc1Freq);
+        lfo1_destination.name("Destination")
+            .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
+//            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
+//            .value_string(Mod::Osc2Width,    "Osc 2 Width")
+//            .value_string(Mod::NoiseLevel,   "Noise Level")
+//            .value_string(Mod::FltCutoff,    "Filt Cutoff")
+//            .value_string(Mod::FltResonance, "Filt Resonance")
+//            .value_string(Mod::FltDrive,     "Filt Drive")
+//            .value_string(Mod::Env2Amount,   "Env 2 Amount")
+            .value_string(Mod::None,         "Off")
+            .default_value(Mod::Osc1Freq);
     }
 
     {
@@ -256,18 +256,18 @@ MVSParamSet::MVSParamSet()
             .default_value(0.5)
             .units(kAudioUnitParameterUnit_Generic);
 
-        lfo2_assign.name("Assign")
-            .value_string(Assign::Osc1Freq,     "Osc 1 Frequency")
-//            .value_string(Assign::Osc2Width,    "Osc 1 Width")
-            .value_string(Assign::Osc2Freq,     "Osc 2 Frequency")
-//            .value_string(Assign::Osc2Width,    "Osc 2 Width")
-//            .value_string(Assign::NoiseLevel,   "Noise Level")
-//            .value_string(Assign::FltCutoff,    "Filt Cutoff")
-//            .value_string(Assign::FltResonance, "Filt Resonance")
-//            .value_string(Assign::FltDrive,     "Filt Drive")
-//            .value_string(Assign::Env2Amount,   "Env 2 Amount")
-            .value_string(Assign::None,         "Off")
-            .default_value(Assign::None);
+        lfo2_destination.name("Destination")
+            .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
+//            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
+//            .value_string(Mod::Osc2Width,    "Osc 2 Width")
+//            .value_string(Mod::NoiseLevel,   "Noise Level")
+//            .value_string(Mod::FltCutoff,    "Filt Cutoff")
+//            .value_string(Mod::FltResonance, "Filt Resonance")
+//            .value_string(Mod::FltDrive,     "Filt Drive")
+//            .value_string(Mod::Env2Amount,   "Env 2 Amount")
+            .value_string(Mod::None,         "Off")
+            .default_value(Mod::None);
     }
 
 //    {
@@ -301,23 +301,23 @@ MVSParamSet::MVSParamSet()
 //            .default_value(+1)
 //            .units(kAudioUnitParameterUnit_Generic);
 //
-//        env2_assign.name("Assign")
-//            .value_string(Assign::Osc1Freq,     "Osc 1 Frequency")
-//            .value_string(Assign::Osc2Width,    "Osc 1 Width")
-//            .value_string(Assign::Osc1Level,    "Osc 1 Level")
-//            .value_string(Assign::Osc2Freq,     "Osc 2 Frequency")
-//            .value_string(Assign::Osc2Width,    "Osc 2 Width")
-//            .value_string(Assign::Osc2Level,    "Osc 2 Level")
-//            .value_string(Assign::NoiseLevel,   "Noise Level")
-//            .value_string(Assign::FltCutoff,    "Filt Cutoff")
-//            .value_string(Assign::FltResonance, "Filt Resonance")
-//            .value_string(Assign::FltDrive,     "Filt Drive")
-//            .value_string(Assign::LFO1Amount,   "LFO 1 Amount")
-//            .value_string(Assign::LFO1Speed,    "LFO 1 Speed")
-//            .value_string(Assign::LFO1Amount,   "LFO 2 Amount")
-//            .value_string(Assign::LFO1Speed,    "LFO 2 Speed")
-//            .value_string(Assign::None,         "Off")
-//            .default_value(Assign::None);
+//        env2_destination.name("Destination")
+//            .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
+//            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+//            .value_string(Mod::Osc1Level,    "Osc 1 Level")
+//            .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
+//            .value_string(Mod::Osc2Width,    "Osc 2 Width")
+//            .value_string(Mod::Osc2Level,    "Osc 2 Level")
+//            .value_string(Mod::NoiseLevel,   "Noise Level")
+//            .value_string(Mod::FltCutoff,    "Filt Cutoff")
+//            .value_string(Mod::FltResonance, "Filt Resonance")
+//            .value_string(Mod::FltDrive,     "Filt Drive")
+//            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
+//            .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
+//            .value_string(Mod::LFO1Amount,   "LFO 2 Amount")
+//            .value_string(Mod::LFO1Speed,    "LFO 2 Speed")
+//            .value_string(Mod::None,         "Off")
+//            .default_value(Mod::None);
 //    }
 }
 

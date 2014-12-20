@@ -69,7 +69,7 @@ public:
 };
 
 // XXX temporary
-class Assign {
+class Mod {
 public:
     enum Destination {
         None,
@@ -145,25 +145,25 @@ public:
     FloatParam                      amp_sustain;
     FloatParam                      amp_release;
 
-//    EnumParam<Assign::Destination>  mw_assign;
+//    EnumParam<Mod::Destination>     mw_destination;
 //    FloatParam                      mw_amount;
 
     EnumParam<LFO::Waveform>        lfo1_waveform;
     FloatParam                      lfo1_speed;
     FloatParam                      lfo1_amount;
-    EnumParam<Assign::Destination>  lfo1_assign;
+    EnumParam<Mod::Destination>     lfo1_destination;
 
     EnumParam<LFO::Waveform>        lfo2_waveform;
     FloatParam                      lfo2_speed;
     FloatParam                      lfo2_amount;
-    EnumParam<Assign::Destination>  lfo2_assign;
+    EnumParam<Mod::Destination>     lfo2_destination;
 
 //    FloatParam                      env2_attack;
 //    FloatParam                      env2_decay;
 //    FloatParam                      env2_sustain;
 //    FloatParam                      env2_release;
 //    FloatParam                      env2_amount;
-//    EnumParam<Assign::Destination>  env2_assign;
+//    EnumParam<Mod::Destination>     env2_destination;
 };
 
 class MVSNote : public SynthNote {
