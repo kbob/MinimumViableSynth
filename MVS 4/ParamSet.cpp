@@ -109,30 +109,6 @@ OSStatus FloatParam::set_value(float new_value)
 }
 
 // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-#pragma mark IntParm go bye-bye
-
-IntParam::IntParam()
-: mIntValue(0)
-{}
-
-float IntParam::get_value() const
-{
-    return (float)mIntValue;
-}
-
-OSStatus IntParam::set_value(float new_value)
-{
-    // AU Lab gives us indexed params as 0/127, 1/127, etc.
-    // We scale them up here.
-    if (!mValueStrings.empty()) {
-        if (new_value < 1.0 && mValueStrings.size() > 1)
-            new_value *= 127.0 / (mValueStrings.size() - 1);
-    }
-    mIntValue = (int)(new_value + 0.5);
-    return noErr;
-}
-
-// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 #pragma mark EnumParam Classes
 
 // An enumerated parameter has "mapped values" which the renderer uses

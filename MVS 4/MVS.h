@@ -14,12 +14,13 @@
 
 #include "Decimator.h"
 #include "Envelope.h"
+#include "LFO.h"
 #include "ModWheel.h"
 #include "NoiseSource.h"
 #include "Oscillator.h"
 #include "ParamSet.h"
 
-static const UInt32 kNumNotes = 500;
+static const UInt32 kNumNotes = 100;
 
 class ModBox;    // container to pass modulator data from MVS to MVSNote.
 
@@ -56,18 +57,18 @@ public:
 };
 
 //XXX temporary
-class LFO {
-public:
-    enum Waveform {
-        Triangle,
-        UpSaw,
-        DnSaw,
-        Square,
-        Random,
-        SampleHold,
-    };
-};
-
+//class LFO {
+//public:
+//    enum Waveform {
+//        Triangle,
+//        UpSaw,
+//        DnSaw,
+//        Square,
+//        Random,
+//        SampleHold,
+//    };
+//};
+//
 // XXX temporary
 class Mod {
 public:
@@ -101,11 +102,11 @@ public:
         LFO2Amount,
         LFO2Speed,
 
-//        Env2Attack,
-//        Env2Decay,
-//        Env2Sustain,
-//        Env2Release,
-//        Env2Amount,
+        Env2Attack,
+        Env2Decay,
+        Env2Sustain,
+        Env2Release,
+        Env2Amount,
     };
 };
 
@@ -145,8 +146,8 @@ public:
     FloatParam                      amp_sustain;
     FloatParam                      amp_release;
 
-//    EnumParam<Mod::Destination>     mw_destination;
-//    FloatParam                      mw_amount;
+    EnumParam<Mod::Destination>     mw_destination;
+    FloatParam                      mw_amount;
 
     EnumParam<LFO::Waveform>        lfo1_waveform;
     FloatParam                      lfo1_speed;
@@ -158,12 +159,12 @@ public:
     FloatParam                      lfo2_amount;
     EnumParam<Mod::Destination>     lfo2_destination;
 
-//    FloatParam                      env2_attack;
-//    FloatParam                      env2_decay;
-//    FloatParam                      env2_sustain;
-//    FloatParam                      env2_release;
-//    FloatParam                      env2_amount;
-//    EnumParam<Mod::Destination>     env2_destination;
+    FloatParam                      env2_attack;
+    FloatParam                      env2_decay;
+    FloatParam                      env2_sustain;
+    FloatParam                      env2_release;
+    FloatParam                      env2_amount;
+    EnumParam<Mod::Destination>     env2_destination;
 };
 
 class MVSNote : public SynthNote {
@@ -261,14 +262,16 @@ public:
                                 const AudioTimeStamp       &inTimeStamp,
                                 UInt32                     inNumberFrames);
 
-    virtual void       RunModulators(ModBox&           ioModBox);
+    virtual void       RunModulators(ModBox&            ioModBox);
 
 private:
     MVSParamSet        mParams;
     Float32           *mOversampleBufPtr;
     Decimator          mDecimator;
     ModWheel           mModWheel;
-    ModBox const     *mModBoxPtr;
+    LFO                mLFO1;
+    LFO                mLFO2;
+    ModBox const      *mModBoxPtr;
     MVSNote            mNotes[kNumNotes];
 
 };

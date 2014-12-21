@@ -15,7 +15,7 @@
 
 #include "AUMIDIDefs.h"
  
-static const UInt32  kMaxActiveNotes = 500;
+static const UInt32  kMaxActiveNotes = 100;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
@@ -33,6 +33,59 @@ struct ModBox {
 
 AUDIOCOMPONENT_ENTRY(AUMusicDeviceFactory, MVS)
 
+# pragma mark Vector Utilities
+
+static LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
+{
+    if (wf != LFO::Triangle && wf != LFO::SampleHold && wf != LFO::Random)
+        return LFO::Unipolar;
+    if (d == Mod::Osc1Freq || d == Mod::Osc1Width ||
+            d == Mod::Osc2Freq || d == Mod::Osc2Width)
+        return LFO::Bipolar;
+    return LFO::Unipolar;
+}
+
+static inline void fill(float src, float *dest, size_t count)
+{
+    for (size_t i = 0; i < count; i++)
+        dest[i] = src;
+}
+
+static inline void fill(float        scale,
+                        float const *src,
+                        float       *dest,
+                        size_t       count)
+{
+    for (size_t i = 0; i < count; i++)
+        dest[i] = scale * src[i];
+}
+
+static inline void add(float scale, const float *src, float *dest, size_t count)
+{
+    for (size_t i = 0; i < count; i++)
+        dest[i] += scale * src[i];
+}
+
+//static inline void add(const float *scale,
+//                       const float *src,
+//                       float *dest,
+//                       size_t count)
+//{
+//    for (size_t i = 0; i < count; i++)
+//        dest[i] += scale[i] * src[i];
+//}
+
+static inline void add_freq(float scale,
+                            const float *src,
+                            float *dest,
+                            size_t count)
+{
+    for (size_t i = 0; i < count; i++)
+        dest[i] *= powf(2, scale * src[i]);
+}
+
+
+// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 #pragma mark MVS Parameters
 
 MVSParamSet::MVSParamSet()
@@ -185,26 +238,26 @@ MVSParamSet::MVSParamSet()
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
     }
 
-//    {
-//        ParamClump mw("Mod. Wheel", "MW");
-//
-//        mw_destination.name("Destination")
-//            .value_string(Mod::NoiseLevel,   "Noise Level")
-//            .value_string(Mod::FltCutoff,    "Flt Cutoff")
-//            .value_string(Mod::FltResonance, "Flt Resonance")
-//            .value_string(Mod::FltDrive,     "Flt Drive")
-//            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
-//            .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
-//            .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
-//            .value_string(Mod::LFO2Speed,    "LFO 2 Speed")
-//            .value_string(Mod::Env2Amount,   "Env 2 Amount")
-//            .default_value(Mod::LFO1Amount);
-//
-//        mw_amount.name("Amount")
-//            .min_max(0, 1)
-//            .default_value(1)
-//            .units(kAudioUnitParameterUnit_Generic);
-//    }
+    {
+        ParamClump mw("Mod. Wheel", "MW");
+
+        mw_destination.name("Destination")
+            .value_string(Mod::NoiseLevel,    "Noise Level")
+//            .value_string(Mod::FiltCutoff,    "Flt Cutoff")
+//            .value_string(Mod::FiltResonance, "Flt Resonance")
+//            .value_string(Mod::FiltDrive,     "Flt Drive")
+            .value_string(Mod::LFO1Amount,    "LFO 1 Amount")
+            .value_string(Mod::LFO1Speed,     "LFO 1 Speed")
+            .value_string(Mod::LFO2Amount,    "LFO 2 Amount")
+            .value_string(Mod::LFO2Speed,     "LFO 2 Speed")
+            .value_string(Mod::Env2Amount,    "Env 2 Amount")
+            .default_value(Mod::LFO1Amount);
+
+        mw_amount.name("Amount")
+            .min_max(0, 1)
+            .default_value(1)
+            .units(kAudioUnitParameterUnit_Generic);
+    }
 
     {
         ParamClump LFO1("LFO 1", "LFO 1");
@@ -226,14 +279,14 @@ MVSParamSet::MVSParamSet()
 
         lfo1_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
-//            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc2Width,    "Osc 1 Width")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
-//            .value_string(Mod::Osc2Width,    "Osc 2 Width")
-//            .value_string(Mod::NoiseLevel,   "Noise Level")
+            .value_string(Mod::Osc2Width,    "Osc 2 Width")
+            .value_string(Mod::NoiseLevel,   "Noise Level")
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
-//            .value_string(Mod::Env2Amount,   "Env 2 Amount")
+            .value_string(Mod::Env2Amount,   "Env 2 Amount")
             .value_string(Mod::None,         "Off")
             .default_value(Mod::Osc1Freq);
     }
@@ -258,67 +311,65 @@ MVSParamSet::MVSParamSet()
 
         lfo2_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
-//            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc2Width,    "Osc 1 Width")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
-//            .value_string(Mod::Osc2Width,    "Osc 2 Width")
-//            .value_string(Mod::NoiseLevel,   "Noise Level")
+            .value_string(Mod::Osc2Width,    "Osc 2 Width")
+            .value_string(Mod::NoiseLevel,   "Noise Level")
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
-//            .value_string(Mod::Env2Amount,   "Env 2 Amount")
+            .value_string(Mod::Env2Amount,   "Env 2 Amount")
             .value_string(Mod::None,         "Off")
             .default_value(Mod::None);
     }
 
-//    {
-//        ParamClump env2("Envelope 2", "Env 2");
-//
-//        env2_attack.name("Attack Time")
-//            .min_max(0, 9.999)
-//            .default_value(0.200)
-//            .units(kAudioUnitParameterUnit_Seconds)
-//            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
-//
-//        env2_decay.name("Decay Time")
-//            .min_max(0, 9.999)
-//            .default_value(0.300)
-//            .units(kAudioUnitParameterUnit_Seconds)
-//            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
-//
-//        env2_sustain.name("Sustain Level")
-//            .min_max(0, 1)
-//            .default_value(0.3)
-//            .units(kAudioUnitParameterUnit_LinearGain);
-//
-//        env2_release.name("Release Time")
-//            .min_max(0, 9.999)
-//            .default_value(0.200)
-//            .units(kAudioUnitParameterUnit_Seconds)
-//            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
-//
-//        env2_amount.name("Amount")
-//            .min_max(-1, +1)
-//            .default_value(+1)
-//            .units(kAudioUnitParameterUnit_Generic);
-//
-//        env2_destination.name("Destination")
-//            .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
-//            .value_string(Mod::Osc2Width,    "Osc 1 Width")
-//            .value_string(Mod::Osc1Level,    "Osc 1 Level")
-//            .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
-//            .value_string(Mod::Osc2Width,    "Osc 2 Width")
-//            .value_string(Mod::Osc2Level,    "Osc 2 Level")
-//            .value_string(Mod::NoiseLevel,   "Noise Level")
+    {
+        ParamClump env2("Envelope 2", "Env 2");
+
+        env2_attack.name("Attack Time")
+            .min_max(0, 9.999)
+            .default_value(0.200)
+            .units(kAudioUnitParameterUnit_Seconds)
+            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
+
+        env2_decay.name("Decay Time")
+            .min_max(0, 9.999)
+            .default_value(0.300)
+            .units(kAudioUnitParameterUnit_Seconds)
+            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
+
+        env2_sustain.name("Sustain Level")
+            .min_max(0, 1)
+            .default_value(0.3)
+            .units(kAudioUnitParameterUnit_LinearGain);
+
+        env2_release.name("Release Time")
+            .min_max(0, 9.999)
+            .default_value(0.200)
+            .units(kAudioUnitParameterUnit_Seconds)
+            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
+
+        env2_amount.name("Amount")
+            .min_max(-1, +1)
+            .default_value(+1)
+            .units(kAudioUnitParameterUnit_Generic);
+
+        env2_destination.name("Destination")
+            .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
+            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc1Level,    "Osc 1 Level")
+            .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
+            .value_string(Mod::Osc2Width,    "Osc 2 Width")
+            .value_string(Mod::Osc2Level,    "Osc 2 Level")
+            .value_string(Mod::NoiseLevel,   "Noise Level")
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
-//            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
-//            .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
-//            .value_string(Mod::LFO1Amount,   "LFO 2 Amount")
-//            .value_string(Mod::LFO1Speed,    "LFO 2 Speed")
-//            .value_string(Mod::None,         "Off")
-//            .default_value(Mod::None);
-//    }
+            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
+            .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
+            .value_string(Mod::None,         "Off")
+            .default_value(Mod::None);
+    }
 }
 
 
@@ -468,7 +519,6 @@ OSStatus MVS::HandleControlChange(UInt8	    inChannel,
                                   UInt8 	inValue,
                                   UInt32	inStartFrame)
 {
-    printf("HandleCC: CC=%u\n", inController);
     if (inController == kMidiController_ModWheel)
         mModWheel.set_raw_MSB(inValue);
     else if (inController == kMidiController_ModWheel + 32)
@@ -505,9 +555,10 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
 
     // Create the ModBox.
     ModBox modbox = {
-        .wheel_values = wheelBuf,
-        .LFO1_values  = LFO1Buf,
-        .LFO2_values  = LFO2Buf,
+        .oversample_count = oversampleFrameCount,
+        .wheel_values     = wheelBuf,
+        .LFO1_values      = LFO1Buf,
+        .LFO2_values      = LFO2Buf,
     };
     mModBoxPtr = &modbox;
 
@@ -544,10 +595,131 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     return noErr;
 }
 
-void MVS::RunModulators(ModBox& ioWork)
+void MVS::RunModulators(ModBox& ioMod)
 {
-    mModWheel.generate(const_cast<float *>(ioWork.wheel_values),
-                       ioWork.oversample_count);
+    const size_t nsamp = ioMod.oversample_count;
+
+    float *wheel_values = const_cast<float *>(ioMod.wheel_values);
+    float *LFO1_values  = const_cast<float *>(ioMod.LFO1_values);
+    float *LFO2_values  = const_cast<float *>(ioMod.LFO2_values);
+
+    float freq[nsamp], depth[nsamp];
+
+    Mod::Destination mwdest = mParams.mw_destination;
+    Mod::Destination l1dest = mParams.lfo1_destination;
+    Mod::Destination l2dest = mParams.lfo2_destination;
+    LFO::Polarity l1polarity = LFO_polarity(mParams.lfo2_waveform, l1dest);
+    LFO::Polarity l2polarity = LFO_polarity(mParams.lfo2_waveform, l2dest);
+
+    // Who modulates whom?
+    bool lfo1_mods_itself = (l1dest == Mod::LFO1Amount  ||
+                             l1dest == Mod::LFO1Speed);
+    bool lfo1_mods_lfo2   = (l1dest == Mod::LFO2Amount  ||
+                             l1dest == Mod::LFO2Speed);
+
+    bool lfo2_mods_itself = (l2dest == Mod::LFO2Amount  ||
+                             l2dest == Mod::LFO2Speed);
+    bool lfo2_mods_lfo1   = (l2dest == Mod::LFO1Amount  ||
+                             l2dest == Mod::LFO1Speed);
+
+    // If there is a modulation cycle, mute all cycle members.
+
+    bool lfo1_in_cycle = !lfo1_mods_itself;
+    bool lfo2_in_cycle = !lfo2_mods_itself;
+    if (lfo1_mods_lfo2 && lfo2_mods_lfo1)
+        lfo1_in_cycle = lfo2_in_cycle = true;
+
+    // Mod Wheel is never modulated.
+    mModWheel.generate(wheel_values, nsamp);
+
+    if (lfo2_in_cycle)
+        fill(0, LFO2_values, nsamp);
+    else if (lfo2_mods_lfo1) {
+
+        // Do LFO2.
+
+        fill(mParams.lfo2_speed, freq, nsamp);
+        fill(1, depth, nsamp);
+        if (mwdest == Mod::LFO2Speed)
+            add_freq(mParams.mw_amount, wheel_values, freq, nsamp);
+        else if (mwdest == Mod::LFO2Amount)
+            fill(mParams.mw_amount, wheel_values, depth, nsamp);
+        mLFO2.generate(mParams.lfo2_waveform,
+                       l2polarity,
+                       freq,
+                       depth,
+                       LFO2_values,
+                       nsamp);
+
+        // Do LFO1.
+
+        if (lfo1_in_cycle)
+            fill(0, LFO1_values, nsamp);
+        else {
+            fill(mParams.lfo1_speed, freq, nsamp);
+            fill(mParams.lfo1_amount, depth, nsamp);
+            if (mwdest == Mod::LFO1Speed)
+                add_freq(mParams.mw_amount, wheel_values, freq, nsamp);
+            else if (mwdest == Mod::LFO1Amount)
+                add(mParams.mw_amount, wheel_values, depth, nsamp);
+            if (l2dest == Mod::LFO1Speed)
+                add_freq(1, LFO2_values, freq, nsamp);
+            else {
+                assert(l2dest == Mod::LFO2Amount);
+                add(1, LFO2_values, depth, nsamp);
+            }
+            mLFO1.generate(mParams.lfo1_waveform,
+                           l1polarity,
+                           freq,
+                           depth,
+                           LFO1_values,
+                           nsamp);
+        }
+    } else {
+
+        // Do LFO1.
+
+        if (lfo1_in_cycle)
+            fill(0, LFO1_values, nsamp);
+        else {
+            fill(mParams.lfo1_speed, freq, nsamp);
+            fill(1, depth, nsamp);
+            if (mwdest == Mod::LFO1Speed)
+                add_freq(mParams.mw_amount, wheel_values, freq, nsamp);
+        else if (mwdest == Mod::LFO1Amount)
+            fill(mParams.mw_amount, wheel_values, depth, nsamp);
+        mLFO1.generate(mParams.lfo1_waveform,
+                       l1polarity,
+                       freq,
+                       depth,
+                       LFO1_values,
+                       nsamp);
+
+            // Do LFO2.
+
+            if (lfo2_in_cycle)
+                fill(0, LFO2_values, nsamp);
+            else {
+                fill(mParams.lfo2_speed, freq, nsamp);
+                fill(mParams.lfo2_amount, depth, nsamp);
+                if (mwdest == Mod::LFO2Speed)
+                    add(mParams.mw_amount, wheel_values, freq, nsamp);
+                else if (mwdest == Mod::LFO2Amount)
+                    add(mParams.mw_amount, wheel_values, depth, nsamp);
+                if (l1dest == Mod::LFO2Speed)
+                    add_freq(1, LFO1_values, freq, nsamp);
+                else if (l1dest == Mod::LFO2Amount) {
+                    add(1, LFO1_values, depth, nsamp);
+                }
+                mLFO2.generate(mParams.lfo1_waveform,
+                               l2polarity,
+                               freq,
+                               depth,
+                               LFO2_values,
+                               nsamp);
+            }
+        }
+    }
 }
 
 
@@ -623,7 +795,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                          AudioBufferList **inBufferList,
                          UInt32            inOutBusCount)
 {
-    const ModBox *modbox = *mModBoxPtrPtr;
+//    const ModBox *modbox = *mModBoxPtrPtr;
 
     Float32 *outBuf     = *mOversampleBufPtr;
     UInt32   frameCount = inNumFrames * mOversampleRatio;

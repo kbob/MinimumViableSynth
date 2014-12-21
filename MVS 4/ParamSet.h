@@ -71,23 +71,6 @@ private:
 
 };
 
-class IntParam : public Param {     // XXX deprecated
-
-public:
-
-                  IntParam     ();
-
-                  operator int () const { return mIntValue; }
-
-    virtual float get_value    () const;
-    virtual OSStatus set_value    (float new_value);
-
-protected:
-
-    int mIntValue;
-
-};
-
 class EnumParamBase : public Param {
 
 public:

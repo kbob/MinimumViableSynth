@@ -47,6 +47,8 @@
 		929D3C391A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
 		929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
 		92AC4F551A2F6F3500C9DB82 /* NoiseSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */; };
+		92DD0C041A468F2500B18028 /* LFO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C021A468F2500B18028 /* LFO.cpp */; };
+		92DD0C071A4691CC00B18028 /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C051A4691CC00B18028 /* Random.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -149,6 +151,10 @@
 		929D3C381A2A3DDC0049102A /* Decimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decimator.h; sourceTree = "<group>"; };
 		92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NoiseSource.cpp; sourceTree = "<group>"; };
 		92AC4F541A2F6F3500C9DB82 /* NoiseSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoiseSource.h; sourceTree = "<group>"; };
+		92DD0C021A468F2500B18028 /* LFO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LFO.cpp; sourceTree = "<group>"; };
+		92DD0C031A468F2500B18028 /* LFO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFO.h; sourceTree = "<group>"; };
+		92DD0C051A4691CC00B18028 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
+		92DD0C061A4691CC00B18028 /* Random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Random.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -348,6 +354,8 @@
 				929D3C381A2A3DDC0049102A /* Decimator.h */,
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
+				92DD0C021A468F2500B18028 /* LFO.cpp */,
+				92DD0C031A468F2500B18028 /* LFO.h */,
 				9291A6D61A45D98B00AA6E18 /* Modwheel.cpp */,
 				9291A6D71A45D98B00AA6E18 /* Modwheel.h */,
 				92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */,
@@ -356,6 +364,8 @@
 				926C8C0A1A4118050082B95A /* ParamSet.h */,
 				92717BE31A1A498100B87C38 /* Oscillator.cpp */,
 				92717BE41A1A498100B87C38 /* Oscillator.h */,
+				92DD0C051A4691CC00B18028 /* Random.cpp */,
+				92DD0C061A4691CC00B18028 /* Random.h */,
 				92717BD81A19A7DC00B87C38 /* MVSVersion.h */,
 			);
 			name = "AU Source";
@@ -485,6 +495,7 @@
 				92717BAD1A19A7DC00B87C38 /* CAAUMIDIMap.cpp in Sources */,
 				92717B7A1A19A7DC00B87C38 /* AUBase.cpp in Sources */,
 				92717BE51A1A498100B87C38 /* Oscillator.cpp in Sources */,
+				92DD0C071A4691CC00B18028 /* Random.cpp in Sources */,
 				92717BD21A19A7DC00B87C38 /* CAXException.cpp in Sources */,
 				92717B841A19A7DC00B87C38 /* AUPluginDispatch.cpp in Sources */,
 				92717B7E1A19A7DC00B87C38 /* AUInputElement.cpp in Sources */,
@@ -492,6 +503,7 @@
 				92717BCA1A19A7DC00B87C38 /* CAStreamBasicDescription.cpp in Sources */,
 				92717B921A19A7DC00B87C38 /* AUInstrumentBase.cpp in Sources */,
 				92717BC21A19A7DC00B87C38 /* CAHostTimeBase.cpp in Sources */,
+				92DD0C041A468F2500B18028 /* LFO.cpp in Sources */,
 				92717BCE1A19A7DC00B87C38 /* CAVectorUnit.cpp in Sources */,
 				92717BB01A19A7DC00B87C38 /* CAAUMIDIMapManager.cpp in Sources */,
 				92717BBE1A19A7DC00B87C38 /* CADebugPrintf.cpp in Sources */,
