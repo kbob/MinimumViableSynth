@@ -19,12 +19,6 @@ static const UInt32  kMaxActiveNotes = 100;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
-struct ModBox {
-    size_t       oversample_count;
-    float const *wheel_values;
-    float const *LFO1_values;
-    float const *LFO2_values;
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +27,7 @@ struct ModBox {
 
 AUDIOCOMPONENT_ENTRY(AUMusicDeviceFactory, MVS)
 
-# pragma mark Vector Utilities
+# pragma mark Utilities
 
 static LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
 {
@@ -242,6 +236,8 @@ MVSParamSet::MVSParamSet()
         ParamClump mw("Mod. Wheel", "MW");
 
         mw_destination.name("Destination")
+            .value_string(Mod::Osc1Width,    "Osc 1 Width")
+            .value_string(Mod::Osc2Width,    "Osc 2 Width")
             .value_string(Mod::NoiseLevel,    "Noise Level")
 //            .value_string(Mod::FiltCutoff,    "Flt Cutoff")
 //            .value_string(Mod::FiltResonance, "Flt Resonance")
@@ -251,7 +247,8 @@ MVSParamSet::MVSParamSet()
             .value_string(Mod::LFO2Amount,    "LFO 2 Amount")
             .value_string(Mod::LFO2Speed,     "LFO 2 Speed")
             .value_string(Mod::Env2Amount,    "Env 2 Amount")
-            .default_value(Mod::LFO1Amount);
+            .default_value(Mod::LFO1Amount)
+            .assigns_mod(Mod::Wheel);
 
         mw_amount.name("Amount")
             .min_max(0, 1)
@@ -279,7 +276,7 @@ MVSParamSet::MVSParamSet()
 
         lfo1_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
-            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc1Width,    "Osc 1 Width")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
             .value_string(Mod::NoiseLevel,   "Noise Level")
@@ -287,8 +284,9 @@ MVSParamSet::MVSParamSet()
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
             .value_string(Mod::Env2Amount,   "Env 2 Amount")
-            .value_string(Mod::None,         "Off")
-            .default_value(Mod::Osc1Freq);
+            .value_string(Mod::NoDest,       "Off")
+            .default_value(Mod::Osc1Freq)
+            .assigns_mod(Mod::LFO1);
     }
 
     {
@@ -311,7 +309,7 @@ MVSParamSet::MVSParamSet()
 
         lfo2_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
-            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc1Width,    "Osc 1 Width")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
             .value_string(Mod::NoiseLevel,   "Noise Level")
@@ -319,8 +317,9 @@ MVSParamSet::MVSParamSet()
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
             .value_string(Mod::Env2Amount,   "Env 2 Amount")
-            .value_string(Mod::None,         "Off")
-            .default_value(Mod::None);
+            .value_string(Mod::NoDest,       "Off")
+            .default_value(Mod::NoDest)
+            .assigns_mod(Mod::LFO2);
     }
 
     {
@@ -356,7 +355,7 @@ MVSParamSet::MVSParamSet()
 
         env2_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
-            .value_string(Mod::Osc2Width,    "Osc 1 Width")
+            .value_string(Mod::Osc1Width,    "Osc 1 Width")
             .value_string(Mod::Osc1Level,    "Osc 1 Level")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
@@ -367,8 +366,9 @@ MVSParamSet::MVSParamSet()
 //            .value_string(Mod::FltDrive,     "Filt Drive")
             .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
             .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
-            .value_string(Mod::None,         "Off")
-            .default_value(Mod::None);
+            .value_string(Mod::NoDest,       "Off")
+            .default_value(Mod::NoDest)
+            .assigns_mod(Mod::Env2);
     }
 }
 
@@ -391,6 +391,12 @@ MVS::MVS(AudioUnit inComponentInstance)
     mParams.set_defaults();
     for (size_t i = 0; i < mParams.size(); i++)
         glob->SetParameter((AudioUnitParameterID)i, mParams.param_value(i));
+
+    // Set the four modulators' default outputs.
+    mModMatrix.assign(Mod::Wheel, Mod::LFO1Amount);
+    mModMatrix.assign(Mod::LFO1, Mod::Osc1Freq);
+    mModMatrix.assign(Mod::LFO2, Mod::NoDest);
+    mModMatrix.assign(Mod::Env2, Mod::NoDest);
 
     SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
 
@@ -506,11 +512,17 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
     OSStatus err = mParams.set_param_value(inID, inValue);
     if (err != noErr)
         return err;
+    float value = mParams.param_value(inID);
+
+    int mod_src = mParams.param_mod_source(inID);
+    if (mod_src) {
+        mModMatrix.assign(mod_src, mParams.param_mod_dest(inID));
+    }
 
     return AUMonotimbralInstrumentBase::SetParameter(inID,
                                                      inScope,
                                                      inElement,
-                                                     mParams.param_value(inID),
+                                                     value,
                                                      inBufferOffsetInFrames);
 }
 
@@ -554,12 +566,10 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     Float32 LFO2Buf[oversampleFrameCount];
 
     // Create the ModBox.
-    ModBox modbox = {
-        .oversample_count = oversampleFrameCount,
-        .wheel_values     = wheelBuf,
-        .LFO1_values      = LFO1Buf,
-        .LFO2_values      = LFO2Buf,
+    const float *mod_values[Mod::SourceCount] = {
+        NULL, wheelBuf, LFO1Buf, LFO2Buf, NULL
     };
+    MVSModBox modbox(mModMatrix, oversampleFrameCount, mod_values);
     mModBoxPtr = &modbox;
 
     RunModulators(modbox);
@@ -595,13 +605,12 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     return noErr;
 }
 
-void MVS::RunModulators(ModBox& ioMod)
+void MVS::RunModulators(MVSModBox& ioMod)
 {
-    const size_t nsamp = ioMod.oversample_count;
-
-    float *wheel_values = const_cast<float *>(ioMod.wheel_values);
-    float *LFO1_values  = const_cast<float *>(ioMod.LFO1_values);
-    float *LFO2_values  = const_cast<float *>(ioMod.LFO2_values);
+    const size_t nsamp = ioMod.sampleCount();
+    float *wheel_values = const_cast<float *>(ioMod.get_values(Mod::Wheel));
+    float *LFO1_values  = const_cast<float *>(ioMod.get_values(Mod::LFO1));
+    float *LFO2_values  = const_cast<float *>(ioMod.get_values(Mod::LFO2));
 
     float freq[nsamp], depth[nsamp];
 
@@ -743,7 +752,7 @@ void MVSNote::AffixParams(const MVSParamSet *params)
     mParams = params;
 }
 
-void MVSNote::AffixModBox(const ModBox **boxPtrPtr)
+void MVSNote::AffixModBox(const MVSModBox **boxPtrPtr)
 {
     mModBoxPtrPtr = boxPtrPtr;
 }

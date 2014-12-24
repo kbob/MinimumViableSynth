@@ -16,6 +16,8 @@ struct ValueStringMap {
     const char *string;
 };
 
+// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+
 class Param {
 
 public:
@@ -28,6 +30,7 @@ public:
             Param&         value_strings (const ValueStringMap *);
             Param&         units         (AudioUnitParameterUnit);
             Param&         flag          (UInt32);
+            Param&         assigns_mod   (int modulator);
 
     // Get/Set
     virtual float          get_value     () const = 0;
@@ -47,12 +50,15 @@ private:
     friend class           ParamSet;
 
     int                    mIndex;
+    int                    mModIndex;
     AudioUnitParameterInfo mInfo;
 
     Param(const Param&);                // disallow copy/assign
     void operator = (const Param&);
 
 };
+
+// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 class FloatParam : public Param {
 
@@ -82,19 +88,23 @@ public:
 
 protected:
 
+    friend class     ParamSet;
+
                      EnumParamBase ();
 
     int              mUnmappedValue;
     int              mMappedValue;
 };
 
-template <class E> class EnumParam : public EnumParamBase {
+template <typename E> class EnumParam : public EnumParamBase {
 
 public:
 
     operator E () const { return (E)mMappedValue; }
     
 };
+
+// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 class ParamClump {
 
@@ -115,6 +125,8 @@ private:
 
 };
 
+// -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+
 class ParamSet {
 
 public:
@@ -124,6 +136,8 @@ public:
     float                         param_value            (size_t index) const;
     const AudioUnitParameterInfo& param_info             (size_t index) const;
     const CFArrayRef              param_value_strings    (size_t index) const;
+    int                           param_mod_source       (size_t index) const;
+    int                           param_mod_dest         (size_t index) const;
     const char                   *clump_name             (UInt32 id)    const;
 
     void                          set_defaults    ();

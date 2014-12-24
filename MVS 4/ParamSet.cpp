@@ -17,7 +17,8 @@ static ParamClump *current_clump;
 #pragma mark Param Base Class
 
 Param::Param()
-    : mIndex(-1)
+    : mIndex(-1),
+      mModIndex(0)
 {
     assert(current_paramset);
     current_paramset->mIndex.push_back(this);
@@ -89,6 +90,14 @@ Param& Param::flag(UInt32 flag)
     mInfo.flags |= flag;
     return *this;
 }
+
+Param& Param::assigns_mod(int modulator)
+{
+    mModIndex = modulator;
+    return *this;
+}
+
+
 
 // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 #pragma mark FloatParam Class
@@ -243,6 +252,20 @@ const char *ParamSet::clump_name(UInt32 id) const
     if (index < mClumpIndex.size())
         return mClumpIndex[index].name();
     return NULL;
+}
+
+int ParamSet::param_mod_source(size_t index) const
+{
+    if (index >= mIndex.size())
+        return 0;
+    return mIndex[index]->mModIndex;
+}
+
+int ParamSet::param_mod_dest(size_t index) const
+{
+    if (EnumParamBase *eparam = dynamic_cast<EnumParamBase *>(mIndex[index]))
+        return eparam->mMappedValue;
+    return 0;
 }
 
 void ParamSet::set_defaults()

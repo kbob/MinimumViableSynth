@@ -155,6 +155,7 @@
 		92DD0C031A468F2500B18028 /* LFO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFO.h; sourceTree = "<group>"; };
 		92DD0C051A4691CC00B18028 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		92DD0C061A4691CC00B18028 /* Random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Random.h; sourceTree = "<group>"; };
+		92DD0C091A48223E00B18028 /* ModMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModMatrix.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -356,6 +357,7 @@
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
 				92DD0C021A468F2500B18028 /* LFO.cpp */,
 				92DD0C031A468F2500B18028 /* LFO.h */,
+				92DD0C091A48223E00B18028 /* ModMatrix.h */,
 				9291A6D61A45D98B00AA6E18 /* Modwheel.cpp */,
 				9291A6D71A45D98B00AA6E18 /* Modwheel.h */,
 				92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */,

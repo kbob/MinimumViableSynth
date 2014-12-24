@@ -15,14 +15,13 @@
 #include "Decimator.h"
 #include "Envelope.h"
 #include "LFO.h"
+#include "ModMatrix.h"
 #include "ModWheel.h"
 #include "NoiseSource.h"
 #include "Oscillator.h"
 #include "ParamSet.h"
 
 static const UInt32 kNumNotes = 100;
-
-class ModBox;    // container to pass modulator data from MVS to MVSNote.
 
 // Define constants to identify factory presets.
 enum Preset {
@@ -56,24 +55,23 @@ public:
     };
 };
 
-//XXX temporary
-//class LFO {
-//public:
-//    enum Waveform {
-//        Triangle,
-//        UpSaw,
-//        DnSaw,
-//        Square,
-//        Random,
-//        SampleHold,
-//    };
-//};
-//
-// XXX temporary
 class Mod {
+
 public:
+
+    enum Source {
+        NullSource,             // must skip zero
+
+        Wheel,
+        LFO1,
+        LFO2,
+        Env2,
+
+        SourceCount             // must be last
+    };
+
     enum Destination {
-        None,
+        NoDest,                 // must skip zero
 
         Osc1Freq,
         Osc1Width,
@@ -107,8 +105,14 @@ public:
         Env2Sustain,
         Env2Release,
         Env2Amount,
+
+        DestinationCount        // must be last
     };
+
 };
+
+typedef ModMatrix<Mod::SourceCount, Mod::DestinationCount> MVSModMatrix;
+typedef ModBox   <Mod::SourceCount, Mod::DestinationCount> MVSModBox;
 
 class MVSParamSet : public ParamSet {
 
@@ -178,7 +182,7 @@ public:
                                   UInt32 ratio,
                                   Float32 **bufPtr);
             void       AffixParams(const MVSParamSet *params);
-            void       AffixModBox(const ModBox  **boxPtrPtr);
+            void       AffixModBox(const MVSModBox **boxPtrPtr);
 
     virtual bool       Attack    (const MusicDeviceNoteParams &inParams);
 
@@ -195,7 +199,7 @@ private:
 
     UInt32             mOversampleRatio;
     Float32          **mOversampleBufPtr;
-    ModBox const    **mModBoxPtrPtr;
+    MVSModBox  const **mModBoxPtrPtr;
     MVSParamSet const *mParams;
     Oscillator         mOsc1;
     Oscillator         mOsc2;
@@ -262,16 +266,18 @@ public:
                                 const AudioTimeStamp       &inTimeStamp,
                                 UInt32                     inNumberFrames);
 
-    virtual void       RunModulators(ModBox&            ioModBox);
+    virtual void       RunModulators(MVSModBox&         ioModBox);
 
 private:
     MVSParamSet        mParams;
     Float32           *mOversampleBufPtr;
+    MVSModMatrix       mModMatrix;
+    MVSModBox const   *mModBoxPtr;
     Decimator          mDecimator;
     ModWheel           mModWheel;
     LFO                mLFO1;
     LFO                mLFO2;
-    ModBox const      *mModBoxPtr;
+
     MVSNote            mNotes[kNumNotes];
 
 };
