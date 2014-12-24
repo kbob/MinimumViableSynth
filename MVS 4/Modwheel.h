@@ -22,6 +22,7 @@ public:
     void     set_raw_LSB(uint8_t value);
 
     void     generate(float *samples_out, size_t count);
+    void     generate_scaled(float scale, float *samples_out, size_t count);
 
 private:
 

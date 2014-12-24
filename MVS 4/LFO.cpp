@@ -23,18 +23,6 @@ void LFO::initialize(double sample_rate)
 }
 
 void LFO::generate(Waveform     waveform,
-                   float const *freq,
-                   float       *samples_out,
-                   size_t       count)
-{
-    // XXX This is an absurdly inefficient way to multiply by 1.
-    float depth[count];
-    for (size_t i = 0; i < count; i++)
-        depth[i] = 1;
-    generate(waveform, Unipolar, freq, depth,samples_out, count);
-}
-
-void LFO::generate(Waveform     waveform,
                    Polarity     polarity,
                    float const *freq,
                    float const *depth,
@@ -112,6 +100,7 @@ void LFO::generate_none(float const *freq,
         phase += freq[i] * inv_sample_rate;
         if (phase >= 1)
             phase -= 1;
+        samples_out[i] = 0;
     }
     mPhase = phase;
 }
@@ -128,7 +117,7 @@ void LFO::generate_unipolar_triangle(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = (phase < 0.5) ? 2 * phase : 2 * (1 - phase);
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -145,7 +134,7 @@ void LFO::generate_bipolar_triangle(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = ((phase < 0.5) ? 4 * phase : 4 * (1 - phase)) - 1;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -162,7 +151,7 @@ void LFO::generate_unipolar_upsaw(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = phase;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -179,7 +168,7 @@ void LFO::generate_bipolar_upsaw(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = 2 * phase - 1;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -196,7 +185,7 @@ void LFO::generate_unipolar_dnsaw(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = 1 - phase;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -213,7 +202,7 @@ void LFO::generate_bipolar_dnsaw(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = 1 - 2 * phase;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -230,7 +219,7 @@ void LFO::generate_unipolar_square(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = phase < 0.5;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -247,7 +236,7 @@ void LFO::generate_bipolar_square(float const *freq,
         if (phase >= 1)
             phase -= 1;
         float h = phase < 0.5 ? +1 : -1;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
 }
@@ -269,7 +258,7 @@ void LFO::generate_unipolar_random(float const *freq,
             rand1 = frandom();
         }
         float h = (phase * rand1 + (1 - phase) * rand0 + 1) / 2;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
     mRand0 = rand0;
@@ -293,7 +282,7 @@ void LFO::generate_bipolar_random(float const *freq,
             rand1 = frandom();
         }
         float h = phase * rand1 + (1 - phase) * rand0;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
     mRand0 = rand0;
@@ -317,7 +306,7 @@ void LFO::generate_unipolar_samphold(float const *freq,
             rand1 = frandom();
         }
         float h = (rand0 + 1) / 2;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
     mRand0 = rand0;
@@ -341,7 +330,7 @@ void LFO::generate_bipolar_samphold(float const *freq,
             rand1 = frandom();
         }
         float h = rand0;
-        samples_out[i] += depth[i] * h;
+        samples_out[i] = depth[i] * h;
     }
     mPhase = phase;
     mRand0 = rand0;

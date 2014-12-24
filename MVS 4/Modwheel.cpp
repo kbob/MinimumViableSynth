@@ -54,3 +54,16 @@ void ModWheel::generate(float *samples_out, size_t count)
         samples_out[i] = actual = non_decay * actual + decay * target;
     mActual = actual;
 }
+
+void ModWheel::generate_scaled(float scale, float *samples_out, size_t count)
+{
+    const float decay = mDecay;
+    const float non_decay = 1.0 - decay;
+    const float target = mTarget;
+    float actual = mActual;
+    for (size_t i = 0; i < count; i++) {
+        actual = non_decay * actual + decay * target;
+        samples_out[i] = scale * actual;
+    }
+    mActual = actual;
+}

@@ -70,9 +70,13 @@ public:
     void set_values(Source src, const float *values);
     const float *get_values(Source src);
 
-    void modulate(FloatParam const& param,
+    void modulate(float             base,
                   Destination       dest,
                   float            *values_out) const;
+
+    void modulate_freq(float        base,
+                       Destination  dest,
+                       float       *values_out) const;
 
 private:
 
@@ -190,12 +194,12 @@ const float *ModBox<NS, ND>::get_values(Source src)
 }
 
 template <int NS, int ND>
-void ModBox<NS, ND>::modulate(FloatParam const& param,
-                              Destination       dest,
-                              float            *values_out) const
+void ModBox<NS, ND>::modulate(float       base,
+                              Destination dest,
+                              float      *values_out) const
 {
     for (size_t i = 0; i < mSampleCount; i++)
-        values_out[i] = param;
+        values_out[i] = base;
     for (size_t i = 0; i < NS; i++) {
         Source m = mMatrix.get_src(dest, i);
         if (!m)
@@ -203,7 +207,26 @@ void ModBox<NS, ND>::modulate(FloatParam const& param,
         const float *src_values = mModValues[m];
         assert(src_values);
         for (size_t j = 0; j < mSampleCount; j++)
-            values_out[j] += param * src_values[j];
+            values_out[j] += src_values[j];
+    }
+}
+
+template <int NS, int ND>
+void ModBox<NS, ND>::modulate_freq(float       base,
+                                   Destination dest,
+                                   float      *values_out) const
+{
+    for (size_t i = 0; i < mSampleCount; i++)
+        values_out[i] = base;
+    for (size_t i = 0; i < NS; i++) {
+        Source m = mMatrix.get_src(dest, i);
+        if (!m)
+            break;
+        const float *src_values = mModValues[m];
+        assert(src_values);
+
+        for (size_t j = 0; j < mSampleCount; j++)
+            values_out[j] *= powf(2.0, src_values[j]);
     }
 }
 

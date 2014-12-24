@@ -38,12 +38,6 @@ public:
                   float       *samples_out,
                   size_t       count);
 
-    // simplified version.
-    void generate(Waveform     waveform,
-                  float const *freq,
-                  float       *samples_out,
-                  size_t       count);
-
 private:
 
     double   mSampleRate;

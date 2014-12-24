@@ -34,7 +34,7 @@ static LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
     if (wf != LFO::Triangle && wf != LFO::SampleHold && wf != LFO::Random)
         return LFO::Unipolar;
     if (d == Mod::Osc1Freq || d == Mod::Osc1Width ||
-            d == Mod::Osc2Freq || d == Mod::Osc2Width)
+        d == Mod::Osc2Freq || d == Mod::Osc2Width)
         return LFO::Bipolar;
     return LFO::Unipolar;
 }
@@ -43,39 +43,6 @@ static inline void fill(float src, float *dest, size_t count)
 {
     for (size_t i = 0; i < count; i++)
         dest[i] = src;
-}
-
-static inline void fill(float        scale,
-                        float const *src,
-                        float       *dest,
-                        size_t       count)
-{
-    for (size_t i = 0; i < count; i++)
-        dest[i] = scale * src[i];
-}
-
-static inline void add(float scale, const float *src, float *dest, size_t count)
-{
-    for (size_t i = 0; i < count; i++)
-        dest[i] += scale * src[i];
-}
-
-//static inline void add(const float *scale,
-//                       const float *src,
-//                       float *dest,
-//                       size_t count)
-//{
-//    for (size_t i = 0; i < count; i++)
-//        dest[i] += scale[i] * src[i];
-//}
-
-static inline void add_freq(float scale,
-                            const float *src,
-                            float *dest,
-                            size_t count)
-{
-    for (size_t i = 0; i < count; i++)
-        dest[i] *= powf(2, scale * src[i]);
 }
 
 
@@ -252,7 +219,7 @@ MVSParamSet::MVSParamSet()
 
         mw_amount.name("Amount")
             .min_max(0, 1)
-            .default_value(1)
+            .default_value(0.05)
             .units(kAudioUnitParameterUnit_Generic);
     }
 
@@ -271,7 +238,7 @@ MVSParamSet::MVSParamSet()
 
         lfo1_amount.name("Amount")
             .min_max(0, 1)
-            .default_value(0.5)
+            .default_value(0)
             .units(kAudioUnitParameterUnit_Generic);
 
         lfo1_destination.name("Destination")
@@ -316,6 +283,8 @@ MVSParamSet::MVSParamSet()
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
+            .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
+            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
             .value_string(Mod::Env2Amount,   "Env 2 Amount")
             .value_string(Mod::NoDest,       "Off")
             .default_value(Mod::NoDest)
@@ -425,7 +394,11 @@ OSStatus MVS::Initialize()
 
     Float64 baseSampleRate = GetOutput(0)->GetStreamFormat().mSampleRate;
     mDecimator.initialize(baseSampleRate, kDecimatorPassFreq, kOversampleRatio);
-    mModWheel.initialize(mDecimator.oversampleRate());
+    double oversample_rate = mDecimator.oversampleRate();
+
+    mModWheel.initialize(oversample_rate);
+    mLFO1.initialize(oversample_rate);
+    mLFO2.initialize(oversample_rate);
 
     return noErr;
 }
@@ -605,19 +578,18 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
     return noErr;
 }
 
-void MVS::RunModulators(MVSModBox& ioMod)
+void MVS::RunModulators(MVSModBox& modbox)
 {
-    const size_t nsamp = ioMod.sampleCount();
-    float *wheel_values = const_cast<float *>(ioMod.get_values(Mod::Wheel));
-    float *LFO1_values  = const_cast<float *>(ioMod.get_values(Mod::LFO1));
-    float *LFO2_values  = const_cast<float *>(ioMod.get_values(Mod::LFO2));
+    const size_t nsamp = modbox.sampleCount();
+    float *wheel_values = const_cast<float *>(modbox.get_values(Mod::Wheel));
+    float *LFO1_values  = const_cast<float *>(modbox.get_values(Mod::LFO1));
+    float *LFO2_values  = const_cast<float *>(modbox.get_values(Mod::LFO2));
 
     float freq[nsamp], depth[nsamp];
 
-    Mod::Destination mwdest = mParams.mw_destination;
     Mod::Destination l1dest = mParams.lfo1_destination;
     Mod::Destination l2dest = mParams.lfo2_destination;
-    LFO::Polarity l1polarity = LFO_polarity(mParams.lfo2_waveform, l1dest);
+    LFO::Polarity l1polarity = LFO_polarity(mParams.lfo1_waveform, l1dest);
     LFO::Polarity l2polarity = LFO_polarity(mParams.lfo2_waveform, l2dest);
 
     // Who modulates whom?
@@ -633,50 +605,39 @@ void MVS::RunModulators(MVSModBox& ioMod)
 
     // If there is a modulation cycle, mute all cycle members.
 
-    bool lfo1_in_cycle = !lfo1_mods_itself;
-    bool lfo2_in_cycle = !lfo2_mods_itself;
+    bool lfo1_in_cycle = lfo1_mods_itself;
+    bool lfo2_in_cycle = lfo2_mods_itself;
     if (lfo1_mods_lfo2 && lfo2_mods_lfo1)
         lfo1_in_cycle = lfo2_in_cycle = true;
 
     // Mod Wheel is never modulated.
-    mModWheel.generate(wheel_values, nsamp);
+    mModWheel.generate_scaled(mParams.mw_amount, wheel_values, nsamp);
 
-    if (lfo2_in_cycle)
-        fill(0, LFO2_values, nsamp);
-    else if (lfo2_mods_lfo1) {
+    if (lfo2_mods_lfo1) {
 
         // Do LFO2.
 
-        fill(mParams.lfo2_speed, freq, nsamp);
-        fill(1, depth, nsamp);
-        if (mwdest == Mod::LFO2Speed)
-            add_freq(mParams.mw_amount, wheel_values, freq, nsamp);
-        else if (mwdest == Mod::LFO2Amount)
-            fill(mParams.mw_amount, wheel_values, depth, nsamp);
-        mLFO2.generate(mParams.lfo2_waveform,
-                       l2polarity,
-                       freq,
-                       depth,
-                       LFO2_values,
-                       nsamp);
+        if (lfo2_in_cycle) {
+            fill(0, LFO2_values, nsamp);
+        }
+        else {
+            modbox.modulate_freq(mParams.lfo2_speed, Mod::LFO2Speed, freq);
+            modbox.modulate(mParams.lfo2_amount, Mod::LFO2Amount, depth);
+            mLFO2.generate(mParams.lfo2_waveform,
+                           l2polarity,
+                           freq,
+                           depth,
+                           LFO2_values,
+                           nsamp);
+        }
 
         // Do LFO1.
 
         if (lfo1_in_cycle)
             fill(0, LFO1_values, nsamp);
         else {
-            fill(mParams.lfo1_speed, freq, nsamp);
-            fill(mParams.lfo1_amount, depth, nsamp);
-            if (mwdest == Mod::LFO1Speed)
-                add_freq(mParams.mw_amount, wheel_values, freq, nsamp);
-            else if (mwdest == Mod::LFO1Amount)
-                add(mParams.mw_amount, wheel_values, depth, nsamp);
-            if (l2dest == Mod::LFO1Speed)
-                add_freq(1, LFO2_values, freq, nsamp);
-            else {
-                assert(l2dest == Mod::LFO2Amount);
-                add(1, LFO2_values, depth, nsamp);
-            }
+            modbox.modulate_freq(mParams.lfo1_speed, Mod::LFO1Speed, freq);
+            modbox.modulate(mParams.lfo1_amount, Mod::LFO1Amount, depth);
             mLFO1.generate(mParams.lfo1_waveform,
                            l1polarity,
                            freq,
@@ -691,42 +652,29 @@ void MVS::RunModulators(MVSModBox& ioMod)
         if (lfo1_in_cycle)
             fill(0, LFO1_values, nsamp);
         else {
-            fill(mParams.lfo1_speed, freq, nsamp);
-            fill(1, depth, nsamp);
-            if (mwdest == Mod::LFO1Speed)
-                add_freq(mParams.mw_amount, wheel_values, freq, nsamp);
-        else if (mwdest == Mod::LFO1Amount)
-            fill(mParams.mw_amount, wheel_values, depth, nsamp);
-        mLFO1.generate(mParams.lfo1_waveform,
-                       l1polarity,
-                       freq,
-                       depth,
-                       LFO1_values,
-                       nsamp);
+            mModBoxPtr->modulate(mParams.lfo1_amount,   Mod::LFO1Amount, depth);
+            mModBoxPtr->modulate_freq(mParams.lfo1_speed, Mod::LFO1Speed, freq);
+            mLFO1.generate(mParams.lfo1_waveform,
+                           l1polarity,
+                           freq,
+                           depth,
+                           LFO1_values,
+                           nsamp);
+        }
 
-            // Do LFO2.
+        // Do LFO2.
 
-            if (lfo2_in_cycle)
-                fill(0, LFO2_values, nsamp);
-            else {
-                fill(mParams.lfo2_speed, freq, nsamp);
-                fill(mParams.lfo2_amount, depth, nsamp);
-                if (mwdest == Mod::LFO2Speed)
-                    add(mParams.mw_amount, wheel_values, freq, nsamp);
-                else if (mwdest == Mod::LFO2Amount)
-                    add(mParams.mw_amount, wheel_values, depth, nsamp);
-                if (l1dest == Mod::LFO2Speed)
-                    add_freq(1, LFO1_values, freq, nsamp);
-                else if (l1dest == Mod::LFO2Amount) {
-                    add(1, LFO1_values, depth, nsamp);
-                }
-                mLFO2.generate(mParams.lfo1_waveform,
-                               l2polarity,
-                               freq,
-                               depth,
-                               LFO2_values,
-                               nsamp);
-            }
+        if (lfo2_in_cycle)
+            fill(0, LFO2_values, nsamp);
+        else {
+            modbox.modulate_freq(mParams.lfo2_speed, Mod::LFO2Speed, freq);
+            modbox.modulate(mParams.lfo2_amount, Mod::LFO2Amount, depth);
+            mLFO2.generate(mParams.lfo2_waveform,
+                           l2polarity,
+                           freq,
+                           depth,
+                           LFO2_values,
+                           nsamp);
         }
     }
 }
@@ -804,7 +752,13 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                          AudioBufferList **inBufferList,
                          UInt32            inOutBusCount)
 {
-//    const ModBox *modbox = *mModBoxPtrPtr;
+    // Copy the monophonic modbox.
+    MVSModBox modbox = **mModBoxPtrPtr;
+    size_t nsamp = modbox.sampleCount();
+
+    // Set the polyphonic modulator.
+    float env2out[nsamp];
+    modbox.set_values(Mod::Env2, env2out);
 
     Float32 *outBuf     = *mOversampleBufPtr;
     UInt32   frameCount = inNumFrames * mOversampleRatio;
@@ -838,11 +792,24 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         toneFrameCount = end;
 
     // Generate Oscillator 1.
+#if 0
     Float32 osc1buf[frameCount];
     memset(osc1buf, 0, toneFrameCount * sizeof osc1buf[0]);
 
     if (o1level)
         mOsc1.generate(o1type, Frequency(), osc1skew, osc1buf, toneFrameCount);
+#else
+    assert(nsamp == frameCount);
+    Float32 osc1buf[nsamp];
+    memset(osc1buf, 0, sizeof osc1buf);
+    {
+        float freq_in[nsamp];
+        float width_in[nsamp];
+        modbox.modulate_freq(Frequency() / SampleRate(), Mod::Osc1Freq, freq_in);
+        modbox.modulate(osc1skew, Mod::Osc1Width, width_in);
+        mOsc1.generate_modulated(o1type, freq_in, osc1skew, osc1buf, toneFrameCount);
+    }
+#endif
 
     // Generate Oscillator 2.
     Float32 osc2buf[frameCount];
