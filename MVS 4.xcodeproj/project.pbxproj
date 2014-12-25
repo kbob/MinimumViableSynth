@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		923D02051A4BCAC30095A7DC /* Mixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 923D02031A4BCAC30095A7DC /* Mixer.cpp */; };
 		926C8C0B1A4118050082B95A /* ParamSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 926C8C091A4118050082B95A /* ParamSet.cpp */; };
 		92717B6D1A19A7DC00B87C38 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */; };
 		92717B6F1A19A7DC00B87C38 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6E1A19A7DC00B87C38 /* AudioToolbox.framework */; };
@@ -64,6 +65,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		923D02031A4BCAC30095A7DC /* Mixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mixer.cpp; sourceTree = "<group>"; };
+		923D02041A4BCAC30095A7DC /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mixer.h; sourceTree = "<group>"; };
 		926C8C091A4118050082B95A /* ParamSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParamSet.cpp; sourceTree = "<group>"; };
 		926C8C0A1A4118050082B95A /* ParamSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParamSet.h; sourceTree = "<group>"; };
 		92717B691A19A7DC00B87C38 /* MVS 4.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MVS 4.component"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -351,6 +354,8 @@
 			children = (
 				92717BD51A19A7DC00B87C38 /* MVS.h */,
 				92717BD61A19A7DC00B87C38 /* MVS.cpp */,
+				923D02031A4BCAC30095A7DC /* Mixer.cpp */,
+				923D02041A4BCAC30095A7DC /* Mixer.h */,
 				929D3C371A2A3DDC0049102A /* Decimator.cpp */,
 				929D3C381A2A3DDC0049102A /* Decimator.h */,
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
@@ -482,6 +487,7 @@
 				92AC4F551A2F6F3500C9DB82 /* NoiseSource.cpp in Sources */,
 				92717B9B1A19A7DC00B87C38 /* SynthNote.cpp in Sources */,
 				9291A6D81A45D98B00AA6E18 /* Modwheel.cpp in Sources */,
+				923D02051A4BCAC30095A7DC /* Mixer.cpp in Sources */,
 				92717B871A19A7DC00B87C38 /* AUScopeElement.cpp in Sources */,
 				92717BD71A19A7DC00B87C38 /* MVS.cpp in Sources */,
 				926C8C0B1A4118050082B95A /* ParamSet.cpp in Sources */,

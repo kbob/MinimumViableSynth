@@ -15,6 +15,7 @@
 #include "Decimator.h"
 #include "Envelope.h"
 #include "LFO.h"
+#include "Mixer.h"
 #include "ModMatrix.h"
 #include "ModWheel.h"
 #include "NoiseSource.h"
@@ -32,16 +33,6 @@ enum Preset {
 // Define the presets.
 static AUPreset kPresets [kNumberOfPresets] = {
     { kPreset_Default, CFSTR("Factory Default") },
-};
-
-// XXX temporary
-class Mixer {
-public:
-    enum Operator {
-        Mix,
-        RingMod,
-        HardSync
-    };
 };
 
 // XXX temporary
@@ -134,7 +125,7 @@ public:
 
     EnumParam<NoiseSource::Type>    noise_spectrum;
 
-//    EnumParam<Mixer::Operator>      mix_operator;
+    EnumParam<Mixer::Operator>      mix_operator;
     FloatParam                      mix_osc1_level;
     FloatParam                      mix_osc2_level;
     FloatParam                      mix_noise_level;
@@ -149,6 +140,7 @@ public:
     FloatParam                      amp_decay;
     FloatParam                      amp_sustain;
     FloatParam                      amp_release;
+    FloatParam                      amp_amount;
 
     EnumParam<Mod::Destination>     mw_destination;
     FloatParam                      mw_amount;
@@ -193,6 +185,10 @@ public:
                                   UInt32            inNumFrames,
                                   AudioBufferList **inBufferList,
                                   UInt32            inOutBusCount);
+    virtual OSStatus   XXX_Render    (UInt64            inAbsoluteSampleFrame,
+                                  UInt32            inNumFrames,
+                                  AudioBufferList **inBufferList,
+                                  UInt32            inOutBusCount);
     virtual Float64    SampleRate();
 
 private:
@@ -201,20 +197,12 @@ private:
     Float32          **mOversampleBufPtr;
     MVSModBox  const **mModBoxPtrPtr;
     MVSParamSet const *mParams;
+    Envelope           mAmpEnv;
+    Envelope           mEnv2;
     Oscillator         mOsc1;
     Oscillator         mOsc2;
     NoiseSource        mNoise;
-    Envelope           mAmpEnv;
-
-    void               FillWithConstant(
-                                  Float32           k,
-                                  Float32          *buf,
-                                  UInt32            count);
-
-    void               CVtoPhase (Float64           baseFreq,
-                                  Float32           cvDepth,
-                                  Float32          *buf,
-                                  UInt32            count);
+    Mixer              mMixer;
 
 };
 

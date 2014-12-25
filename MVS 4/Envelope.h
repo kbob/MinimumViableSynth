@@ -57,5 +57,4 @@ private:
 
 };
 
-
 #endif /* defined(__MVS__Envelope__) */

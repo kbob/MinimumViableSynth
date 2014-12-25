@@ -33,58 +33,58 @@ void LFO::generate(Waveform     waveform,
 
     switch (JOIN(waveform, polarity)) {
 
-        case JOIN(None, Unipolar):
-        case JOIN(None, Bipolar):
-            generate_none(freq, depth, samples_out, count);
-            break;
+    case JOIN(None, Unipolar):
+    case JOIN(None, Bipolar):
+        generate_none(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(Triangle, Unipolar):
-            generate_unipolar_triangle(freq, depth, samples_out, count);
-            break;
+    case JOIN(Triangle, Unipolar):
+        generate_unipolar_triangle(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(Triangle, Bipolar):
-            generate_bipolar_triangle(freq, depth, samples_out, count);
-            break;
+    case JOIN(Triangle, Bipolar):
+        generate_bipolar_triangle(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(UpSaw, Unipolar):
-            generate_unipolar_upsaw(freq, depth, samples_out, count);
-            break;
+    case JOIN(UpSaw, Unipolar):
+        generate_unipolar_upsaw(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(UpSaw, Bipolar):
-            generate_bipolar_upsaw(freq, depth, samples_out, count);
-            break;
+    case JOIN(UpSaw, Bipolar):
+        generate_bipolar_upsaw(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(DnSaw, Unipolar):
-            generate_unipolar_dnsaw(freq, depth, samples_out, count);
-            break;
+    case JOIN(DnSaw, Unipolar):
+        generate_unipolar_dnsaw(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(DnSaw, Bipolar):
-            generate_bipolar_dnsaw(freq, depth, samples_out, count);
-            break;
+    case JOIN(DnSaw, Bipolar):
+        generate_bipolar_dnsaw(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(Square, Unipolar):
-            generate_unipolar_square(freq, depth, samples_out, count);
-            break;
+    case JOIN(Square, Unipolar):
+        generate_unipolar_square(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(Square, Bipolar):
-            generate_bipolar_square(freq, depth, samples_out, count);
-            break;
+    case JOIN(Square, Bipolar):
+        generate_bipolar_square(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(Random, Unipolar):
-            generate_unipolar_random(freq, depth, samples_out, count);
-            break;
+    case JOIN(Random, Unipolar):
+        generate_unipolar_random(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(Random, Bipolar):
-            generate_bipolar_random(freq, depth, samples_out, count);
-            break;
+    case JOIN(Random, Bipolar):
+        generate_bipolar_random(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(SampleHold, Unipolar):
-            generate_unipolar_samphold(freq, depth, samples_out, count);
-            break;
+    case JOIN(SampleHold, Unipolar):
+        generate_unipolar_samphold(freq, depth, samples_out, count);
+        break;
 
-        case JOIN(SampleHold, Bipolar):
-            generate_bipolar_samphold(freq, depth, samples_out, count);
-            break;
+    case JOIN(SampleHold, Bipolar):
+        generate_bipolar_samphold(freq, depth, samples_out, count);
+        break;
     }
 #undef JOIN
 }

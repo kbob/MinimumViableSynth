@@ -126,20 +126,20 @@ const char *OTname(Oscillator::Waveform t)
 {
     switch (t) {
 
-        case Oscillator::None:
-            return "None";
+    case Oscillator::None:
+        return "None";
 
-        case Oscillator::Saw:
-            return "Saw";
+    case Oscillator::Saw:
+        return "Saw";
 
-        case Oscillator::Square:
-            return "Square";
+    case Oscillator::Square:
+        return "Square";
 
-        case Oscillator::Triangle:
-            return "Triangle";
+    case Oscillator::Triangle:
+        return "Triangle";
 
-        case Oscillator::Sine:
-            return "Sine";
+    case Oscillator::Sine:
+        return "Sine";
     }
 }
 
@@ -152,24 +152,24 @@ void Oscillator::generate(Waveform waveform,
     begin_chunk(waveform, freq, modifier);
     switch (waveform) {
 
-        case None:
-            break;
+    case None:
+        break;
 
-        case Saw:
-            generate_saw(freq, samples_out, count);
-            break;
+    case Saw:
+        generate_saw(freq, samples_out, count);
+        break;
 
-        case Square:
-            generate_square(freq, samples_out, count);
-            break;
+    case Square:
+        generate_square(freq, samples_out, count);
+        break;
 
-        case Triangle:
-            generate_triangle(freq, samples_out, count);
-            break;
+    case Triangle:
+        generate_triangle(freq, samples_out, count);
+        break;
 
-        case Sine:
-            generate_sine(freq, samples_out, count);
-            break;
+    case Sine:
+        generate_sine(freq, samples_out, count);
+        break;
     }
     mThresh = mNewThresh;
 }
@@ -184,24 +184,24 @@ void Oscillator::generate_modulated(Waveform     waveform,
     begin_chunk(waveform, freq, modifier);
     switch (waveform) {
 
-        case None:
-            break;
+    case None:
+        break;
 
-        case Saw:
-            generate_modulated_saw(phaseIncrements, samples_out, count);
-            break;
+    case Saw:
+        generate_modulated_saw(phaseIncrements, samples_out, count);
+        break;
 
-        case Square:
-            generate_modulated_square(phaseIncrements, samples_out, count);
-            break;
+    case Square:
+        generate_modulated_square(phaseIncrements, samples_out, count);
+        break;
 
-        case Triangle:
-            generate_modulated_triangle(phaseIncrements, samples_out, count);
-            break;
+    case Triangle:
+        generate_modulated_triangle(phaseIncrements, samples_out, count);
+        break;
 
-        case Sine:
-            generate_modulated_sine(phaseIncrements, samples_out, count);
-            break;
+    case Sine:
+        generate_modulated_sine(phaseIncrements, samples_out, count);
+        break;
     }
     mThresh = mNewThresh;
 }
@@ -218,45 +218,45 @@ void Oscillator::generate_with_sync(Waveform     waveform,
     begin_chunk(waveform, freq, modifier);
     switch (waveform) {
 
-        case None:
-            generate_sync_only     (phaseIncrements,
-                                    samples_out,
-                                    sync_in,
-                                    sync_out,
-                                    count);
-            break;
+    case None:
+        generate_sync_only     (phaseIncrements,
+                                samples_out,
+                                sync_in,
+                                sync_out,
+                                count);
+        break;
 
-        case Saw:
-            generate_sync_saw      (phaseIncrements,
-                                    samples_out,
-                                    sync_in,
-                                    sync_out,
-                                    count);
-            break;
+    case Saw:
+        generate_sync_saw      (phaseIncrements,
+                                samples_out,
+                                sync_in,
+                                sync_out,
+                                count);
+        break;
 
-        case Square:
-            generate_sync_square   (phaseIncrements,
-                                    samples_out,
-                                    sync_in,
-                                    sync_out,
-                                    count);
-            break;
+    case Square:
+        generate_sync_square   (phaseIncrements,
+                                samples_out,
+                                sync_in,
+                                sync_out,
+                                count);
+        break;
 
-        case Triangle:
-            generate_sync_triangle (phaseIncrements,
-                                    samples_out,
-                                    sync_in,
-                                    sync_out,
-                                    count);
-            break;
+    case Triangle:
+        generate_sync_triangle (phaseIncrements,
+                                samples_out,
+                                sync_in,
+                                sync_out,
+                                count);
+        break;
 
-        case Sine:
-            generate_sync_sine     (phaseIncrements,
-                                    samples_out,
-                                    sync_in,
-                                    sync_out,
-                                    count);
-            break;
+    case Sine:
+        generate_sync_sine     (phaseIncrements,
+                                samples_out,
+                                sync_in,
+                                sync_out,
+                                count);
+        break;
     }
     mThresh = mNewThresh;
 }
@@ -779,53 +779,53 @@ inline void Oscillator::calc_h_m(Waveform waveform,
 {
     switch (waveform) {
 
-        case None:
-            *h = 0;
-            *m = 0;
-            break;
+    case None:
+        *h = 0;
+        *m = 0;
+        break;
 
-        case Saw:
-            *h = 2 * phase - 1;
-            *m = 2 * freq / mSampleRate;
-            break;
+    case Saw:
+        *h = 2 * phase - 1;
+        *m = 2 * freq / mSampleRate;
+        break;
 
-        case Square:
-            // fprintf(stderr, "calc square: phase=%g thresh=%g\n", phase, thresh);
-            if (phase < thresh)
-                *h = 1;
-            else
-                *h = thresh / (thresh - 1);
-            // fprintf(stderr, "             *h = %g\n", *h);
-            *m = 0;
-            break;
+    case Square:
+        // fprintf(stderr, "calc square: phase=%g thresh=%g\n", phase, thresh);
+        if (phase < thresh)
+            *h = 1;
+        else
+            *h = thresh / (thresh - 1);
+        // fprintf(stderr, "             *h = %g\n", *h);
+        *m = 0;
+        break;
 
-        case Triangle:
-            if (phase < thresh) {
-                float up_slope = 2 / thresh;
-                // fprintf(stderr, "calc tri:    freq = %g\n", freq);
-                // fprintf(stderr, "             up slope = %g\n", up_slope);
-                // fprintf(stderr, "             phase=%g thresh=%g\n",
-                //                               phase, thresh);
-                *h = phase * up_slope - 1;
-                *m = up_slope * freq / mSampleRate;
-            } else {
-                float dn_slope = -2 / (1 - thresh);
-                // fprintf(stderr, "calc tri:    freq = %g\n", freq);
-                // fprintf(stderr, "             dn slope = %g\n", dn_slope);
-                // fprintf(stderr, "             phase=%g thresh=%g\n",
-                //                               phase, thresh);
-                *h = 1 + dn_slope * (phase - thresh);
-                *m = dn_slope * freq / mSampleRate;
-            }
-            break;
+    case Triangle:
+        if (phase < thresh) {
+            float up_slope = 2 / thresh;
+            // fprintf(stderr, "calc tri:    freq = %g\n", freq);
+            // fprintf(stderr, "             up slope = %g\n", up_slope);
+            // fprintf(stderr, "             phase=%g thresh=%g\n",
+            //                               phase, thresh);
+            *h = phase * up_slope - 1;
+            *m = up_slope * freq / mSampleRate;
+        } else {
+            float dn_slope = -2 / (1 - thresh);
+            // fprintf(stderr, "calc tri:    freq = %g\n", freq);
+            // fprintf(stderr, "             dn slope = %g\n", dn_slope);
+            // fprintf(stderr, "             phase=%g thresh=%g\n",
+            //                               phase, thresh);
+            *h = 1 + dn_slope * (phase - thresh);
+            *m = dn_slope * freq / mSampleRate;
+        }
+        break;
 
-        case Sine:
-            *h = sinf(2 * M_PI * phase);
-            *m = cosf(2 * M_PI * phase) * freq / mSampleRate;
-            // fprintf(stderr, "calc sine:   freq = %g\n", freq);
-            // fprintf(stderr, "             phase = %g\n", phase);
-            // fprintf(stderr, "             *h = %g\n", *h);
-            // fprintf(stderr, "             *m = %g\n", *m);
-            break;
+    case Sine:
+        *h = sinf(2 * M_PI * phase);
+        *m = cosf(2 * M_PI * phase) * freq / mSampleRate;
+        // fprintf(stderr, "calc sine:   freq = %g\n", freq);
+        // fprintf(stderr, "             phase = %g\n", phase);
+        // fprintf(stderr, "             *h = %g\n", *h);
+        // fprintf(stderr, "             *m = %g\n", *m);
+        break;
     }
 }

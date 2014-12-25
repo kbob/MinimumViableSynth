@@ -45,19 +45,19 @@ void Envelope::initialize(Float64      sampleRate,
     mLevel         = 0;
     switch (type) {
 
-        case Linear:
-            mAttackDelta  = maxLevel / mAttackSamples;
-            mDecayDelta   = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
-            mReleaseDelta = -maxLevel / (releaseTime * sampleRate);
-            mLevel = 0;
-            break;
+    case Linear:
+        mAttackDelta  = maxLevel / mAttackSamples;
+        mDecayDelta   = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
+        mReleaseDelta = -maxLevel / (releaseTime * sampleRate);
+        mLevel = 0;
+        break;
 
-        case Exponential:
-            mAttackDelta = expDelta(0, maxLevel, mAttackSamples);
-            mDecayDelta = expDelta(1.0001, sustainLevel, mDecaySamples);
-            mReleaseDelta = expDelta(maxLevel, 0, releaseTime * sampleRate);
-            mLevel = kInaudibleLevel;
-            break;
+    case Exponential:
+        mAttackDelta = expDelta(0, maxLevel, mAttackSamples);
+        mDecayDelta = expDelta(1.0001, sustainLevel, mDecaySamples);
+        mReleaseDelta = expDelta(maxLevel, 0, releaseTime * sampleRate);
+        mLevel = kInaudibleLevel;
+        break;
     }
 }
 

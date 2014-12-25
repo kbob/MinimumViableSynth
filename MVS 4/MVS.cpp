@@ -45,6 +45,12 @@ static inline void fill(float src, float *dest, size_t count)
         dest[i] = src;
 }
 
+static inline float scale_dB40(float level)
+{
+    return level <= -40 ? 0 : powf(10, level / 20);
+}
+
+
 
 // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 #pragma mark MVS Parameters
@@ -118,11 +124,11 @@ MVSParamSet::MVSParamSet()
     {
         ParamClump mix("Mixer", "Mix");
 
-//        mix_operator.name("Operator")
-//            .value_string(Mixer::Mix,      "Mix")
-//            .value_string(Mixer::RingMod,  "Ring Modulate")
-//            .value_string(Mixer::HardSync, "Hard Sync")
-//            .default_value(Mixer::Mix);
+        mix_operator.name("Operator")
+            .value_string(Mixer::Mix,      "Mix")
+            .value_string(Mixer::RingMod,  "Ring Modulate")
+            .value_string(Mixer::HardSync, "Hard Sync")
+            .default_value(Mixer::Mix);
 
         mix_osc1_level.name("Oscillator 1 Level")
             .min_max(-40, 0)
@@ -197,6 +203,11 @@ MVSParamSet::MVSParamSet()
             .default_value(0.050)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
+
+        amp_amount.name("Level")
+            .min_max(-40, 0)
+            .default_value(0)
+            .units(kAudioUnitParameterUnit_Decibels);
     }
 
     {
@@ -213,6 +224,7 @@ MVSParamSet::MVSParamSet()
             .value_string(Mod::LFO1Speed,     "LFO 1 Speed")
             .value_string(Mod::LFO2Amount,    "LFO 2 Amount")
             .value_string(Mod::LFO2Speed,     "LFO 2 Speed")
+            .value_string(Mod::AmpLevel,      "Env 1 Amount")
             .value_string(Mod::Env2Amount,    "Env 2 Amount")
             .default_value(Mod::LFO1Amount)
             .assigns_mod(Mod::Wheel);
@@ -244,12 +256,15 @@ MVSParamSet::MVSParamSet()
         lfo1_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
             .value_string(Mod::Osc1Width,    "Osc 1 Width")
+            .value_string(Mod::Osc1Level,    "Osc 1 Level")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
+            .value_string(Mod::Osc2Level,    "Osc 2 Level")
             .value_string(Mod::NoiseLevel,   "Noise Level")
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
+            .value_string(Mod::AmpLevel,     "Env 1 Amount")
             .value_string(Mod::Env2Amount,   "Env 2 Amount")
             .value_string(Mod::NoDest,       "Off")
             .default_value(Mod::Osc1Freq)
@@ -277,14 +292,17 @@ MVSParamSet::MVSParamSet()
         lfo2_destination.name("Destination")
             .value_string(Mod::Osc1Freq,     "Osc 1 Frequency")
             .value_string(Mod::Osc1Width,    "Osc 1 Width")
+            .value_string(Mod::Osc1Level,    "Osc 1 Level")
             .value_string(Mod::Osc2Freq,     "Osc 2 Frequency")
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
+            .value_string(Mod::Osc2Level,    "Osc 2 Level")
             .value_string(Mod::NoiseLevel,   "Noise Level")
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
             .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
             .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
+            .value_string(Mod::AmpLevel,     "Env 1 Amount")
             .value_string(Mod::Env2Amount,   "Env 2 Amount")
             .value_string(Mod::NoDest,       "Off")
             .default_value(Mod::NoDest)
@@ -715,25 +733,33 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     float sustainLevel = mParams->amp_sustain;
     float releaseTime  = mParams->amp_release;
 
-    mOsc1.initialize(sampleRate);
-    mOsc2.initialize(sampleRate);
-    mNoise.initialize(sampleRate);
     mAmpEnv.initialize(sampleRate,
                        maxLevel,
                        attackTime, decayTime, sustainLevel, releaseTime,
                        Envelope::Exponential);
+
+#if FULLY_IMPLEMENTED
+    mEnv1.initialize(sampleRate);
+    mEnv2.initialize(sampleRate);
+#endif
+    mOsc1.initialize(sampleRate);
+    mOsc2.initialize(sampleRate);
+    mNoise.initialize(sampleRate);
+    mMixer.initialize(sampleRate);
     return true;
 }
 
 void MVSNote::Release(UInt32 inFrame)
 {
     mAmpEnv.release();
+    mEnv2.release();
     SynthNote::Release(inFrame);
 }
 
 void MVSNote::FastRelease(UInt32 inFrame) // voice is being stolen.
 {
     mAmpEnv.release();
+    mEnv2.release();
     SynthNote::Release(inFrame);
 }
 
@@ -752,13 +778,211 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                          AudioBufferList **inBufferList,
                          UInt32            inOutBusCount)
 {
+    const MVSParamSet *params = mParams;
+
+    // Copy the monophonic modbox.
+    MVSModBox     modbox      = **mModBoxPtrPtr;
+    size_t        nsamp       = modbox.sampleCount();
+    typedef float buf[nsamp];
+
+    // Initialize the polyphonic modbox by adding a buffer for env2.
+    buf           env2_values;
+    modbox.set_values(Mod::Env2, env2_values);
+
+    // Get the (oversampled) output buffer.
+    float        *render_out  = *mOversampleBufPtr;
+
+    float         sample_rate = SampleRate();
+    float         frequency   = Frequency();
+    float         norm_freq   = frequency / sample_rate;
+
+
+    // - - - - - - -        Envelope 1               - - - - - - - - - -
+
+    buf env1_values;
+    {
+        buf attack, decay, sustain, release, amount;
+
+        modbox.modulate(params->amp_attack,  Mod::AmpAttack,  attack);
+        modbox.modulate(params->amp_decay,   Mod::AmpDecay,   decay);
+        modbox.modulate(params->amp_sustain, Mod::AmpSustain, sustain);
+        modbox.modulate(params->amp_release, Mod::AmpRelease, release);
+        modbox.modulate(params->amp_amount,  Mod::AmpLevel,   amount);
+#if FULLY_IMPLEMENTED
+        mEnv1.generate(attack, decay, sustain, release, amount, env1_values);
+#else
+        mAmpEnv.generate(env1_values, (UInt32)nsamp);
+#endif
+    }
+
+    // - - - - - - -        Envelope 2               - - - - - - - - - -
+
+    {
+        buf attack, decay, sustain, release, amount;
+
+        modbox.modulate(params->env2_attack,  Mod::Env2Attack,  attack);
+        modbox.modulate(params->env2_decay,   Mod::Env2Decay,   decay);
+        modbox.modulate(params->env2_sustain, Mod::Env2Sustain, sustain);
+        modbox.modulate(params->env2_release, Mod::Env2Release, release);
+        modbox.modulate(scale_dB40(params->env2_amount),  Mod::Env2Amount,  amount);
+#if FULLY_IMPLEMENTED
+        mEnv2.generate(attack, decay, sustain, release, amount, env2_values);
+#else
+        fill(0, env2_values, nsamp);
+#endif
+    }
+
+    // - - - - - - -        Oscillator 2             - - - - - - - - - -
+
+    buf osc2_out;
+    buf osc_sync;
+    {
+        buf freq, width;
+        float coarse_detune = params->o2_coarse_detune;
+        float fine_detune   = params->o2_fine_detune;
+        float detune        = (coarse_detune + fine_detune / 100) / 12;
+        float base_freq     = norm_freq * powf(2.0, detune);
+        float base_width    = params->o2_width / 100;
+
+        modbox.modulate_freq(base_freq, Mod::Osc2Freq, freq);
+        modbox.modulate(base_width, Mod::Osc2Width, width);
+        if (params->mix_operator == Mixer::HardSync) {
+            buf sync_in;
+            sync_in[0] = nsamp + 1; // no sync events
+            mOsc2.generate_with_sync(params->o2_waveform,
+                                     freq,
+#if FULLY_IMPLEMENTED
+                                     width,
+#else
+                                     base_width,
+#endif
+                                     osc2_out,
+                                     sync_in,
+                                     osc_sync,
+                                     nsamp);
+        } else {
+            mOsc2.generate_modulated(params->o2_waveform,
+                                     freq,
+#if FULLY_IMPLEMENTED
+                                     width,
+#else
+                                     base_width,
+#endif
+                                     osc2_out,
+                                     nsamp);
+        }
+    }
+
+    // - - - - - - -        Oscillator 1             - - - - - - - - - -
+
+    buf osc1_out;
+    {
+        buf freq, width;
+        float base_freq = norm_freq;
+        float base_width = params->o1_width / 100;
+
+        modbox.modulate_freq(base_freq, Mod::Osc1Freq, freq);
+        modbox.modulate(base_width, Mod::Osc1Width, width);
+        if (params->mix_operator == Mixer::HardSync) {
+            buf sync_out_unused;
+            mOsc1.generate_with_sync(params->o1_waveform,
+                                     freq,
+#if FULLY_IMPLEMENTED
+                                     width,
+#else
+                                     base_width,
+#endif
+
+                                     osc1_out,
+                                     osc_sync,
+                                     sync_out_unused,
+                                     nsamp);
+        } else {
+            mOsc1.generate_modulated(params->o1_waveform,
+                                     freq,
+#if FULLY_IMPLEMENTED
+                                     width,
+#else
+                                     base_width,
+#endif
+                                     osc1_out,
+                                     nsamp);
+        }
+    }
+
+    // - - - - - - -        Noise Source             - - - - - - - - - -
+
+    buf noise_out;
+    mNoise.generate(params->noise_spectrum, noise_out, nsamp);
+
+    // - - - - - - -        Mixer                    - - - - - - - - - -
+
+    buf mixer_out;
+    {
+        buf osc1_level, osc2_level, noise_level;
+        float osc1_base_level  = scale_dB40(params->mix_osc1_level);
+        float osc2_base_level  = scale_dB40(params->mix_osc2_level);
+        float noise_base_level = scale_dB40(params->mix_noise_level);
+
+        modbox.modulate(osc1_base_level, Mod::Osc1Level, osc1_level);
+        modbox.modulate(osc2_base_level, Mod::Osc2Level, osc2_level);
+        modbox.modulate(noise_base_level, Mod::NoiseLevel, noise_level);
+        mMixer.generate(params->mix_operator,
+                        osc1_out,
+                        osc1_level,
+                        osc2_out,
+                        osc2_level,
+                        noise_out,
+                        noise_level,
+                        mixer_out,
+                        nsamp);
+    }
+
+#if FULLY_IMPLEMENTED
+    // - - - - - - -        Filter                   - - - - - - - - - -
+
+    buf filter_out;
+    {
+        buf cutoff, resonance, drive;
+
+        modbox.modulate(params->flt_cutoff,    Mod:FltCutoff, cutoff);
+        modbox.modulate(params->flt_resonance, Mod:Resonance, cutoff);
+        modbox.modulate(params->flt_drive,     Mod:Drive,     cutoff);
+        mFilter.generate(params->flt_type,
+                         cutoff,
+                         resonance,
+                         drive,
+                         filter_out,
+                         nsamp);
+    }
+#else
+    float *filter_out = mixer_out;
+#endif
+
+    // - - - - - - -        Amplifier                - - - - - - - - - -
+
+#if FULLY_IMPLEMENTED
+    mAmplifier.generate_sum(filter_out, env1_values, render_out);
+#else
+    for (size_t i = 0; i < nsamp; i++)
+        render_out[i] += filter_out[i] * env1_values[i];
+#endif
+
+    return noErr;
+}
+
+OSStatus MVSNote::XXX_Render(UInt64            inAbsoluteSampleFrame,
+                         UInt32            inNumFrames,
+                         AudioBufferList **inBufferList,
+                         UInt32            inOutBusCount)
+{
     // Copy the monophonic modbox.
     MVSModBox modbox = **mModBoxPtrPtr;
     size_t nsamp = modbox.sampleCount();
 
     // Set the polyphonic modulator.
-    float env2out[nsamp];
-    modbox.set_values(Mod::Env2, env2out);
+    float env2_values[nsamp];
+    modbox.set_values(Mod::Env2, env2_values);
 
     Float32 *outBuf     = *mOversampleBufPtr;
     UInt32   frameCount = inNumFrames * mOversampleRatio;
@@ -856,23 +1080,4 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         NoteEnded(end);
 
     return noErr;
-}
-
-void MVSNote::FillWithConstant(Float32 k, Float32 *buf, UInt32 count)
-{
-    for (UInt32 i = 0; i < count; i++)
-        buf[i] = k;
-}
-
-void MVSNote::CVtoPhase(Float64  baseFreq,
-                        Float32  cvDepth,
-                        Float32 *buf,
-                        UInt32   count)
-{
-    Float32 baseInc = baseFreq / SampleRate();
-    for (UInt32 i = 0; i < count; i++) {
-        Float32 cv = buf[i];
-        Float32 inc = baseInc * (1 + cvDepth * cv);
-        buf[i] = inc;
-    }
 }
