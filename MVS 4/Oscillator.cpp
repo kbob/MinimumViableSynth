@@ -8,6 +8,8 @@
 
 #include "Oscillator.h"
 
+#include <algorithm>
+
 // Stupid delay line.
 
 // This delay line is stored in a member of the Oscillator object, but
@@ -23,7 +25,8 @@
         float zm2 = mShiftZ[0],                                         \
               zm1 = mShiftZ[1],                                         \
               z0  = mShiftZ[2],                                         \
-              zp1 = mShiftZ[3];
+              zp1 = mShiftZ[3],                                         \
+              ztmp; ztmp = 0;
 
 #define END_Z                                                           \
     {                                                                   \
@@ -42,6 +45,7 @@
 // Insert a new sample, shift others down.
 #define SHIFT_IN(x) (zm2 = zm1, zm1 = z0 + (x), z0 = zp1, zp1 = 0)
 
+#define SHIFT_Z(x) ((ztmp = SHIFT_OUT()), SHIFT_IN((x)), ztmp)
 
 // polyBLEP: polynomial approximation to Bandwidth-Limited stEP function
 // polyBLAM: polynomial approximation to Bandwidth-Limited rAMp function
@@ -80,10 +84,10 @@
            (z0  += (h) * (- (d) * (d) / 2                               \
                           + (d)                                         \
                           - 1 / 2.)))
- 
+
 #elif BLEP_ORDER == 0
 
-    #define BLEP_ME(d, h) ((void)0) /* La di da... */
+    #define BLEP_ME(d, h) ((void)((d) + (h))) /* La di da... */
 
 #else
 
@@ -93,13 +97,13 @@
 
 #if BLAM_ORDER == 1
 
-    #define BLAM_ME(d, h)                                               \
-        ((zm1 += (h) * (+ (d) * (d) * (d) / 6)),                        \
-         (z0  += (h) * (+ (1-(d)) * (1-(d)) * (1-(d)) / 6)))
+    #define BLAM_ME(d, m)                                               \
+        ((zm1 += (m) * (+ (d) * (d) * (d) / 6)),                        \
+         (z0  += (m) * (+ (1-(d)) * (1-(d)) * (1-(d)) / 6)))
 
 #elif BLAM_ORDER == 0
 
-    #define BLAM_ME(d, h) ((void)0)
+    #define BLAM_ME(d, m) ((void)((d) + (m)))
 
 #else
 
@@ -107,19 +111,9 @@
 
 #endif
 
-Oscillator::Oscillator()
-{}
-
-void Oscillator::initialize(double sampleRate)
+static float clamp_width(float width)
 {
-    mSampleRate = sampleRate;
-    mInverseSampleRate = 1.0 / sampleRate;
-    mWaveform = None;
-    mPhase = 0.0;
-    mNewThresh = 0.5;
-    mThresh = -1;               // signal begin_chunk to initialize.
-
-    CLEAR_Z();
+    return std::max<float>(0.01f, std::min<float>(0.50f, width));
 }
 
 const char *OTname(Oscillator::Waveform t)
@@ -143,13 +137,25 @@ const char *OTname(Oscillator::Waveform t)
     }
 }
 
-void Oscillator::generate(Waveform waveform,
-                          double   freq,
-                          float    modifier,
-                          float   *samples_out,
-                          size_t   count)
+Oscillator::Oscillator()
+{}
+
+void Oscillator::initialize(float sample_rate)
 {
-    begin_chunk(waveform, freq, modifier);
+    mWaveform = None;
+    mWaveformChanged = true;
+    mPhase = 0;
+    mThresh = -1;
+    CLEAR_Z();
+}
+
+void Oscillator::generate(Waveform     waveform,
+                          float        freq,
+                          float        width,
+                          float       *samples_out,
+                          size_t       count)
+{
+    begin_chunk(waveform, freq, width);
     switch (waveform) {
 
     case None:
@@ -160,622 +166,102 @@ void Oscillator::generate(Waveform waveform,
         break;
 
     case Square:
-        generate_square(freq, samples_out, count);
+        generate_square(freq, width, samples_out, count);
         break;
 
     case Triangle:
-        generate_triangle(freq, samples_out, count);
+        generate_triangle(freq, width, samples_out, count);
         break;
 
     case Sine:
         generate_sine(freq, samples_out, count);
         break;
     }
-    mThresh = mNewThresh;
 }
 
+
 void Oscillator::generate_modulated(Waveform     waveform,
-                                    float const *phaseIncrements,
-                                    float        modifier,
+                                    float const *freqs,
+                                    float const *widths,
                                     float       *samples_out,
                                     size_t       count)
 {
-    float freq = phaseIncrements[0] * mSampleRate;
-    begin_chunk(waveform, freq, modifier);
+    begin_chunk(waveform, freqs[0], widths[0]);
     switch (waveform) {
 
     case None:
         break;
 
     case Saw:
-        generate_modulated_saw(phaseIncrements, samples_out, count);
+        generate_modulated_saw(freqs, samples_out, count);
         break;
 
     case Square:
-        generate_modulated_square(phaseIncrements, samples_out, count);
+        generate_modulated_square(freqs, widths, samples_out, count);
         break;
 
     case Triangle:
-        generate_modulated_triangle(phaseIncrements, samples_out, count);
+        generate_modulated_triangle(freqs, widths, samples_out, count);
         break;
 
     case Sine:
-        generate_modulated_sine(phaseIncrements, samples_out, count);
+        generate_modulated_sine(freqs, samples_out, count);
         break;
     }
-    mThresh = mNewThresh;
 }
 
 void Oscillator::generate_with_sync(Waveform     waveform,
-                                    float const *phaseIncrements,
-                                    float        modifier,
+                                    float const *freqs,
+                                    float const *widths,
                                     float       *samples_out,
                                     float const *sync_in,
                                     float       *sync_out,
                                     size_t       count)
 {
-    float freq = phaseIncrements[0] * mSampleRate;
-    begin_chunk(waveform, freq, modifier);
+    begin_chunk(waveform, freqs[0], widths[0]);
     switch (waveform) {
 
     case None:
-        generate_sync_only     (phaseIncrements,
-                                samples_out,
-                                sync_in,
-                                sync_out,
-                                count);
+        generate_sync_only(freqs, samples_out, sync_in, sync_out, count);
         break;
 
     case Saw:
-        generate_sync_saw      (phaseIncrements,
-                                samples_out,
-                                sync_in,
-                                sync_out,
-                                count);
+        generate_sync_saw(freqs, samples_out, sync_in, sync_out, count);
         break;
 
     case Square:
-        generate_sync_square   (phaseIncrements,
-                                samples_out,
-                                sync_in,
-                                sync_out,
-                                count);
+        generate_sync_square(freqs,
+                             widths,
+                             samples_out,
+                             sync_in,
+                             sync_out,
+                             count);
         break;
 
     case Triangle:
-        generate_sync_triangle (phaseIncrements,
-                                samples_out,
-                                sync_in,
-                                sync_out,
-                                count);
+        generate_sync_triangle(freqs,
+                               widths,
+                               samples_out,
+                               sync_in,
+                               sync_out,
+                               count);
         break;
 
     case Sine:
-        generate_sync_sine     (phaseIncrements,
-                                samples_out,
-                                sync_in,
-                                sync_out,
-                                count);
+        generate_sync_sine(freqs, samples_out, sync_in, sync_out, count);
         break;
     }
-    mThresh = mNewThresh;
-}
-
-void Oscillator::generate_sync_only(float const *phaseIncrements,
-                                    float       *samples_out,
-                                    float const *sync_in,
-                                    float       *sync_out,
-                                    size_t       count)
-{
-    BEGIN_Z;
-    float phase = mPhase;
-    size_t sii = 0, soi = 0;
-    size_t next_reset = (size_t)sync_in[sii];
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (i == next_reset) {
-            float d = fmodf(sync_in[sii], 1.0);
-            phase = d * inc * mInverseSampleRate;
-            sync_out[soi++] = sync_in[sii++];
-            next_reset = (size_t)sync_in[sii];
-            // BLEP/BLAM not needed.  We are silent.
-        } else if (phase >= 1.0) {
-            // negative discontinuity
-            phase -= 1.0;
-            float d = phase / inc;
-            sync_out[soi++] = i - 1 + d;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(0);
-    }
-    sync_out[soi] = count + 1;
-    assert(sync_in[sii] >= count);
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_saw(double freq,
-                              float *samples_out,
-                              size_t count)
-{
-    BEGIN_Z;
-    float phase   = mPhase;
-    float inc     = freq * mInverseSampleRate;
-    float inv_inc = 1 / inc;
-    for (size_t i = 0; i < count; i++) {
-        phase += inc;
-        if (phase >= 1.0) {
-            // negative discontinuity
-            phase -= 1.0;
-            BLEP_ME(phase * inv_inc, -2.0);
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(2 * phase - 1);
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_modulated_saw(float const *phaseIncrements,
-                                        float       *samples_out,
-                                        size_t       count)
-{
-    BEGIN_Z;
-    float phase = mPhase;
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (phase >= 1.0) {
-            // negative discontinuity
-            phase -= 1.0;
-            BLEP_ME(phase / inc, -2.0);
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(2 * phase - 1);
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_sync_saw(float const *phaseIncrements,
-                                   float       *samples_out,
-                                   float const *sync_in,
-                                   float       *sync_out,
-                                   size_t       count)
-{
-    BEGIN_Z;
-    float phase = mPhase;
-    size_t sii = 0, soi = 0;
-    size_t next_reset = (size_t)sync_in[sii];
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (i == next_reset) {
-            float h0 = 2 * phase - 1;
-            float d = fmodf(sync_in[sii], 1.0);
-            phase = d * inc * mInverseSampleRate;
-            sync_out[soi++] = sync_in[sii++];
-            next_reset = (size_t)sync_in[sii];
-            BLEP_ME(d, -1 - h0);
-            // BLAM not needed.  Slope is constant.
-        } else if (phase >= 1.0) {
-            // negative discontinuity
-            phase -= 1.0;
-            float d = phase / inc;
-            BLEP_ME(d, -2.0);
-            sync_out[soi++] = i - 1 + d;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(2 * phase - 1);
-    }
-    sync_out[soi] = count + 1;
-    assert(sync_in[sii] >= count);
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_square(double freq,
-                                 float *samples_out,
-                                 size_t count)
-{
-    BEGIN_Z;
-    float phase        = mPhase;
-    float thresh       = mThresh;
-    float new_thresh   = mNewThresh;
-    float high         = 1.0;
-    float low          = thresh / (thresh - 1);
-    float level        = phase < thresh ? high : low;
-    float fall_trigger = level > 0 ? thresh : 9999;
-    float inc          = freq * mInverseSampleRate;
-    float inv_inc      = 1 / inc;
-    for (size_t i = 0; i < count; i++) {
-        phase += inc;
-        if (phase >= 1.0) {
-            // positive discontinuity
-            phase -= 1.0;
-            level = high;
-            BLEP_ME(phase * inv_inc, high - low);
-            thresh = new_thresh;
-            low = thresh / (thresh - 1);
-            fall_trigger = thresh;
-        } else if (phase > fall_trigger) {
-            // negative discontinuity
-            level = low;
-            BLEP_ME((phase - thresh) * inv_inc, low - high);
-            fall_trigger = 9999;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(level);
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_modulated_square(float const *phaseIncrements,
-                                           float       *samples_out,
-                                           size_t       count)
-{
-    BEGIN_Z;
-    float phase        = mPhase;
-    float thresh       = mThresh;
-    float new_thresh   = mNewThresh;
-    float high         = 1.0;
-    float low          = thresh / (thresh - 1);
-    float level        = phase < thresh ? high : low;
-    float fall_trigger = level > 0 ? thresh : 9999;
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (phase >= 1.0) {
-            // positive discontinuity
-            phase -= 1.0;
-            level = high;
-            BLEP_ME(phase / inc, high - low);
-            thresh = new_thresh;
-            low = thresh / (thresh - 1);
-            fall_trigger = thresh;
-        } else if (phase > fall_trigger) {
-            // negative discontinuity
-            level = low;
-            BLEP_ME((phase - thresh) / inc, low - high);
-            fall_trigger = 9999;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(level);
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_sync_square(float const *phaseIncrements,
-                                      float       *samples_out,
-                                      float const *sync_in,
-                                      float       *sync_out,
-                                      size_t       count)
-{
-    BEGIN_Z;
-    float phase        = mPhase;
-    float thresh       = mThresh;
-    float new_thresh   = mNewThresh;
-    float high         = 1.0;
-    float low          = thresh / (thresh - 1);
-    float level        = phase < thresh ? high : low;
-    float fall_trigger = level > 0 ? thresh : 9999;
-    size_t sii = 0, soi = 0;
-    size_t next_reset = (size_t)sync_in[sii];
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (i == next_reset) {
-            float h0 = level;
-            float d = fmodf(sync_in[sii], 1.0);
-            phase = d * inc * mInverseSampleRate;
-            sync_out[soi++] = sync_in[sii++];
-            next_reset = (size_t)sync_in[sii];
-            BLEP_ME(phase / inc, high - h0);
-            // BLAM not needed.  Slope is always zero.
-            level = high;
-            if (thresh != new_thresh) {
-                thresh = new_thresh;
-                low = thresh / (thresh - 1);
-            }
-            fall_trigger = thresh;
-        } else if (phase >= 1.0) {
-            // positive discontinuity
-            phase -= 1.0;
-            level = high;
-            float d = phase / inc;
-            BLEP_ME(d, high - low);
-            if (thresh != new_thresh) {
-                thresh = new_thresh;
-                low = thresh / (thresh - 1);
-            }
-            fall_trigger = thresh;
-            sync_out[soi++] = i - 1 + d;
-        } else if (phase > fall_trigger) {
-            // negative discontinuity
-            level = low;
-            BLEP_ME((phase - thresh) / inc, low - high);
-            fall_trigger = 9999;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(level);
-    }
-    sync_out[soi] = count + 1;
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_triangle(double freq,
-                                   float *samples_out,
-                                   size_t count)
-{
-    BEGIN_Z;
-    float phase        = mPhase;
-    float thresh       = mThresh;
-    float new_thresh   = mNewThresh;
-    float up_slope     = 2 / thresh;
-    float dn_slope     = -2 / (1 - thresh);
-    float m            = phase < thresh ? up_slope : dn_slope;
-    float o            = phase < thresh ? 0 : thresh;
-    float b            = phase < thresh ? -1 : +1;
-    float fall_trigger = phase < thresh ? thresh : 9999;
-    float inc          = freq * mInverseSampleRate;
-    float inv_inc      = 1 / inc;
-    for (size_t i = 0; i < count; i++) {
-        phase += inc;
-        if (phase >= 1.0) {
-            // bottom corner and start of new waveform.
-            // N.B., calculate BLAM using old dn_slope and new up_slope.
-            phase       -= 1.0;
-            thresh       = new_thresh;
-            up_slope     = 2 / thresh;
-            m            = up_slope;
-            o            = 0;
-            b            = -1;
-            BLAM_ME(phase * inv_inc, (up_slope - dn_slope) * inc);
-            dn_slope     = -2 / (1 - thresh);
-            fall_trigger = thresh;
-        } else if (phase > fall_trigger) {
-            // top corner
-            m = dn_slope;
-            o = thresh;
-            b = +1;
-            BLAM_ME((phase - thresh) * inv_inc, (dn_slope - up_slope) * inc);
-            fall_trigger = 9999;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(m * (phase - o) + b);
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_modulated_triangle(float const *phaseIncrements,
-                                             float       *samples_out,
-                                             size_t       count)
-{
-    BEGIN_Z;
-    float phase        = mPhase;
-    float thresh       = mThresh;
-    float new_thresh   = mNewThresh;
-    float up_slope     = 2 / thresh;
-    float dn_slope     = -2 / (1 - thresh);
-    float m            = phase < thresh ? up_slope : dn_slope;
-    float o            = phase < thresh ? 0 : thresh;
-    float b            = phase < thresh ? -1 : +1;
-    float fall_trigger = phase < thresh ? thresh : 9999;
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (phase >= 1.0) {
-            // bottom corner and start of new waveform.
-            // N.B., calculate BLAM using old dn_slope and new up_slope.
-            phase       -= 1.0;
-            thresh       = new_thresh;
-            up_slope     = 2 / thresh;
-            m            = up_slope;
-            o            = 0;
-            b            = -1;
-            BLAM_ME(phase / inc, (up_slope - dn_slope) * inc);
-            dn_slope     = -2 / (1 - thresh);
-            fall_trigger = thresh;
-        } else if (phase > fall_trigger) {
-            // top corner
-            m = dn_slope;
-            o = thresh;
-            b = +1;
-            BLAM_ME((phase - thresh) / inc, (dn_slope - up_slope) * inc);
-            fall_trigger = 9999;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(m * (phase - o) + b);
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_sync_triangle(float const *phaseIncrements,
-                                        float       *samples_out,
-                                        float const *sync_in,
-                                        float       *sync_out,
-                                        size_t       count)
-{
-    BEGIN_Z;
-    float phase        = mPhase;
-    float thresh       = mThresh;
-    float new_thresh   = mNewThresh;
-    float up_slope     = 2 / thresh;
-    float dn_slope     = -2 / (1 - thresh);
-    float m            = phase < thresh ? up_slope : dn_slope;
-    float o            = phase < thresh ? 0 : thresh;
-    float b            = phase < thresh ? -1 : +1;
-    float fall_trigger = phase < thresh ? thresh : 9999;
-    size_t sii = 0, soi = 0;
-    size_t next_reset  = (size_t)sync_in[sii];
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (i == next_reset) {
-            float h0 = m * (phase - o) + b;
-            float m0 = m;
-            float d = fmodf(sync_in[sii], 1.0);
-            phase = d * inc * mInverseSampleRate;
-            sync_out[soi++] = sync_in[sii++];
-            next_reset = (size_t)sync_in[sii];
-            thresh       = new_thresh;
-            up_slope     = 2 / thresh;
-            m            = up_slope;
-            o            = 0;
-            b            = -1;
-            float h1 = m * (phase - o) + b;
-            BLEP_ME(d, h1 - h0);
-            if (m0 != m)
-                BLAM_ME(d, (m - m0) * inc);
-            fall_trigger = thresh;
-        } else if (phase >= 1.0) {
-            // bottom corner and start of new waveform.
-            // N.B., calculate BLAM using old dn_slope and new up_slope.
-            phase       -= 1.0;
-            thresh       = new_thresh;
-            up_slope     = 2 / thresh;
-            m            = up_slope;
-            o            = 0;
-            b            = -1;
-            float d = phase / inc;
-            BLAM_ME(d, (up_slope - dn_slope) * inc);
-            dn_slope     = -2 / (1 - thresh);
-            sync_out[soi++] = i - 1 + d;
-            fall_trigger = thresh;
-        } else if (phase > fall_trigger) {
-            // top corner
-            m = dn_slope;
-            o = thresh;
-            b = +1;
-            BLAM_ME((phase - thresh) / inc, (dn_slope - up_slope) * inc);
-            fall_trigger = 9999;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(m * (phase - o) + b);
-    }
-    sync_out[soi] = count + 1;
-    assert(sync_in[sii] >= count);
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_sine(double freq,
-                               float *samples_out,
-                               size_t count)
-{
-    BEGIN_Z;
-    float phase = mPhase;
-    float inc   = freq * mInverseSampleRate;
-    for (size_t i = 0; i < count; i++) {
-        phase += inc;
-        if (phase >= 1.0) {
-            phase -= 1.0;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(sinf(2 * M_PI * phase));
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_modulated_sine(float const *phaseIncrements,
-                                         float       *samples_out,
-                                         size_t       count)
-{
-    BEGIN_Z;
-    float phase = mPhase;
-    for (size_t i = 0; i < count; i++) {
-        phase += phaseIncrements[i];
-        if (phase >= 1.0) {
-            phase -= 1.0;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(sinf(2 * M_PI * phase));
-    }
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::generate_sync_sine(float const *phaseIncrements,
-                                    float       *samples_out,
-                                    float const *sync_in,
-                                    float       *sync_out,
-                                    size_t       count)
-{
-    BEGIN_Z;
-    float phase = mPhase;
-    size_t sii = 0, soi = 0;
-    size_t next_reset = (size_t)sync_in[sii];
-    for (size_t i = 0; i < count; i++) {
-        float inc = phaseIncrements[i];
-        phase += inc;
-        if (i == next_reset) {
-            float h0 = sinf(2 * M_PI * phase);
-            float m0 = cosf(2 * M_PI * phase) * inc;
-            float d = fmodf(sync_in[sii], 1.0);
-            phase = d * inc * mInverseSampleRate;
-            sync_out[soi++] = sync_in[sii++];
-            next_reset = (size_t)sync_in[sii];
-            float h1 = 0;
-            float m1 = 1 * inc;
-            BLEP_ME(d, h1 - h0);
-            BLAM_ME(d, m1 - m0);
-        } else if (phase >= 1.0) {
-            phase -= 1.0;
-            float d = phase / inc;
-            sync_out[soi++] = i - 1 + d;
-        }
-        samples_out[i] = SHIFT_OUT();
-        SHIFT_IN(sinf(2 * M_PI * phase));
-    }
-    sync_out[soi] = count + 1;
-    assert(sync_in[sii] >= count);
-    mPhase = phase;
-    END_Z;
-}
-
-void Oscillator::begin_chunk(Waveform waveform, float freq, float modifier)
-{
-    float thresh = 0.5 - 0.49 * modifier; // maximum skew is 99%.
-    float phase = mPhase;
-    if (mWaveform != waveform) {
-        BEGIN_Z;
-        float h0, h1, m0, m1;  // height and slope
-        if (mThresh == -1)
-            mThresh = thresh;
-        calc_h_m(mWaveform, freq, mPhase, mThresh, &h0, &m0);
-        calc_h_m(waveform, freq, phase, mThresh, &h1, &m1);
-        // fprintf(stderr, "waveform %s -> %s\n", OTname(mWaveform), OTname(waveform));
-        if (h1 != h0) {
-            BLEP_ME(0, h1 - h0);
-            // fprintf(stderr, "BLEP h = %g - %g = %g\n", h1, h0, h1 - h0);
-        }
-        if (m1 != m0) {
-            BLAM_ME(0, m1 - m0);
-            // fprintf(stderr, "BLAM m = %g - %g = %g\n", m1, m0, m1 - m0);
-        }
-        // fprintf(stderr, "\n");
-        mWaveform = waveform;
-        END_Z;
-    }
-    mPhase = phase;
-    mNewThresh = thresh;
+    
 }
 
 // h is the height of the waveform at the given phase.  m is its slope.
-// In other works, y and dy/dx.
-inline void Oscillator::calc_h_m(Waveform waveform,
-                                 float    freq,
-                                 float    phase,
-                                 float    thresh,
-                                 float   *h,
-                                 float   *m)
+// In other words, y and dy/dx.
+inline void Oscillator::calc_h_m(Waveform   waveform,
+                                 float  freq,
+                                 float  phase,
+                                 float  thresh,
+                                 float *h,
+                                 float *m)
 {
     switch (waveform) {
 
@@ -785,47 +271,616 @@ inline void Oscillator::calc_h_m(Waveform waveform,
         break;
 
     case Saw:
-        *h = 2 * phase - 1;
-        *m = 2 * freq / mSampleRate;
+        *h = -2 * phase + 1;
+        *m = -2 * freq;
         break;
 
     case Square:
-        // fprintf(stderr, "calc square: phase=%g thresh=%g\n", phase, thresh);
         if (phase < thresh)
             *h = 1;
         else
             *h = thresh / (thresh - 1);
-        // fprintf(stderr, "             *h = %g\n", *h);
         *m = 0;
         break;
 
     case Triangle:
         if (phase < thresh) {
-            float up_slope = 2 / thresh;
-            // fprintf(stderr, "calc tri:    freq = %g\n", freq);
-            // fprintf(stderr, "             up slope = %g\n", up_slope);
-            // fprintf(stderr, "             phase=%g thresh=%g\n",
-            //                               phase, thresh);
-            *h = phase * up_slope - 1;
-            *m = up_slope * freq / mSampleRate;
+            float up_slope = +2 / thresh;
+            *h = up_slope * phase - 1;
+            *m = up_slope * freq;
         } else {
             float dn_slope = -2 / (1 - thresh);
-            // fprintf(stderr, "calc tri:    freq = %g\n", freq);
-            // fprintf(stderr, "             dn slope = %g\n", dn_slope);
-            // fprintf(stderr, "             phase=%g thresh=%g\n",
-            //                               phase, thresh);
-            *h = 1 + dn_slope * (phase - thresh);
-            *m = dn_slope * freq / mSampleRate;
+            *h = dn_slope * (phase - thresh) + 1;
+            *m = dn_slope * freq;
         }
         break;
 
     case Sine:
         *h = sinf(2 * M_PI * phase);
-        *m = cosf(2 * M_PI * phase) * freq / mSampleRate;
-        // fprintf(stderr, "calc sine:   freq = %g\n", freq);
-        // fprintf(stderr, "             phase = %g\n", phase);
-        // fprintf(stderr, "             *h = %g\n", *h);
-        // fprintf(stderr, "             *m = %g\n", *m);
+        *m = cosf(2 * M_PI * phase) * freq;
         break;
     }
+}
+
+void Oscillator::begin_chunk(Waveform waveform, float freq, float width0)
+{
+    mWaveformChanged = mWaveform != waveform;
+    if (mWaveformChanged) {
+        BEGIN_Z;
+        float phase = mPhase;
+        float h0, h1, m0, m1;
+        if (mThresh == -1)
+            mThresh = width0;
+        width0 = clamp_width(width0);
+        calc_h_m(mWaveform, freq, phase, width0, &h0, &m0);
+        calc_h_m(waveform, freq, phase + freq, width0, &h1, &m1);
+        // printf("New Waveform: %s -> %s\n",
+        //        OTname(mWaveform), OTname(waveform));
+        if (h1 != h0) {
+            BLEP_ME(0, h1 - h0);
+            // printf("    BLEP h = %g - %g = %g\n", h1, h0, h1 - h0);
+        }
+        if (m1 != m0) {
+            BLAM_ME(0, m1 - m0);
+            // printf("    BLAM m = %g - %g = %g\n", m1, m0, m1 - m0);
+        }
+        // printf("\n");
+        mWaveform = waveform;
+        END_Z;
+    }
+}
+
+
+// -  -  -  -  -  -  -  -  -  -  -  -
+#pragma mark Basic Generators
+
+
+void Oscillator::generate_saw(float freq, float *samples_out, size_t count)
+{
+    BEGIN_Z;
+    float phase    = mPhase;
+    float inv_freq = 1 / freq;
+
+    for (size_t i = 0; i < count; i++) {
+        phase += freq;
+        if (phase >= 1.0) {
+            // positive discontinuity
+            phase -= 1.0;
+            if (i || !mWaveformChanged)
+                BLEP_ME(phase * inv_freq, +2.0);
+        }
+        samples_out[i] = SHIFT_Z(-2 * phase + 1);
+    }
+    mPhase = phase;
+    mThresh = -1;
+    END_Z;
+}
+
+void Oscillator::generate_square(float freq,
+                                 float width,
+                                 float *samples_out,
+                                 size_t count)
+{
+    BEGIN_Z;
+    float phase    = mPhase;
+    float thresh   = mThresh;
+    float high     = 1.0;
+    float low      = thresh / (thresh - 1);
+    float level    = phase < thresh ? high : low;
+    float inv_freq = 1 / freq;
+
+    width = clamp_width(width);
+    for (size_t i = 0; i < count; i++) {
+        phase += freq;
+        if (phase >= 1.0) {
+            // Positive discontinuity
+            phase -= 1;
+            if (i || !mWaveformChanged)
+                BLEP_ME(phase * inv_freq, high - level);
+            level = high;
+        }
+        if (level > 0 && phase >= width) {
+            // Negative discontinuity
+            low = width / (width - 1);
+            if (i || !mWaveformChanged)
+                BLEP_ME((phase - width) * inv_freq, low - level);
+            level = low;
+            thresh = width;
+        }
+        samples_out[i] = SHIFT_Z(level);
+    }
+    mPhase  = phase;
+    mThresh = thresh;
+    END_Z;
+}
+
+void Oscillator::generate_triangle(float freq,
+                                   float width,
+                                   float *samples_out,
+                                   size_t count)
+{
+    BEGIN_Z;
+    float phase    = mPhase;
+    float thresh   = mThresh;
+    float slope    = phase < thresh ? +2 / thresh : -2 / (1 - thresh);
+    float inv_freq = 1 / freq;
+
+    width = clamp_width(width);
+    for (size_t i = 0; i < count; i++) {
+        phase += freq;
+        if (phase >= 1.0) {
+            // bottom corner and start of new waveform
+            phase -= 1.0;
+            float m0 = slope;
+            slope = 2 / width;
+            if (i || !mWaveformChanged)
+                BLAM_ME(phase * inv_freq, (slope - m0) * freq);
+        }
+        float level;
+        if (phase < width) {
+            // rising slope
+            level = slope * phase - 1;
+        } else if (slope > 0) {
+            // top corner
+            float m0 = slope;
+            slope = -2 / (1 - width);
+            thresh = width;
+            float ph1 = phase - thresh;
+            if (i || !mWaveformChanged)
+                BLAM_ME(ph1 * inv_freq, (slope - m0) * freq);
+            level = slope * ph1 + 1;
+        } else {
+            // falling slope
+            float ph1 = phase - thresh;
+            level = slope * ph1 + 1;
+        }
+        samples_out[i] = SHIFT_Z(level);
+    }
+    mPhase  = phase;
+    mThresh = thresh;
+    END_Z;
+}
+
+void Oscillator::generate_sine(float freq,
+                               float *samples_out,
+                               size_t count)
+{
+    BEGIN_Z;
+    float phase = mPhase;
+
+    for (size_t i = 0; i < count; i++) {
+        phase += freq;
+        if (phase >= 1.0)
+            phase -= 1.0;
+        float y = sinf(2 * M_PI * phase);
+        samples_out[i] = SHIFT_Z(y);
+    }
+    mPhase = phase;
+    mThresh = -1;
+    END_Z;
+}
+
+
+// -  -  -  -  -  -  -  -  -  -  -  -
+#pragma mark Modulated Generators
+
+
+void Oscillator::generate_modulated_saw(float const *freqs,
+                                        float       *samples_out,
+                                        size_t       count)
+{
+    BEGIN_Z;
+    float phase = mPhase;
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (phase >= 1.0) {
+            // positive discontinuity
+            phase -= 1.0;
+            if (i || !mWaveformChanged)
+                BLEP_ME(phase / freq, +2.0);
+        }
+        samples_out[i] = SHIFT_Z(-2 * phase + 1);
+    }
+    mPhase = phase;
+    mThresh = -1;
+    END_Z;
+}
+
+void Oscillator::generate_modulated_square(float const *freqs,
+                                           float const *widths,
+                                           float       *samples_out,
+                                           size_t       count)
+{
+    BEGIN_Z;
+    float phase  = mPhase;
+    float thresh = mThresh;
+    float high   = 1.0;
+    float low    = thresh / (thresh - 1);
+    float level  = phase < thresh ? high : low;
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (phase >= 1.0) {
+            // Positive discontinuity
+            phase -= 1;
+            if (i || !mWaveformChanged)
+                BLEP_ME(phase / freq, high - level);
+            level = high;
+        }
+        if (level > 0) {
+            float width = clamp_width(widths[i]);
+            if (phase >= width) {
+                // Negative discontinuity
+                low = width / (width - 1);
+                if (i || !mWaveformChanged) {
+                    float d = (phase - width) / freq;
+                    if (d >= 1)
+                        d = 0;
+                    float h = low - level;
+                    BLEP_ME(d, h);
+                    // printf("N: d = %.3g = (%.3g - %.3g) / %.3g, "
+                    //        "h = %.3g = %.3g - %.3g\n",
+                    //        d, phase, width, freq, h, low, level);
+                }
+                level = low;
+            }
+            thresh = width;
+        } 
+        samples_out[i] = SHIFT_Z(level);
+    }
+    mPhase  = phase;
+    mThresh = thresh;
+    END_Z;
+}
+
+void Oscillator::generate_modulated_triangle(float const *freqs,
+                                             float const *widths,
+                                             float       *samples_out,
+                                             size_t       count)
+{
+    BEGIN_Z;
+    float phase  = mPhase;
+    float thresh = mThresh;
+    float slope  = phase < thresh ? +2 / thresh : -2 / (1 - thresh);
+
+    static size_t nsamp = 0;
+    
+    for (size_t i = 0; i < count; i++) {
+        float width = clamp_width(widths[i]);
+        float freq = freqs[i];
+        phase += freq;
+        if (phase >= 1.0) {
+            // bottom corner and start of new waveform
+            phase -= 1.0;
+            float m0 = slope;
+            slope = +2 / width;
+            if (i || !mWaveformChanged)
+                BLAM_ME(phase / freq, (slope - m0) * freq);
+            // else
+            //     printf("No BLAM!!!\n");
+            // printf("B %zu\n", nsamp + i);
+        }
+        float level;
+        if (phase < width) {
+            // rising slope
+            slope = +2 / width;
+            thresh = width;
+            level = slope * phase - 1;
+        } else if (slope > 0) {
+            // top corner
+            float m0 = slope;
+            slope = -2 / (1 - width);
+            thresh = width;
+            float ph1 = phase - thresh;
+            if (i || !mWaveformChanged) {
+                float d = ph1 / freq;
+                if (d >= 1)
+                    d = 0;
+                float m = (slope - m0) * freq;
+                BLAM_ME(d, m);
+                // printf("T %zu: d = %.3g = %.3g / %.3g, "
+                //        "m = %.3g = (%.3g - %.3g) * %.3g\n",
+                //        nsamp + i, d, ph1, freq, m, slope, m0, freq);
+            }
+            // else
+            //     printf("No BLAM!!!\n");
+            level = slope * ph1 + 1;
+        } else {
+            // falling slope
+            float ph1 = phase - thresh;
+            level = slope * ph1 + 1;
+        }
+        samples_out[i] = SHIFT_Z(level);
+    }
+    nsamp += count;
+    mPhase  = phase;
+    mThresh = thresh;
+    END_Z;
+}
+
+void Oscillator::generate_modulated_sine(float const *freqs,
+                                         float       *samples_out,
+                                         size_t       count)
+{
+    BEGIN_Z;
+    float phase = mPhase;
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (phase >= 1.0)
+            phase -= 1.0;
+        float y = sinf(2 * M_PI * phase);
+        samples_out[i] = SHIFT_Z(y);
+    }
+    mPhase = phase;
+    mThresh = -1;
+    END_Z;
+}
+
+
+// -  -  -  -  -  -  -  -  -  -  -  -
+#pragma mark Synchronized Generators
+
+void Oscillator::generate_sync_only(float const *freqs,
+                                    float       *samples_out,
+                                    float const *sync_in,
+                                    float       *sync_out,
+                                    size_t      count)
+{
+    BEGIN_Z;
+    float phase = mPhase;
+    size_t sii = 0, soi = 0;
+    size_t next_reset = (size_t)sync_in[sii];
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (i == next_reset) {
+            float d = fmodf(sync_in[sii], 1.0);
+            phase = d * freq;
+            sync_out[soi++] = sync_in[sii++];
+            next_reset = (size_t)sync_in[sii];
+            // BLEP/BLAM not needed.  We are silent.
+        } else if (phase >= 1.0) {
+            phase -= 1.0;
+            float d = phase / freq;
+            sync_out[soi++] = i - 1 + d;
+        }
+        samples_out[i] = SHIFT_Z(0);
+    }
+    sync_out[soi] = count + 1;
+    mPhase = phase;
+    END_Z;
+}
+
+void Oscillator::generate_sync_saw(float const *freqs,
+                                   float       *samples_out,
+                                   float const *sync_in,
+                                   float       *sync_out,
+                                   size_t      count)
+{
+    BEGIN_Z;
+    float phase = mPhase;
+    size_t sii = 0, soi = 0;
+    size_t next_reset = (size_t)sync_in[sii];
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (i == next_reset) {
+            // hard sync
+            float h0 = -2 * phase + 1;
+            float d = fmodf(sync_in[sii], 1.0);
+            phase = d * freq;
+            if (i || !mWaveformChanged)
+                BLEP_ME(d, +1 - h0);
+            sync_out[soi++] = sync_in[sii++];
+            next_reset = (size_t)sync_in[sii];
+        } else if (phase >= 1.0) {
+            // positive discontinuity
+            phase -= 1.0;
+            float d = phase / freq;
+            if (i || !mWaveformChanged)
+                BLEP_ME(phase / freq, +2.0);
+            sync_out[soi++] = i - 1 + d;
+        }
+        samples_out[i] = SHIFT_Z(-2 * phase + 1);
+    }
+    sync_out[soi] = count + 1;
+    mPhase = phase;
+    mThresh = -1;
+    END_Z;
+}
+
+void Oscillator::generate_sync_square(float const *freqs,
+                                      float const *widths,
+                                      float       *samples_out,
+                                      float const *sync_in,
+                                      float       *sync_out,
+                                      size_t      count)
+{
+    BEGIN_Z;
+    float phase  = mPhase;
+    float thresh = mThresh;
+    float high   = 1.0;
+    float low    = thresh / (thresh - 1);
+    float level  = phase < thresh ? high : low;
+    size_t sii = 0, soi = 0;
+    size_t next_reset = (size_t)sync_in[sii];
+
+    static size_t  nsamp = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (i == next_reset) {
+            // hard sync
+            float h0 = level;
+            float d = fmodf(sync_in[sii], 1.0);
+            phase = d * freq;
+            level = high;
+            if (i || !mWaveformChanged)
+                BLEP_ME(d, level - h0);
+            sync_out[soi++] = sync_in[sii++];
+            next_reset = (size_t)sync_in[sii];
+        } else if (phase >= 1.0) {
+            // Positive discontinuity
+            phase -= 1;
+            float d = phase / freq;
+            if (i || !mWaveformChanged)
+                BLEP_ME(d, high - level);
+            level = high;
+            sync_out[soi++] = i - 1 + d;
+        }
+        if (level > 0) {
+            float width = clamp_width(widths[i]);
+            if (phase >= width) {
+                // Negative discontinuity
+                low = width / (width - 1);
+                if (i || !mWaveformChanged) {
+                    float d = (phase - width) / freq;
+                    if (d >= 1)
+                        d = 0;
+                    float h = low - level;
+                    BLEP_ME(d, h);
+                    // printf("N: d = %.3g = (%.3g - %.3g) / %.3g, "
+                    //        "h = %.3g = %.3g - %.3g\n",
+                    //        d, phase, width, freq, h, low, level);
+                }
+                level = low;
+            }
+            thresh = width;
+        }
+        samples_out[i] = SHIFT_Z(level);
+    }
+    nsamp += count;
+    sync_out[soi] = count + 1;
+    mPhase  = phase;
+    mThresh = thresh;
+    END_Z;
+}
+
+void Oscillator::generate_sync_triangle(float const *freqs,
+                                        float const *widths,
+                                        float       *samples_out,
+                                        float const *sync_in,
+                                        float       *sync_out,
+                                        size_t      count)
+{
+    BEGIN_Z;
+    float phase  = mPhase;
+    float thresh = mThresh;
+    float slope  = phase < thresh ? +2 / thresh : -2 / (1 - thresh);
+    size_t sii = 0, soi = 0;
+    size_t next_reset = (size_t)sync_in[sii];
+
+    static size_t nsamp = 0;
+    
+    for (size_t i = 0; i < count; i++) {
+        float width = clamp_width(widths[i]);
+        float freq = freqs[i];
+        phase += freq;
+        if (i == next_reset) {
+            float d = fmodf(sync_in[sii], 1.0);
+            phase = d * freq;
+            float m0 = slope;
+            slope = +2 / width;
+            if (i || !mWaveformChanged)
+                BLAM_ME(d, (slope - m0) * freq);
+            sync_out[soi++] = sync_in[sii++];
+        } else if (phase >= 1.0) {
+            // bottom corner and start of new waveform
+            phase -= 1.0;
+            float m0 = slope;
+            slope = +2 / width;
+            float d = phase / freq;
+            if (i || !mWaveformChanged)
+                BLAM_ME(d, (slope - m0) * freq);
+            // else
+            //     printf("No BLAM!!!\n");
+            // printf("B %zu\n", nsamp + i);
+            sync_out[soi++] = i - 1 + d;
+        }
+        float level;
+        if (phase < width) {
+            // rising slope
+            slope = +2 / width;
+            thresh = width;
+            level = slope * phase - 1;
+        } else if (slope > 0) {
+            // top corner
+            float m0 = slope;
+            slope = -2 / (1 - width);
+            thresh = width;
+            float ph1 = phase - thresh;
+            if (i || !mWaveformChanged) {
+                float d = ph1 / freq;
+                if (d >= 1)
+                    d = 0;
+                float m = (slope - m0) * freq;
+                BLAM_ME(d, m);
+                // printf("T %zu: d = %.3g = %.3g / %.3g, "
+                //        "m = %.3g = (%.3g - %.3g) * %.3g\n",
+                //        nsamp + i, d, ph1, freq, m, slope, m0, freq);
+            }
+            // else
+            //     printf("No BLAM!!!\n");
+            level = slope * ph1 + 1;
+        } else {
+            // falling slope
+            float ph1 = phase - thresh;
+            level = slope * ph1 + 1;
+        }
+        samples_out[i] = SHIFT_Z(level);
+    }
+    sync_out[soi] = count + 1;
+    nsamp += count;
+    mPhase  = phase;
+    mThresh = thresh;
+    END_Z;
+}
+
+void Oscillator::generate_sync_sine(float const *freqs,
+                                    float       *samples_out,
+                                    float const *sync_in,
+                                    float       *sync_out,
+                                    size_t      count)
+{
+    BEGIN_Z;
+    float phase = mPhase;
+    size_t sii = 0, soi = 0;
+    size_t next_reset = (size_t)sync_in[sii];
+
+    for (size_t i = 0; i < count; i++) {
+        float freq = freqs[i];
+        phase += freq;
+        if (i == next_reset) {
+            float h0 = sinf(2 * M_PI * phase);
+            float m0 = cosf(2 * M_PI * phase) * freq;
+            float d = fmodf(sync_in[sii], 1.0);
+            phase = d * freq;
+            float h1 = sinf(2 * M_PI * phase);
+            float m1 = cosf(2 * M_PI * phase) * freq;
+            if (i || !mWaveformChanged) {
+                BLEP_ME(d, h1 - h0);
+                BLAM_ME(d, m1 - m0);
+            }
+            sync_out[soi++] = sync_in[sii++];
+            next_reset = (size_t)sync_in[sii];
+        } else if (phase >= 1.0) {
+            phase -= 1.0;
+            float d = phase / freq;
+            sync_out[soi++] = i - 1 + d;
+        }
+        float y = sinf(2 * M_PI * phase);
+        samples_out[i] = SHIFT_Z(y);
+    }
+    sync_out[soi] = count + 1;
+    mPhase = phase;
+    mThresh = -1;
+    END_Z;
 }

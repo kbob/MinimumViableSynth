@@ -83,8 +83,8 @@ MVSParamSet::MVSParamSet()
             .default_value(Oscillator::Saw);
 
         o1_width.name("Width")
-            .min_max(0, 100)
-            .default_value(0)
+            .min_max(0, 50)
+            .default_value(50)
             .units(kAudioUnitParameterUnit_Percent);
     }
 
@@ -106,8 +106,8 @@ MVSParamSet::MVSParamSet()
             .default_value(Oscillator::Square);
 
         o2_width.name("Width")
-            .min_max(0, 100)
-            .default_value(0)
+            .min_max(0, 50)
+            .default_value(50)
             .units(kAudioUnitParameterUnit_Percent);
     }
 
@@ -360,8 +360,10 @@ MVSParamSet::MVSParamSet()
 //            .value_string(Mod::FltCutoff,    "Filt Cutoff")
 //            .value_string(Mod::FltResonance, "Filt Resonance")
 //            .value_string(Mod::FltDrive,     "Filt Drive")
+#if FULLY_IMPLEMENTED
             .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
             .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
+#endif
             .value_string(Mod::NoDest,       "Off")
             .default_value(Mod::NoDest)
             .assigns_mod(Mod::Env2);
@@ -866,11 +868,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
             sync_in[0] = nsamp + 1; // no sync events
             mOsc2.generate_with_sync(params->o2_waveform,
                                      freq,
-#if FULLY_IMPLEMENTED
                                      width,
-#else
-                                     base_width,
-#endif
                                      osc2_out,
                                      sync_in,
                                      osc_sync,
@@ -878,11 +876,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         } else {
             mOsc2.generate_modulated(params->o2_waveform,
                                      freq,
-#if FULLY_IMPLEMENTED
                                      width,
-#else
-                                     base_width,
-#endif
                                      osc2_out,
                                      nsamp);
         }
@@ -902,12 +896,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
             buf sync_out_unused;
             mOsc1.generate_with_sync(params->o1_waveform,
                                      freq,
-#if FULLY_IMPLEMENTED
                                      width,
-#else
-                                     base_width,
-#endif
-
                                      osc1_out,
                                      osc_sync,
                                      sync_out_unused,
@@ -915,11 +904,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         } else {
             mOsc1.generate_modulated(params->o1_waveform,
                                      freq,
-#if FULLY_IMPLEMENTED
                                      width,
-#else
-                                     base_width,
-#endif
                                      osc1_out,
                                      nsamp);
         }
@@ -1049,7 +1034,7 @@ OSStatus MVSNote::XXX_Render(UInt64            inAbsoluteSampleFrame,
         float width_in[nsamp];
         modbox.modulate_freq(Frequency() / SampleRate(), Mod::Osc1Freq, freq_in);
         modbox.modulate(osc1skew, Mod::Osc1Width, width_in);
-        mOsc1.generate_modulated(o1type, freq_in, osc1skew, osc1buf, toneFrameCount);
+        mOsc1.generate_modulated(o1type, freq_in, width_in, osc1buf, toneFrameCount);
     }
 #endif
 

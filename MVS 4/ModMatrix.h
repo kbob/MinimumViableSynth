@@ -205,6 +205,8 @@ void ModBox<NS, ND>::modulate(float       base,
         if (!m)
             break;
         const float *src_values = mModValues[m];
+        if (!src_values)
+            printf("ModBox::modulate(base=%g, dest=%d): m = %d\n", base, dest, m);
         assert(src_values);
         for (size_t j = 0; j < mSampleCount; j++)
             values_out[j] += src_values[j];
