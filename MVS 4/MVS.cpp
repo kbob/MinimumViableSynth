@@ -92,12 +92,12 @@ MVSParamSet::MVSParamSet()
         ParamClump osc2("Oscillator 2", "Osc 2");
 
         o2_coarse_detune.name("Coarse Detune")
-            .min_max(-40, +40)
+            .min_max(-64, +63)
             .default_value(0)
             .units(kAudioUnitParameterUnit_MIDINoteNumber);
 
         o2_fine_detune.name("Fine Detune")
-            .min_max(-100, +100)
+            .min_max(-128, +126)
             .default_value(0)
             .units(kAudioUnitParameterUnit_Cents);
 
@@ -154,6 +154,7 @@ MVSParamSet::MVSParamSet()
 //            .value_string(Filter::HighPass,   "High Pass")
 //            .value_string(Filter::BandPass,   "Band Pass")
 //            .value_string(Filter::BandReject, "Band Reject")
+//            .value_string(Filter::Off,        "Off")
 //            .default_value(Filter::LowPass);
 //
 //        flt_cutoff.name("Cutoff Frequency")
@@ -226,6 +227,7 @@ MVSParamSet::MVSParamSet()
             .value_string(Mod::LFO2Speed,     "LFO 2 Speed")
             .value_string(Mod::AmpLevel,      "Env 1 Amount")
             .value_string(Mod::Env2Amount,    "Env 2 Amount")
+            .value_string(Mod::NoDest,        "Off")
             .default_value(Mod::LFO1Amount)
             .assigns_mod(Mod::Wheel);
 
@@ -246,7 +248,8 @@ MVSParamSet::MVSParamSet()
             .min_max(0.1, 20)
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
-            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
+        ;
+//            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
 
         lfo1_amount.name("Amount")
             .min_max(0, 1)
@@ -282,7 +285,8 @@ MVSParamSet::MVSParamSet()
             .min_max(0.1, 20)
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
-            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
+//            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
+        ;
 
         lfo2_amount.name("Amount")
             .min_max(0, 1)
@@ -334,6 +338,11 @@ MVSParamSet::MVSParamSet()
             .default_value(0.200)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
+
+        env2_keytrack.name("Key Track")
+            .min_max(0, 1)
+            .default_value(1)
+        .units(kAudioUnitParameterUnit_Generic);
 
         env2_amount.name("Amount")
             .min_max(-1, +1)
@@ -800,6 +809,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     // - - - - - - -        Envelope 1               - - - - - - - - - -
 
     buf env1_values;
+    UInt32 end;
     {
         buf attack, decay, sustain, release, amount;
 
@@ -809,9 +819,14 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         modbox.modulate(params->amp_release, Mod::AmpRelease, release);
         modbox.modulate(params->amp_amount,  Mod::AmpLevel,   amount);
 #if FULLY_IMPLEMENTED
-        mEnv1.generate(attack, decay, sustain, release, amount, env1_values);
+        end = mEnv1.generate(attack,
+                             decay,
+                             sustain,
+                             release,
+                             amount,
+                             env1_values);
 #else
-        mAmpEnv.generate(env1_values, (UInt32)nsamp);
+        end = mAmpEnv.generate(env1_values, (UInt32)nsamp);
 #endif
     }
 
@@ -967,6 +982,9 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     for (size_t i = 0; i < nsamp; i++)
         render_out[i] += filter_out[i] * env1_values[i];
 #endif
+
+    if (end != 0xFFFFFFFF)
+        NoteEnded(end);
 
     return noErr;
 }

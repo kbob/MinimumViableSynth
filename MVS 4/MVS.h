@@ -39,6 +39,7 @@ static AUPreset kPresets [kNumberOfPresets] = {
 class Filter {
 public:
     enum Type {
+        Off,
         LowPass,
         HighPass,
         BandPass,
@@ -159,6 +160,7 @@ public:
     FloatParam                      env2_decay;
     FloatParam                      env2_sustain;
     FloatParam                      env2_release;
+    FloatParam                      env2_keytrack;
     FloatParam                      env2_amount;
     EnumParam<Mod::Destination>     env2_destination;
 };
