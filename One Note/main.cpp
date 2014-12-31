@@ -24,7 +24,7 @@ private:
 
 OneNote::OneNote()
 {
-    mOsc1.initialize(44100.0, Oscillator::Square);
+    mOsc1.initialize(44100.0);
     mAmpEnv.initialize(44100.0, 0.6, 0.1, 0.2, 0.1, 0.3, Envelope::Exponential);
 }
 
@@ -48,7 +48,11 @@ size_t OneNote::render(Float32 *outbuf, size_t count)
             released = true;
         }
         memset(osc1buf, 0, sizeof osc1buf);
-        mOsc1.generate(440.0, 0.0, osc1buf, (UInt32)chunk_count);
+        mOsc1.generate(Oscillator::Square,
+                       440.0 / 44100,
+                       0.5,
+                       osc1buf,
+                       chunk_count);
         for (size_t i = 0; i < chunk_count; i++)
             outbuf[note_count + i] = osc1buf[i] * ampbuf[i];
 //        for (size_t i = 0; i < chunk_count; i++)

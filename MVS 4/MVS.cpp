@@ -183,13 +183,13 @@ MVSParamSet::MVSParamSet()
         ParamClump amp("Amplifier", "Amp");
 
         amp_attack.name("Attack Time")
-            .min_max(0, 9.999)
+            .min_max(0, powf(9.999, 1/3.))
             .default_value(0.001)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
 
         amp_decay.name("Decay Time")
-            .min_max(0, 9.999)
+            .min_max(0, powf(9.999, 1/3.))
             .default_value(0.100)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -200,7 +200,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_LinearGain);
 
         amp_release.name("Release Time")
-            .min_max(0, 9.999)
+            .min_max(0, powf(9.999, 1/3.))
             .default_value(0.050)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -245,11 +245,11 @@ MVSParamSet::MVSParamSet()
             .default_value(LFO::Triangle);
 
         lfo1_speed.name("Speed")
-            .min_max(0.1, 20)
+            .min_max(log(0.1), log(50))
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
+            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
         ;
-//            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
 
         lfo1_amount.name("Amount")
             .min_max(0, 1)
@@ -282,7 +282,7 @@ MVSParamSet::MVSParamSet()
             .default_value(LFO::UpSaw);
 
         lfo2_speed.name("Speed")
-            .min_max(0.1, 20)
+            .min_max(log(0.1), log(50))
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
 //            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
@@ -737,8 +737,13 @@ void MVSNote::AffixModBox(const MVSModBox **boxPtrPtr)
 bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 {
     Float64 sampleRate   = SampleRate();
-    Float32 maxLevel     = powf(inParams.mVelocity/127.0, 3.0);
 
+#if FULLY_IMPLEMENTED
+    mEnv1.initialize(sampleRate);
+    mEnv2.initialize(sampleRate);
+    mAmplifier.initialize(sampleRate);
+#else
+    float maxLevel     = powf(inParams.mVelocity/127.0, 3.0);
     float attackTime   = mParams->amp_attack;
     float decayTime    = mParams->amp_decay;
     float sustainLevel = mParams->amp_sustain;
@@ -748,10 +753,6 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
                        maxLevel,
                        attackTime, decayTime, sustainLevel, releaseTime,
                        Envelope::Exponential);
-
-#if FULLY_IMPLEMENTED
-    mEnv1.initialize(sampleRate);
-    mEnv2.initialize(sampleRate);
 #endif
     mOsc1.initialize(sampleRate);
     mOsc2.initialize(sampleRate);
@@ -826,7 +827,8 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                              sustain,
                              release,
                              amount,
-                             env1_values);
+                             env1_values,
+                             nsamp);
 #else
         end = mAmpEnv.generate(env1_values, (UInt32)nsamp);
 #endif
@@ -843,7 +845,13 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
         modbox.modulate(params->env2_release, Mod::Env2Release, release);
         modbox.modulate(scale_dB40(params->env2_amount),  Mod::Env2Amount,  amount);
 #if FULLY_IMPLEMENTED
-        mEnv2.generate(attack, decay, sustain, release, amount, env2_values);
+        mEnv2.generate(attack,
+                       decay,
+                       sustain,
+                       release,
+                       amount,
+                       env2_values,
+                       nsamp);
 #else
         fill(0, env2_values, nsamp);
 #endif
