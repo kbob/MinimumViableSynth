@@ -188,10 +188,6 @@ public:
                                   UInt32            inNumFrames,
                                   AudioBufferList **inBufferList,
                                   UInt32            inOutBusCount);
-    virtual OSStatus   XXX_Render    (UInt64            inAbsoluteSampleFrame,
-                                  UInt32            inNumFrames,
-                                  AudioBufferList **inBufferList,
-                                  UInt32            inOutBusCount);
     virtual Float64    SampleRate();
 
 private:
