@@ -29,7 +29,7 @@ AUDIOCOMPONENT_ENTRY(AUMusicDeviceFactory, MVS)
 
 # pragma mark Utilities
 
-static LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
+static inline LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
 {
     if (wf != LFO::Triangle && wf != LFO::SampleHold && wf != LFO::Random)
         return LFO::Unipolar;
@@ -39,17 +39,21 @@ static LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
     return LFO::Unipolar;
 }
 
+static inline Envelope::Type envelope_type(Mod::Destination dest)
+{
+    return Envelope::Exponential;  // refine later...
+}
+
 static inline void fill(float src, float *dest, size_t count)
 {
     for (size_t i = 0; i < count; i++)
         dest[i] = src;
 }
 
-static inline float scale_dB40(float level)
+static inline float scale_dB40(float dB)
 {
-    return level <= -40 ? 0 : powf(10, level / 20);
+    return dB <= -40 ? 0 : powf(10, dB / 20);
 }
-
 
 
 // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -681,8 +685,8 @@ void MVS::RunModulators(MVSModBox& modbox)
         if (lfo1_in_cycle)
             fill(0, LFO1_values, nsamp);
         else {
-            mModBoxPtr->modulate(mParams.lfo1_amount,   Mod::LFO1Amount, depth);
             mModBoxPtr->modulate_freq(mParams.lfo1_speed, Mod::LFO1Speed, freq);
+            mModBoxPtr->modulate(mParams.lfo1_amount,   Mod::LFO1Amount, depth);
             mLFO1.generate(mParams.lfo1_waveform,
                            l1polarity,
                            freq,
@@ -738,46 +742,37 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
 {
     Float64 sampleRate   = SampleRate();
 
-#if FULLY_IMPLEMENTED
+    mGain = powf(inParams.mVelocity / 127.0, 3.0);
     mEnv1.initialize(sampleRate);
     mEnv2.initialize(sampleRate);
-    mAmplifier.initialize(sampleRate);
-#else
-    float maxLevel     = powf(inParams.mVelocity/127.0, 3.0);
-    float attackTime   = mParams->amp_attack;
-    float decayTime    = mParams->amp_decay;
-    float sustainLevel = mParams->amp_sustain;
-    float releaseTime  = mParams->amp_release;
-
-    mAmpEnv.initialize(sampleRate,
-                       maxLevel,
-                       attackTime, decayTime, sustainLevel, releaseTime,
-                       Envelope::Exponential);
-#endif
     mOsc1.initialize(sampleRate);
     mOsc2.initialize(sampleRate);
     mNoise.initialize(sampleRate);
     mMixer.initialize(sampleRate);
+#if FULLY_IMPLEMENTED
+    mFilter.initialize(sampleRate);
+#endif
+    mAmplifier.initialize(sampleRate);
     return true;
 }
 
 void MVSNote::Release(UInt32 inFrame)
 {
-    mAmpEnv.release();
+    mEnv1.release();
     mEnv2.release();
     SynthNote::Release(inFrame);
 }
 
 void MVSNote::FastRelease(UInt32 inFrame) // voice is being stolen.
 {
-    mAmpEnv.release();
+    mEnv1.release();
     mEnv2.release();
     SynthNote::Release(inFrame);
 }
 
 Float32 MVSNote::Amplitude()
 {
-    return mAmpEnv.amplitude();
+    return mEnv1.amplitude();
 }
 
 Float64 MVSNote::SampleRate()
@@ -812,49 +807,47 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     // - - - - - - -        Envelope 1               - - - - - - - - - -
 
     buf env1_values;
-    UInt32 end;
+    size_t end;
     {
         buf attack, decay, sustain, release, amount;
+        float gain = mGain * scale_dB40(params->amp_amount);
 
         modbox.modulate(params->amp_attack,  Mod::AmpAttack,  attack);
         modbox.modulate(params->amp_decay,   Mod::AmpDecay,   decay);
         modbox.modulate(params->amp_sustain, Mod::AmpSustain, sustain);
         modbox.modulate(params->amp_release, Mod::AmpRelease, release);
-        modbox.modulate(params->amp_amount,  Mod::AmpLevel,   amount);
-#if FULLY_IMPLEMENTED
-        end = mEnv1.generate(attack,
+        modbox.modulate(gain,                Mod::AmpLevel,   amount);
+        end = mEnv1.generate(Envelope::Exponential,
+                             attack,
                              decay,
                              sustain,
                              release,
                              amount,
                              env1_values,
                              nsamp);
-#else
-        end = mAmpEnv.generate(env1_values, (UInt32)nsamp);
-#endif
     }
 
     // - - - - - - -        Envelope 2               - - - - - - - - - -
 
     {
         buf attack, decay, sustain, release, amount;
+        float gain = scale_dB40(params->env2_amount);
+        Envelope::Type env_type = envelope_type(params->env2_destination);
+
 
         modbox.modulate(params->env2_attack,  Mod::Env2Attack,  attack);
         modbox.modulate(params->env2_decay,   Mod::Env2Decay,   decay);
         modbox.modulate(params->env2_sustain, Mod::Env2Sustain, sustain);
         modbox.modulate(params->env2_release, Mod::Env2Release, release);
-        modbox.modulate(scale_dB40(params->env2_amount),  Mod::Env2Amount,  amount);
-#if FULLY_IMPLEMENTED
-        mEnv2.generate(attack,
+        modbox.modulate(gain,                 Mod::Env2Amount,  amount);
+        mEnv2.generate(env_type,
+                       attack,
                        decay,
                        sustain,
                        release,
                        amount,
                        env2_values,
                        nsamp);
-#else
-        fill(0, env2_values, nsamp);
-#endif
     }
 
     // - - - - - - -        Oscillator 2             - - - - - - - - - -
@@ -969,15 +962,10 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
 
     // - - - - - - -        Amplifier                - - - - - - - - - -
 
-#if FULLY_IMPLEMENTED
-    mAmplifier.generate_sum(filter_out, env1_values, render_out);
-#else
-    for (size_t i = 0; i < nsamp; i++)
-        render_out[i] += filter_out[i] * env1_values[i];
-#endif
+    mAmplifier.generate_sum(filter_out, env1_values, render_out, nsamp);
 
-    if (end != 0xFFFFFFFF)
-        NoteEnded(end);
+    if (end <= nsamp)
+        NoteEnded((UInt32)end);
 
     return noErr;
 }
@@ -1022,9 +1010,13 @@ OSStatus MVSNote::XXX_Render(UInt64            inAbsoluteSampleFrame,
     // Generate envelope.  If note terminates, truncate frame count.
     UInt32 toneFrameCount = frameCount;
     Float32 ampbuf[frameCount];
+#if 0
     UInt32 end = mAmpEnv.generate(ampbuf, frameCount);
     if (end != 0xFFFFFFFF)
         toneFrameCount = end;
+#else
+    // XXX write me!
+#endif
 
     // Generate Oscillator 1.
 #if 0
@@ -1087,8 +1079,12 @@ OSStatus MVSNote::XXX_Render(UInt64            inAbsoluteSampleFrame,
         outBuf[i] += out;
     }
 
+#if 0
     if (end != 0xFFFFFFFF)
         NoteEnded(end);
+#else
+    // XXX write me!
+#endif
 
     return noErr;
 }

@@ -12,49 +12,63 @@
 class Envelope {
 
 public:
-    enum EnvelopeType {
+
+    enum Type {
         Linear,
         Exponential
     };
 
-    Envelope();
+    Envelope            ();
+    void    initialize          (float        sample_rate);
 
-    void    initialize(Float64      sampleRate,
-                       Float32      maxLevel,
-                       Float32      attackTime,
-                       Float32      decayTime,
-                       Float32      sustainLevel,
-                       Float32      releaseTime,
-                       EnvelopeType type = Linear);
+    float   amplitude           () const;
 
-    void    release();
+    void    release             ();
 
-    Float32 amplitude() const { return mLevel; }
-
-    UInt32  generate(float *sampBuf, UInt32 count);
+    size_t  generate            (Type         type,
+                                 float const *attack,
+                                 float const *decay,
+                                 float const *sustain,
+                                 float const *release,
+                                 float const *amount,
+                                 float       *out,
+                                 size_t       count);
 
 private:
-    enum EnvelopeSegment {
-        ES_Attack,
-        ES_Decay,
-        ES_Sustain,
-        ES_Release
+
+    enum Segment {
+        Attack,
+        Decay,
+        Sustain,
+        Release,
+        Done
     };
 
-    EnvelopeType    mType;
-    Float32         mMaxLevel;
-    UInt32          mAttackSamples;
-    UInt32          mDecaySamples;
-    Float32         mSustainLevel;
+    float   mSampleRate;
+    float   mInverseSampleRate;
+    Segment mSegment;
+    size_t  mSamplesDone;
+    float   mLevel;
+    float   mAmplitude;
+    float   mAttackDuration;
+    float   mReleaseTime;
 
-    Float32         mAttackDelta;
-    Float32         mDecayDelta;
-    Float32         mReleaseDelta;
+    size_t  generate_linear     (float const *attack,
+                                 float const *decay,
+                                 float const *sustain,
+                                 float const *release,
+                                 float const *amount,
+                                 float       *out,
+                                 size_t       count);
 
-    EnvelopeSegment mSegment;
-    UInt32          mSamplesDone;
-    Float32         mLevel;
-
+    size_t generate_exponential (float const *attack,
+                                 float const *decay,
+                                 float const *sustain,
+                                 float const *release,
+                                 float const *amount,
+                                 float       *out,
+                                 size_t       count);
+    
 };
 
 #endif /* defined(__MVS__Envelope__) */

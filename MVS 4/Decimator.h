@@ -24,8 +24,6 @@
 #ifndef __Sample4X__Decimator__
 #define __Sample4X__Decimator__
 
-#include <stddef.h>
-
 class Decimator {
 
 public:

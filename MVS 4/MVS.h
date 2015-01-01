@@ -12,6 +12,7 @@
 #include "AUInstrumentBase.h"
 #include "MVSVersion.h"
 
+#include "Amplifier.h"
 #include "Decimator.h"
 #include "Envelope.h"
 #include "LFO.h"
@@ -199,12 +200,15 @@ private:
     Float32          **mOversampleBufPtr;
     MVSModBox  const **mModBoxPtrPtr;
     MVSParamSet const *mParams;
-    Envelope           mAmpEnv;
+    float              mGain;
+    Envelope           mEnv1;
     Envelope           mEnv2;
     Oscillator         mOsc1;
     Oscillator         mOsc2;
     NoiseSource        mNoise;
     Mixer              mMixer;
+    Filter             mFilter;
+    Amplifier          mAmplifier;
 
 };
 

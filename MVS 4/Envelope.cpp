@@ -8,155 +8,262 @@
 
 #include "Envelope.h"
 
-#include <cmath>
+static const float kInaudibleLevel = 0.0001;
+static const float kReallyInaudibleLevel = 1.0 / (1 << 16);
 
-static const Float32 kInaudibleLevel = 0.0001;
-
-Envelope::Envelope()
-{}
-
-static Float32 expDelta(Float32 start, Float32 end, size_t samples)
+static inline float clamp(float y0, float y1, float y)
 {
-    if (!samples)
-        return start < end ? 1.0 : 0.0;
-
-    if (start < kInaudibleLevel)
-        start = kInaudibleLevel;
-    if (end < kInaudibleLevel)
-        end = kInaudibleLevel;
-    return 1.0 + (log(end) - log(start)) / samples;
+    if (y < y0)
+        return y0;
+    if (y > y1)
+        return y1;
+    return y;
 }
 
-void Envelope::initialize(Float64      sampleRate,
-                          float        maxLevel,
-                          float        attackTime,
-                          float        decayTime,
-                          float        sustainLevel,
-                          float        releaseTime,
-                          EnvelopeType type)
+Envelope::Envelope()
+: mLevel(0),
+mAmplitude(0)
+{}
+
+void Envelope::initialize(float sample_rate)
 {
-    mType          = type;
-    mMaxLevel      = maxLevel;
-    mAttackSamples = attackTime * sampleRate;
-    mDecaySamples  = decayTime * sampleRate;
-    mSustainLevel  = maxLevel * sustainLevel;
-    mSegment       = ES_Attack;
-    mSamplesDone   = 0;
-    mLevel         = 0;
-    switch (type) {
+    mSampleRate = sample_rate;
+    mInverseSampleRate = 1 / sample_rate;
+    mSegment = Attack;
+    mSamplesDone = 0;
+    mLevel = 0;
+    mAmplitude = 0;
+    mAttackDuration = 0;
+    mReleaseTime = 0;
+}
 
-    case Linear:
-        mAttackDelta  = maxLevel / mAttackSamples;
-        mDecayDelta   = -maxLevel * (1.0 - sustainLevel) / mDecaySamples;
-        mReleaseDelta = -maxLevel / (releaseTime * sampleRate);
-        mLevel = 0;
-        break;
-
-    case Exponential:
-        mAttackDelta = expDelta(0, maxLevel, mAttackSamples);
-        mDecayDelta = expDelta(1.0001, sustainLevel, mDecaySamples);
-        mReleaseDelta = expDelta(maxLevel, 0, releaseTime * sampleRate);
-        mLevel = kInaudibleLevel;
-        break;
-    }
+float Envelope::amplitude() const
+{
+    return mAmplitude;
 }
 
 void Envelope::release()
 {
-    mSegment = ES_Release;
+    mSegment = Release;
+    mReleaseTime = mSamplesDone * mInverseSampleRate;
+//    printf("Release at %zu = %g\n",
+//           mSamplesDone, mReleaseTime);
 }
 
-UInt32 Envelope::generate(float *sampBuf, UInt32 count)
+size_t Envelope::generate(Type         type,
+                          float const *attack,
+                          float const *decay,
+                          float const *sustain,
+                          float const *release,
+                          float const *amount,
+                          float       *out,
+                          size_t       count)
 {
-    UInt32  i = 0, n;
-    UInt32  endFrame = 0xFFFFFFFF;
-    UInt32  samplesDone = mSamplesDone;
-    Float32 level = mLevel;
-    Float32 delta;
+    switch (type) {
 
-    while (i < count) {
+        case Linear:
+            return generate_linear(attack,
+                                   decay,
+                                   sustain,
+                                   release,
+                                   amount,
+                                   out,
+                                   count);
+
+        case Exponential:
+            return generate_exponential(attack,
+                                        decay,
+                                        sustain,
+                                        release,
+                                        amount,
+                                        out,
+                                        count);
+    }
+}
+
+size_t Envelope::generate_linear(float const *attack,
+                                 float const *decay,
+                                 float const *sustain,
+                                 float const *release,
+                                 float const *amount,
+                                 float       *out,
+                                 size_t       count)
+{
+    float  level        = mLevel;
+    float  amplitude    = mAmplitude;
+    size_t samples_done = mSamplesDone;
+    size_t end_frame    = SIZE_MAX;
+
+    for (size_t i = 0; i < count; ) {
         switch (mSegment) {
 
-        case ES_Attack:
-            delta = mAttackDelta;
-            n = mAttackSamples - samplesDone;
-            if (n > count)
-                n = count;
-            else
-                mSegment = ES_Decay;
-            if (mType == Exponential) {
-                for ( ; i < n; i++) {
-                    level *= delta;
-                    sampBuf[i] = level;
-                }
-            } else { // mType == Linear
-                for ( ; i < n; i++) {
-                    level += delta;
-                    sampBuf[i] = level;
-                }
-            }
-            samplesDone += n;
-            if (mSegment == ES_Decay)
-                level = mMaxLevel;
-            continue;
-
-        case ES_Decay:
-            delta = mDecayDelta;
-            n = mAttackSamples + mDecaySamples - samplesDone;
-            if (n > count)
-                n = count;
-            else
-                mSegment = ES_Sustain;
-            if (mType == Exponential) {
-                for ( ; i < n; i++) {
-                    level *= delta;
-                    sampBuf[i] = level;
-                }
-            } else { // mType == Linear
-                for ( ; i < n; i++) {
-                    level += delta;
-                    sampBuf[i] = level;
-                }
-            }
-            samplesDone += n;
-            continue;
-
-        case ES_Sustain:
-            level = mSustainLevel;
-            for ( ; i < count; i++)
-                sampBuf[i] = level;
-            continue;
-
-        case ES_Release:
-            delta = mReleaseDelta;
-            if (mType == Exponential) {
+            case Attack:
                 for ( ; i < count; i++) {
-                    level *= delta;
-                    if (level < 1.0 / (1 << 16)) {
-                        level = 0;
-                        endFrame = i;
+                    float t = (samples_done + i) * mInverseSampleRate;
+                    float a = attack[i];
+                    if (t > a) {
+                        mSegment = Decay;
+                        mAttackDuration = t;
                         break;
                     }
-                    sampBuf[i] = level;
+                    level = t / a;
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
                 }
-            } else { // mType == Linear
+                /* FALLTHRU */    // Remember lint?
+
+            case Decay:
                 for ( ; i < count; i++) {
-                    level += delta;
+                    float t = (samples_done + i) * mInverseSampleRate
+                    - mAttackDuration;
+                    float d = decay[i];
+                    if (t > d) {
+                        mSegment = Sustain;
+                        break;
+                    }
+                    float s = clamp(0, 1, sustain[i]);
+                    level = 1 - (1 - s) * t / d;
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
+                }
+                /* FALLTHRU */
+
+            case Sustain:
+                for ( ; i < count; i++) {
+                    level = clamp(0, 1, sustain[i]);
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
+                }
+                break;
+
+            case Release:
+                for ( ; i < count && mSegment == Release; i++) {
+                    float r = release[i];
+                    level = r ? level - mInverseSampleRate / r : 0;
+                    // printf("%zu: r = %g, level = %g\n",
+                    //        samples_done + i, r, level);
                     if (level < 0) {
                         level = 0;
-                        endFrame = i;
-                        break;
+                        mSegment = Done;
+                        end_frame = i;
                     }
-                    sampBuf[i] = level;
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
                 }
-            }
-            for ( ; i < count; i++)
-                sampBuf[i] = 0;
-            samplesDone += count;
-            break;
+                break;
+
+            case Done:
+                end_frame = i;
+                for ( ; i < count; i++)
+                    out[i] = level = 0;
+                break;
         }
     }
-    mSamplesDone = samplesDone;
+    mSamplesDone += count;
     mLevel = level;
-    return endFrame;
+    mAmplitude = amplitude;
+    return end_frame;
+}
+
+size_t Envelope::generate_exponential(float const *attack,
+                                      float const *decay,
+                                      float const *sustain,
+                                      float const *release,
+                                      float const *amount,
+                                      float       *out,
+                                      size_t       count)
+{
+    float const scale = -logf(kInaudibleLevel) * mInverseSampleRate;
+    float       level        = mLevel;
+    float       amplitude    = mAmplitude;
+    size_t      samples_done = mSamplesDone;
+    size_t      end_frame    = SIZE_MAX;
+
+    for (size_t i = 0; i < count; ) {
+        switch (mSegment) {
+
+            case Attack:
+                if (samples_done == 0)
+                    level = kInaudibleLevel;
+                for ( ; i < count; i++) {
+                    float a = attack[i];
+                    if (a)
+                        level *= 1 + scale / a;
+                    else
+                        level = 1;
+                    if (level >= 1) {
+                        level = 1;
+                        mSegment = Decay;
+                        mAttackDuration = a;
+                        // printf("Attack done at %zu = %g\n",
+                        //        samples_done + i,
+                        //        (samples_done + i) * mInverseSampleRate);
+                        break;
+                    }
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
+                }
+                /* FALLTHRU */    // Remember lint?
+
+            case Decay:
+                for ( ; i < count; i++) {
+                    float d = decay[i];
+                    float s = clamp(0, 1, sustain[i]);
+                    if (d) {
+                        float delta = 1 - scale / d;
+                        level = s + (level - s) * delta;
+                    } else
+                        level = s;
+                    if (level <= s * 1.0001) {
+                        level = s;
+                        mSegment = Sustain;
+                        // printf("Decay done at %zu = %g\n",
+                        //        samples_done + i,
+                        //        (samples_done + i) * mInverseSampleRate);
+                        break;
+                    }
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
+                }
+                /* FALLTHRU */
+
+            case Sustain:
+                for ( ; i < count; i++) {
+                    level = clamp(0, 1, sustain[i]);
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
+                }
+                break;
+
+            case Release:
+                for ( ; i < count && mSegment == Release; i++) {
+                    float r = release[i];
+                    if (r)
+                        level *= 1 - scale / r;
+                    else
+                        level = 0;
+                    if (level < kReallyInaudibleLevel) {
+                        level = 0;
+                        mSegment = Done;
+                        end_frame = i;
+                        // printf("Release done at %zu = %g\n",
+                        //        samples_done + i,
+                        //        (samples_done + i) * mInverseSampleRate);
+                    }
+                    amplitude = level * amount[i];
+                    out[i] = amplitude;
+                }
+                break;
+                
+            case Done:
+                end_frame = i;
+                for ( ; i < count; i++)
+                    out[i] = level = 0;
+                break;
+        }
+    }
+    mSamplesDone += count;
+    mLevel = level;
+    mAmplitude = amplitude;
+    return end_frame;
 }

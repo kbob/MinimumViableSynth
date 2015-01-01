@@ -50,6 +50,8 @@
 		92AC4F551A2F6F3500C9DB82 /* NoiseSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */; };
 		92DD0C041A468F2500B18028 /* LFO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C021A468F2500B18028 /* LFO.cpp */; };
 		92DD0C071A4691CC00B18028 /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C051A4691CC00B18028 /* Random.cpp */; };
+		92E00EE41A552CE300241D82 /* Amplifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE21A552CE300241D82 /* Amplifier.cpp */; };
+		92E00EE51A552CE300241D82 /* Amplifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE21A552CE300241D82 /* Amplifier.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -159,6 +161,8 @@
 		92DD0C051A4691CC00B18028 /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		92DD0C061A4691CC00B18028 /* Random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Random.h; sourceTree = "<group>"; };
 		92DD0C091A48223E00B18028 /* ModMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModMatrix.h; sourceTree = "<group>"; };
+		92E00EE21A552CE300241D82 /* Amplifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Amplifier.cpp; sourceTree = "<group>"; };
+		92E00EE31A552CE300241D82 /* Amplifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Amplifier.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -354,14 +358,16 @@
 			children = (
 				92717BD51A19A7DC00B87C38 /* MVS.h */,
 				92717BD61A19A7DC00B87C38 /* MVS.cpp */,
-				923D02031A4BCAC30095A7DC /* Mixer.cpp */,
-				923D02041A4BCAC30095A7DC /* Mixer.h */,
+				92E00EE21A552CE300241D82 /* Amplifier.cpp */,
+				92E00EE31A552CE300241D82 /* Amplifier.h */,
 				929D3C371A2A3DDC0049102A /* Decimator.cpp */,
 				929D3C381A2A3DDC0049102A /* Decimator.h */,
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
 				92DD0C021A468F2500B18028 /* LFO.cpp */,
 				92DD0C031A468F2500B18028 /* LFO.h */,
+				923D02031A4BCAC30095A7DC /* Mixer.cpp */,
+				923D02041A4BCAC30095A7DC /* Mixer.h */,
 				92DD0C091A48223E00B18028 /* ModMatrix.h */,
 				9291A6D61A45D98B00AA6E18 /* Modwheel.cpp */,
 				9291A6D71A45D98B00AA6E18 /* Modwheel.h */,
@@ -490,6 +496,7 @@
 				923D02051A4BCAC30095A7DC /* Mixer.cpp in Sources */,
 				92717B871A19A7DC00B87C38 /* AUScopeElement.cpp in Sources */,
 				92717BD71A19A7DC00B87C38 /* MVS.cpp in Sources */,
+				92E00EE41A552CE300241D82 /* Amplifier.cpp in Sources */,
 				926C8C0B1A4118050082B95A /* ParamSet.cpp in Sources */,
 				92717B811A19A7DC00B87C38 /* AUOutputElement.cpp in Sources */,
 				92717B8A1A19A7DC00B87C38 /* ComponentBase.cpp in Sources */,
@@ -533,6 +540,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92717BED1A1B211600B87C38 /* main.cpp in Sources */,
+				92E00EE51A552CE300241D82 /* Amplifier.cpp in Sources */,
 				92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */,
 				929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */,
 				92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */,
