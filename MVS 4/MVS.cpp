@@ -79,6 +79,7 @@ MVSParamSet::MVSParamSet()
         { -1,                   NULL              }
     };
 
+    // - - - - - - -        Oscillator 1             - - - - - - - - - -
     {
         ParamClump osc1("Oscillator 1", "Osc 1");
 
@@ -92,6 +93,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_Percent);
     }
 
+    // - - - - - - -        Oscillator 2             - - - - - - - - - -
     {
         ParamClump osc2("Oscillator 2", "Osc 2");
 
@@ -115,6 +117,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_Percent);
     }
 
+    // - - - - - - -        Noise Source             - - - - - - - - - -
     {
         ParamClump noise("Noise Source", "Noise");
 
@@ -125,6 +128,7 @@ MVSParamSet::MVSParamSet()
             .default_value(NoiseSource::White);
     }
 
+    // - - - - - - -        Mixer                    - - - - - - - - - -
     {
         ParamClump mix("Mixer", "Mix");
 
@@ -150,6 +154,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_Decibels);
     }
 
+//    // - - - - - - -        Filter                   - - - - - - - - - -
 //    {
 //        ParamClump flt("Filter", "Filt");
 //
@@ -183,6 +188,7 @@ MVSParamSet::MVSParamSet()
 //            .units(kAudioUnitParameterUnit_Percent);
 //    }
 
+    // - - - - - - -        Amplifier                - - - - - - - - - -
     {
         ParamClump amp("Amplifier", "Amp");
 
@@ -215,6 +221,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_Decibels);
     }
 
+    // - - - - - - -        Mod Wheel                - - - - - - - - - -
     {
         ParamClump mw("Mod. Wheel", "MW");
 
@@ -241,6 +248,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_Generic);
     }
 
+    // - - - - - - -        LFO 1                    - - - - - - - - - -
     {
         ParamClump LFO1("LFO 1", "LFO 1");
 
@@ -253,7 +261,6 @@ MVSParamSet::MVSParamSet()
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
             .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
-        ;
 
         lfo1_amount.name("Amount")
             .min_max(0, 1)
@@ -278,6 +285,7 @@ MVSParamSet::MVSParamSet()
             .assigns_mod(Mod::LFO1);
     }
 
+    // - - - - - - -        LFO 2                    - - - - - - - - - -
     {
         ParamClump LFO1("LFO 2", "LFO 2");
 
@@ -289,8 +297,7 @@ MVSParamSet::MVSParamSet()
             .min_max(log(0.1), log(50))
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
-//            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
-        ;
+            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
 
         lfo2_amount.name("Amount")
             .min_max(0, 1)
@@ -317,6 +324,12 @@ MVSParamSet::MVSParamSet()
             .assigns_mod(Mod::LFO2);
     }
 
+    // - - - - - - -        Envelope 1               - - - - - - - - - -
+    {
+
+    }
+
+    // - - - - - - -        Envelope 2               - - - - - - - - - -
     {
         ParamClump env2("Envelope 2", "Env 2");
 
@@ -946,9 +959,9 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     {
         buf cutoff, resonance, drive;
 
-        modbox.modulate(params->flt_cutoff,    Mod:FltCutoff, cutoff);
-        modbox.modulate(params->flt_resonance, Mod:Resonance, cutoff);
-        modbox.modulate(params->flt_drive,     Mod:Drive,     cutoff);
+        modbox.modulate_freq(params->flt_cutoff,    Mod:FltCutoff, cutoff);
+        modbox.modulate     (params->flt_resonance, Mod:Resonance, cutoff);
+        modbox.modulate     (params->flt_drive,     Mod:Drive,     cutoff);
         mFilter.generate(params->flt_type,
                          cutoff,
                          resonance,
