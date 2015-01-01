@@ -1,13 +1,13 @@
 //
-//  Modwheel.h
+//  ModWheel.h
 //  MVS 4
 //
 //  Created by Bob Miller on 12/20/14.
 //  Copyright (c) 2014 kbobsoft.com. All rights reserved.
 //
 
-#ifndef __MVS_4__Modwheel__
-#define __MVS_4__Modwheel__
+#ifndef __MVS_4__ModWheel__
+#define __MVS_4__ModWheel__
 
 // Fill a buffer with smoothed Modulation Wheel values.
 
@@ -35,4 +35,4 @@ private:
 
 };
 
-#endif /* defined(__MVS_4__Modwheel__) */
+#endif /* defined(__MVS_4__ModWheel__) */
