@@ -844,7 +844,8 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
 
     {
         buf attack, decay, sustain, release, amount;
-        float gain = scale_dB40(params->env2_amount);
+//        float gain = scale_dB40(params->env2_amount);
+        float gain = params->env2_amount;
         Envelope::Type env_type = envelope_type(params->env2_destination);
 
 
