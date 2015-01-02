@@ -154,39 +154,39 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_Decibels);
     }
 
-//    // - - - - - - -        Filter                   - - - - - - - - - -
-//    {
-//        ParamClump flt("Filter", "Filt");
-//
-//        flt_type.name("Type")
-//            .value_string(Filter::LowPass,    "Low Pass")
-//            .value_string(Filter::HighPass,   "High Pass")
-//            .value_string(Filter::BandPass,   "Band Pass")
-//            .value_string(Filter::BandReject, "Band Reject")
-//            .value_string(Filter::Off,        "Off")
-//            .default_value(Filter::LowPass);
-//
-//        flt_cutoff.name("Cutoff Frequency")
-//            .min_max(20, 20000)
-//            .default_value(20000)
-//            .units(kAudioUnitParameterUnit_Hertz)
-//            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
-//
-//        flt_resonance.name("Resonance")
-//            .min_max(0, 4)
-//            .default_value(0)
-//            .units(kAudioUnitParameterUnit_LinearGain);
-//
-//        flt_drive.name("Drive")
-//            .min_max(-24, 0)
-//            .default_value(-24)
-//            .units(kAudioUnitParameterUnit_Decibels);
-//
-//        flt_keytrack.name("Key Track")
-//            .min_max(0, 100)
-//            .default_value(0)
-//            .units(kAudioUnitParameterUnit_Percent);
-//    }
+    // - - - - - - -        Filter                   - - - - - - - - - -
+    {
+        ParamClump flt("Filter", "Filt");
+
+        flt_type.name("Type")
+            .value_string(Filter::LowPass,    "Low Pass")
+            .value_string(Filter::HighPass,   "High Pass")
+            .value_string(Filter::BandPass,   "Band Pass")
+            .value_string(Filter::BandReject, "Band Reject")
+            .value_string(Filter::Off,        "Off")
+            .default_value(Filter::LowPass);
+
+        flt_cutoff.name("Cutoff Frequency")
+            .min_max(log(20), log(20000))
+            .default_value(20000)
+            .units(kAudioUnitParameterUnit_Hertz)
+            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
+
+        flt_resonance.name("Resonance")
+            .min_max(0, 4)
+            .default_value(0)
+            .units(kAudioUnitParameterUnit_LinearGain);
+
+        flt_drive.name("Drive")
+            .min_max(-24, +12)
+            .default_value(-24)
+            .units(kAudioUnitParameterUnit_Decibels);
+
+        flt_keytrack.name("Key Track")
+            .min_max(0, 100)
+            .default_value(0)
+            .units(kAudioUnitParameterUnit_Percent);
+    }
 
     // - - - - - - -        Amplifier                - - - - - - - - - -
     {
@@ -228,22 +228,22 @@ MVSParamSet::MVSParamSet()
         mw_destination.name("Destination")
             .value_string(Mod::Osc1Width,    "Osc 1 Width")
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
-            .value_string(Mod::NoiseLevel,    "Noise Level")
-//            .value_string(Mod::FiltCutoff,    "Flt Cutoff")
-//            .value_string(Mod::FiltResonance, "Flt Resonance")
-//            .value_string(Mod::FiltDrive,     "Flt Drive")
-            .value_string(Mod::LFO1Amount,    "LFO 1 Amount")
-            .value_string(Mod::LFO1Speed,     "LFO 1 Speed")
-            .value_string(Mod::LFO2Amount,    "LFO 2 Amount")
-            .value_string(Mod::LFO2Speed,     "LFO 2 Speed")
-            .value_string(Mod::AmpLevel,      "Env 1 Amount")
-            .value_string(Mod::Env2Amount,    "Env 2 Amount")
-            .value_string(Mod::NoDest,        "Off")
+            .value_string(Mod::NoiseLevel,   "Noise Level")
+            .value_string(Mod::FltCutoff,    "Flt Cutoff")
+            .value_string(Mod::FltResonance, "Flt Resonance")
+            .value_string(Mod::FltDrive,     "Flt Drive")
+            .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
+            .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
+            .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
+            .value_string(Mod::LFO2Speed,    "LFO 2 Speed")
+            .value_string(Mod::AmpLevel,     "Env 1 Amount")
+            .value_string(Mod::Env2Amount,   "Env 2 Amount")
+            .value_string(Mod::NoDest,       "Off")
             .default_value(Mod::LFO1Amount)
             .assigns_mod(Mod::Wheel);
 
         mw_amount.name("Amount")
-            .min_max(0, 1)
+            .min_max(0, 2)
             .default_value(0.05)
             .units(kAudioUnitParameterUnit_Generic);
     }
@@ -263,7 +263,7 @@ MVSParamSet::MVSParamSet()
             .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
 
         lfo1_amount.name("Amount")
-            .min_max(0, 1)
+            .min_max(0, 2)
             .default_value(0)
             .units(kAudioUnitParameterUnit_Generic);
 
@@ -275,9 +275,9 @@ MVSParamSet::MVSParamSet()
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
             .value_string(Mod::Osc2Level,    "Osc 2 Level")
             .value_string(Mod::NoiseLevel,   "Noise Level")
-//            .value_string(Mod::FltCutoff,    "Filt Cutoff")
-//            .value_string(Mod::FltResonance, "Filt Resonance")
-//            .value_string(Mod::FltDrive,     "Filt Drive")
+            .value_string(Mod::FltCutoff,    "Filt Cutoff")
+            .value_string(Mod::FltResonance, "Filt Resonance")
+            .value_string(Mod::FltDrive,     "Filt Drive")
             .value_string(Mod::AmpLevel,     "Env 1 Amount")
             .value_string(Mod::Env2Amount,   "Env 2 Amount")
             .value_string(Mod::NoDest,       "Off")
@@ -300,7 +300,7 @@ MVSParamSet::MVSParamSet()
             .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
 
         lfo2_amount.name("Amount")
-            .min_max(0, 1)
+            .min_max(0, 2)
             .default_value(0.5)
             .units(kAudioUnitParameterUnit_Generic);
 
@@ -312,9 +312,9 @@ MVSParamSet::MVSParamSet()
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
             .value_string(Mod::Osc2Level,    "Osc 2 Level")
             .value_string(Mod::NoiseLevel,   "Noise Level")
-//            .value_string(Mod::FltCutoff,    "Filt Cutoff")
-//            .value_string(Mod::FltResonance, "Filt Resonance")
-//            .value_string(Mod::FltDrive,     "Filt Drive")
+            .value_string(Mod::FltCutoff,    "Filt Cutoff")
+            .value_string(Mod::FltResonance, "Filt Resonance")
+            .value_string(Mod::FltDrive,     "Filt Drive")
             .value_string(Mod::LFO1Speed,    "LFO 1 Speed")
             .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
             .value_string(Mod::AmpLevel,     "Env 1 Amount")
@@ -362,7 +362,7 @@ MVSParamSet::MVSParamSet()
         .units(kAudioUnitParameterUnit_Generic);
 
         env2_amount.name("Amount")
-            .min_max(-1, +1)
+            .min_max(-2, +2 * 63 / 64.)    // compensate for MIDI resolution
             .default_value(+1)
             .units(kAudioUnitParameterUnit_Generic);
 
@@ -374,9 +374,9 @@ MVSParamSet::MVSParamSet()
             .value_string(Mod::Osc2Width,    "Osc 2 Width")
             .value_string(Mod::Osc2Level,    "Osc 2 Level")
             .value_string(Mod::NoiseLevel,   "Noise Level")
-//            .value_string(Mod::FltCutoff,    "Filt Cutoff")
-//            .value_string(Mod::FltResonance, "Filt Resonance")
-//            .value_string(Mod::FltDrive,     "Filt Drive")
+            .value_string(Mod::FltCutoff,    "Filt Cutoff")
+            .value_string(Mod::FltResonance, "Filt Resonance")
+            .value_string(Mod::FltDrive,     "Filt Drive")
 #if FULLY_IMPLEMENTED
             .value_string(Mod::LFO1Amount,   "LFO 1 Amount")
             .value_string(Mod::LFO2Amount,   "LFO 2 Amount")
@@ -762,9 +762,7 @@ bool MVSNote::Attack(const MusicDeviceNoteParams &inParams)
     mOsc2.initialize(sampleRate);
     mNoise.initialize(sampleRate);
     mMixer.initialize(sampleRate);
-#if FULLY_IMPLEMENTED
     mFilter.initialize(sampleRate);
-#endif
     mAmplifier.initialize(sampleRate);
     return true;
 }
@@ -844,7 +842,6 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
 
     {
         buf attack, decay, sustain, release, amount;
-//        float gain = scale_dB40(params->env2_amount);
         float gain = params->env2_amount;
         Envelope::Type env_type = envelope_type(params->env2_destination);
 
@@ -953,22 +950,23 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                         nsamp);
     }
 
-#if FULLY_IMPLEMENTED
+#if 1 || FULLY_IMPLEMENTED
     // - - - - - - -        Filter                   - - - - - - - - - -
 
     buf filter_out;
     {
         buf cutoff, resonance, drive;
 
-        modbox.modulate_freq(params->flt_cutoff,    Mod:FltCutoff, cutoff);
-        modbox.modulate     (params->flt_resonance, Mod:Resonance, cutoff);
-        modbox.modulate     (params->flt_drive,     Mod:Drive,     cutoff);
-        mFilter.generate(params->flt_type,
-                         cutoff,
-                         resonance,
-                         drive,
-                         filter_out,
-                         nsamp);
+        modbox.modulate_freq(params->flt_cutoff,  Mod::FltCutoff,    cutoff);
+        modbox.modulate   (params->flt_resonance, Mod::FltResonance, resonance);
+        modbox.modulate   (params->flt_drive,     Mod::FltDrive,     drive);
+        mFilter.generate  (params->flt_type,
+                           mixer_out,
+                           cutoff,
+                           resonance,
+                           drive,
+                           filter_out,
+                           nsamp);
     }
 #else
     float *filter_out = mixer_out;

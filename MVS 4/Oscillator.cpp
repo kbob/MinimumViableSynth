@@ -10,7 +10,7 @@
 
 #include <algorithm>
 
-// Stupid delay line.
+// Stupid delay line trick.
 
 // This delay line is stored in a member of the Oscillator object, but
 // it is also cached in four local variables.  Between BEGIN_Z and
@@ -18,7 +18,7 @@
 // member variable is the only copy.
 //
 // I do it this way in the hope that the compiler can generate better
-// code than if every access touched the object.
+// code than if every access touched the array.
 
 #define BEGIN_Z                                                         \
     {                                                                   \
@@ -54,6 +54,9 @@
 //
 // BLEP_ME and BLAM_ME implicitly use the delay line, so only call
 // them between Z_BEGIN and Z_END.
+//
+// BLEP is implemented for orders 3, 1, and 0 (none).
+// BLAM is implemented for orders 1 and 0.
 
 #define BLEP_ORDER 3
 #define BLAM_ORDER 1

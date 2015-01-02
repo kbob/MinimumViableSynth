@@ -52,6 +52,8 @@
 		92DD0C071A4691CC00B18028 /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C051A4691CC00B18028 /* Random.cpp */; };
 		92E00EE41A552CE300241D82 /* Amplifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE21A552CE300241D82 /* Amplifier.cpp */; };
 		92E00EE51A552CE300241D82 /* Amplifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE21A552CE300241D82 /* Amplifier.cpp */; };
+		92E00EE81A56167400241D82 /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE61A56167400241D82 /* Filter.cpp */; };
+		92E00EE91A56167400241D82 /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE61A56167400241D82 /* Filter.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -163,6 +165,8 @@
 		92DD0C091A48223E00B18028 /* ModMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModMatrix.h; sourceTree = "<group>"; };
 		92E00EE21A552CE300241D82 /* Amplifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Amplifier.cpp; sourceTree = "<group>"; };
 		92E00EE31A552CE300241D82 /* Amplifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Amplifier.h; sourceTree = "<group>"; };
+		92E00EE61A56167400241D82 /* Filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Filter.cpp; sourceTree = "<group>"; };
+		92E00EE71A56167400241D82 /* Filter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Filter.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -364,6 +368,8 @@
 				929D3C381A2A3DDC0049102A /* Decimator.h */,
 				92717BE01A19B5DD00B87C38 /* Envelope.cpp */,
 				92717BE11A19B5DD00B87C38 /* Envelope.h */,
+				92E00EE61A56167400241D82 /* Filter.cpp */,
+				92E00EE71A56167400241D82 /* Filter.h */,
 				92DD0C021A468F2500B18028 /* LFO.cpp */,
 				92DD0C031A468F2500B18028 /* LFO.h */,
 				923D02031A4BCAC30095A7DC /* Mixer.cpp */,
@@ -503,6 +509,7 @@
 				92717B8E1A19A7DC00B87C38 /* AUBuffer.cpp in Sources */,
 				92717BA51A19A7DC00B87C38 /* MusicDeviceBase.cpp in Sources */,
 				92717BC61A19A7DC00B87C38 /* CAMutex.cpp in Sources */,
+				92E00EE81A56167400241D82 /* Filter.cpp in Sources */,
 				92717BB61A19A7DC00B87C38 /* CAAudioChannelLayout.cpp in Sources */,
 				92717B9E1A19A7DC00B87C38 /* SynthNoteList.cpp in Sources */,
 				92717B971A19A7DC00B87C38 /* SynthElement.cpp in Sources */,
@@ -540,6 +547,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92717BED1A1B211600B87C38 /* main.cpp in Sources */,
+				92E00EE91A56167400241D82 /* Filter.cpp in Sources */,
 				92E00EE51A552CE300241D82 /* Amplifier.cpp in Sources */,
 				92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */,
 				929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */,

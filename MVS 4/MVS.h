@@ -15,6 +15,7 @@
 #include "Amplifier.h"
 #include "Decimator.h"
 #include "Envelope.h"
+#include "Filter.h"
 #include "LFO.h"
 #include "Mixer.h"
 #include "ModMatrix.h"
@@ -34,18 +35,6 @@ enum Preset {
 // Define the presets.
 static AUPreset kPresets [kNumberOfPresets] = {
     { kPreset_Default, CFSTR("Factory Default") },
-};
-
-// XXX temporary
-class Filter {
-public:
-    enum Type {
-        Off,
-        LowPass,
-        HighPass,
-        BandPass,
-        BandReject
-    };
 };
 
 class Mod {
@@ -76,10 +65,10 @@ public:
         Osc2Level,
         NoiseLevel,
 
-//        FltCutoff,
-//        FltResonance,
-//        FltDrive,
-//        FltKeyTrack,
+        FltCutoff,
+        FltResonance,
+        FltDrive,
+        FltKeyTrack,
 
         AmpLevel,
         AmpAttack,
@@ -132,11 +121,11 @@ public:
     FloatParam                      mix_osc2_level;
     FloatParam                      mix_noise_level;
 
-//    EnumParam<Filter::Type>         flt_type;
-//    FloatParam                      flt_cutoff;
-//    FloatParam                      flt_resonance;
-//    FloatParam                      flt_drive;
-//    FloatParam                      flt_keytrack;
+    EnumParam<Filter::Type>         flt_type;
+    FloatParam                      flt_cutoff;
+    FloatParam                      flt_resonance;
+    FloatParam                      flt_drive;
+    FloatParam                      flt_keytrack;
 
     FloatParam                      amp_attack;
     FloatParam                      amp_decay;
