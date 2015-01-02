@@ -15,7 +15,7 @@
 
 #include "AUMIDIDefs.h"
  
-static const UInt32  kMaxActiveNotes = 100;
+static const UInt32  kMaxActiveNotes = 50;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
@@ -365,9 +365,9 @@ MVSParamSet::MVSParamSet()
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
 
         env2_keytrack.name("Key Track")
-            .min_max(0, 1)
-            .default_value(1)
-        .units(kAudioUnitParameterUnit_Generic);
+            .min_max(0, 100)
+            .default_value(50)
+        .units(kAudioUnitParameterUnit_Percent);
 
         env2_amount.name("Amount")
             .min_max(-2, +2 * 63 / 64.)    // compensate for MIDI resolution
@@ -830,13 +830,13 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     size_t end;
     {
         buf attack, decay, sustain, release, amount;
-        float gain = mGain * scale_dB40(params->amp_amount);
+        float base_gain = mGain * scale_dB40(params->amp_amount);
 
         modbox.modulate(params->amp_attack,  Mod::AmpAttack,  attack);
         modbox.modulate(params->amp_decay,   Mod::AmpDecay,   decay);
         modbox.modulate(params->amp_sustain, Mod::AmpSustain, sustain);
         modbox.modulate(params->amp_release, Mod::AmpRelease, release);
-        modbox.modulate(gain,                Mod::AmpLevel,   amount);
+        modbox.modulate(base_gain,           Mod::AmpLevel,   amount);
         end = mEnv1.generate(Envelope::Exponential,
                              attack,
                              decay,
@@ -851,15 +851,19 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
 
     {
         buf attack, decay, sustain, release, amount;
-        float gain = params->env2_amount;
+        float key_adjust   = powf(A_rel_freq, -params->env2_keytrack / 100);
+        float base_attack  = params->env2_attack  * key_adjust;
+        float base_decay   = params->env2_decay   * key_adjust;
+        float base_release = params->env2_release * key_adjust;
+        float base_gain = params->env2_amount;
         Envelope::Type env_type = envelope_type(params->env2_destination);
 
 
-        modbox.modulate(params->env2_attack,  Mod::Env2Attack,  attack);
-        modbox.modulate(params->env2_decay,   Mod::Env2Decay,   decay);
+        modbox.modulate(base_attack,          Mod::Env2Attack,  attack);
+        modbox.modulate(base_decay,           Mod::Env2Decay,   decay);
         modbox.modulate(params->env2_sustain, Mod::Env2Sustain, sustain);
-        modbox.modulate(params->env2_release, Mod::Env2Release, release);
-        modbox.modulate(gain,                 Mod::Env2Amount,  amount);
+        modbox.modulate(base_release,         Mod::Env2Release, release);
+        modbox.modulate(base_gain,            Mod::Env2Amount,  amount);
         mEnv2.generate(env_type,
                        attack,
                        decay,
