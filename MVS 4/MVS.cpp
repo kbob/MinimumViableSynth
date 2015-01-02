@@ -55,6 +55,14 @@ static inline float scale_dB40(float dB)
     return dB <= -40 ? 0 : powf(10, dB / 20);
 }
 
+static inline float clamp(float x0, float x1, float x)
+{
+    if (x < x0)
+        return x0;
+    if (x > x1)
+        return x1;
+    return x;
+}
 
 // -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 #pragma mark MVS Parameters
@@ -813,6 +821,7 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
     float         sample_rate = SampleRate();
     float         frequency   = Frequency();
     float         norm_freq   = frequency / sample_rate;
+    float         A_rel_freq  = frequency / 440.0;  // relative to A4
 
 
     // - - - - - - -        Envelope 1               - - - - - - - - - -
@@ -950,14 +959,17 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                         nsamp);
     }
 
-#if 1 || FULLY_IMPLEMENTED
     // - - - - - - -        Filter                   - - - - - - - - - -
 
     buf filter_out;
     {
         buf cutoff, resonance, drive;
+        float base_freq = clamp(20, 20000,
+                                params->flt_cutoff *
+                                powf(A_rel_freq, params->flt_keytrack / 100));
 
-        modbox.modulate_freq(params->flt_cutoff,  Mod::FltCutoff,    cutoff);
+
+        modbox.modulate_freq(base_freq,  Mod::FltCutoff,    cutoff);
         modbox.modulate   (params->flt_resonance, Mod::FltResonance, resonance);
         modbox.modulate   (params->flt_drive,     Mod::FltDrive,     drive);
         mFilter.generate  (params->flt_type,
@@ -968,9 +980,6 @@ OSStatus MVSNote::Render(UInt64            inAbsoluteSampleFrame,
                            filter_out,
                            nsamp);
     }
-#else
-    float *filter_out = mixer_out;
-#endif
 
     // - - - - - - -        Amplifier                - - - - - - - - - -
 
