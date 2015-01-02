@@ -59,6 +59,6 @@ void Mixer::generate_ringmod(float const *src1, float const *src1_level,
                              size_t       nsamp)
 {
     for (size_t i = 0; i < nsamp; i++)
-        out[i] = src1_level[i] * src1[i] * src2_level[i] * src2[i] +
+        out[i] = src1_level[i] * src1[i] * src2[i] +
                  src3_level[i] * src3[i];
 }
