@@ -92,9 +92,10 @@ void Filter::generate_low_pass(float const *signal,
 {
     for (size_t i = 0; i < nsamp; i++) {
         float Fs       = mSampleRate;
-        float Fc       = cutoff[i];
-        float k        = resonance[i];
-        float gain     = powf(10, clamp(-24, +12, drive[i]) / 20);
+        float Fc       = clamp(20, 20000, cutoff[i]);
+        float k        = clamp(0, 4,resonance[i]);
+        float d        = clamp(-24, +12, drive[i]);
+        float gain     = powf(10, d / 20);
         float inv_gain = gain < 0.1 ? 0.1 / gain : 1;
         float x        = M_PI * Fc / Fs;
         float A        = x * (1 - x) / (1 + x);

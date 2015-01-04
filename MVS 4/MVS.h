@@ -234,6 +234,9 @@ public:
                                 AudioUnitParameterValue inValue,
                                 UInt32                  inBufferOffsetInFrames);
 
+    virtual OSStatus	RestoreState(
+                                CFPropertyListRef		inData);
+
     // override AUInstrumentBase to collect ModWheel changes.
     virtual OSStatus   HandleControlChange(
                                 UInt8	                inChannel,

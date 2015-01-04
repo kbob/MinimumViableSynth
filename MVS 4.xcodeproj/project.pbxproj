@@ -252,9 +252,9 @@
 			isa = PBXGroup;
 			children = (
 				92717B781A19A7DC00B87C38 /* AUBase */,
-				92717B8C1A19A7DC00B87C38 /* Utility */,
 				92717B901A19A7DC00B87C38 /* AUInstrumentBase */,
 				92717BA01A19A7DC00B87C38 /* OtherBases */,
+				92717B8C1A19A7DC00B87C38 /* Utility */,
 			);
 			name = AUPublic;
 			sourceTree = "<group>";

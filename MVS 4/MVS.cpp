@@ -34,7 +34,8 @@ static inline LFO::Polarity LFO_polarity(LFO::Waveform wf, Mod::Destination d)
     if (wf != LFO::Triangle && wf != LFO::SampleHold && wf != LFO::Random)
         return LFO::Unipolar;
     if (d == Mod::Osc1Freq || d == Mod::Osc1Width ||
-        d == Mod::Osc2Freq || d == Mod::Osc2Width)
+        d == Mod::Osc2Freq || d == Mod::Osc2Width ||
+        d == Mod::FltCutoff)
         return LFO::Bipolar;
     return LFO::Unipolar;
 }
@@ -551,6 +552,23 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
                                                      inElement,
                                                      value,
                                                      inBufferOffsetInFrames);
+}
+
+OSStatus MVS::RestoreState(CFPropertyListRef inData)
+{
+    OSStatus status = AUBase::RestoreState(inData);
+    if (status == noErr) {
+        for (UInt32 i = 0; i < mParams.size(); i++) {
+            AudioUnitParameterValue value = Globals()->GetParameter(i);
+            mParams.set_param_value(i, value);
+            int mod_src = mParams.param_mod_source(i);
+            if (mod_src) {
+                mModMatrix.assign(mod_src, mParams.param_mod_dest(i));
+            }
+
+        }
+    }
+    return status;
 }
 
 OSStatus MVS::HandleControlChange(UInt8	    inChannel,
