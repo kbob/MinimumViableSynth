@@ -554,6 +554,34 @@ OSStatus MVS::SetParameter(AudioUnitParameterID    inID,
                                                      inBufferOffsetInFrames);
 }
 
+OSStatus MVS::GetPresets(CFArrayRef *outData) const
+{
+    if (!outData)
+        return noErr;
+
+    CFMutableArrayRef presets = CFArrayCreateMutable(kCFAllocatorDefault,
+                                                     kNumberOfPresets,
+                                                     NULL);
+    for (size_t i = 0; i < kNumberOfPresets; i++)
+        CFArrayAppendValue(presets, &kPresets[i]);
+    *outData = presets;
+    return noErr;
+}
+
+OSStatus MVS::NewFactoryPresetSet(const AUPreset &inNewFactoryPreset)
+{
+    SInt32 chosenPreset = inNewFactoryPreset.presetNumber;
+    if (chosenPreset == kPreset_Default) {
+        for (UInt32 i = 0; i < mParams.size(); i++) {
+            AudioUnitParameterValue v = mParams.param_value(i);
+            SetParameter(i, kAudioUnitScope_Global, 0, v, 0);
+        }
+        mParams.set_defaults();
+        return noErr;
+    }
+    return kAudioUnitErr_InvalidProperty;
+}
+
 OSStatus MVS::RestoreState(CFPropertyListRef inData)
 {
     OSStatus status = AUBase::RestoreState(inData);

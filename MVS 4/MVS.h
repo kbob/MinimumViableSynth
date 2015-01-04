@@ -234,7 +234,13 @@ public:
                                 AudioUnitParameterValue inValue,
                                 UInt32                  inBufferOffsetInFrames);
 
-    virtual OSStatus	RestoreState(
+    virtual OSStatus   GetPresets(
+                                CFArrayRef             *outData) const;
+
+    virtual OSStatus   NewFactoryPresetSet(
+                                const AUPreset         &inNewFactoryPreset);
+
+    virtual OSStatus   RestoreState(
                                 CFPropertyListRef		inData);
 
     // override AUInstrumentBase to collect ModWheel changes.
