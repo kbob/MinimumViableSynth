@@ -24,7 +24,7 @@
 #include "Oscillator.h"
 #include "ParamSet.h"
 
-static const UInt32 kNumNotes = 50;
+static const UInt32 kNumNotes = 24;
 
 // Define constants to identify factory presets.
 enum Preset {

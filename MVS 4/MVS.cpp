@@ -15,7 +15,7 @@
 
 #include "AUMIDIDefs.h"
  
-static const UInt32  kMaxActiveNotes = 50;
+static const UInt32  kMaxActiveNotes = 24;
 static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
