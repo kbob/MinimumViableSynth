@@ -48,6 +48,7 @@ protected:
 private:
 
     friend class           ParamSet;
+    friend class           EnumParamBase;
 
     int                    mIndex;
     int                    mModIndex;

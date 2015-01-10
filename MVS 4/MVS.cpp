@@ -16,7 +16,6 @@
 #include "AUMIDIDefs.h"
  
 static const UInt32  kMaxActiveNotes = 24;
-static const UInt32  kOversampleRatio = 4;
 static const Float64 kDecimatorPassFreq = 20000.0;
 
 
@@ -176,15 +175,17 @@ MVSParamSet::MVSParamSet()
             .default_value(Filter::LowPass);
 
         flt_cutoff.name("Cutoff Frequency")
-            .min_max(log(20), log(20000))
-            .default_value(20000)
+            .min_max(logf(20), logf(20000))
+            .default_value(logf(20000))
             .units(kAudioUnitParameterUnit_Hertz)
-            .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
+            .flag(kAudioUnitParameterFlag_DisplayLogarithmic)
+            .flag(kAudioUnitParameterFlag_IsHighResolution);
 
         flt_resonance.name("Resonance")
-            .min_max(0, 4)
+            .min_max(0, powf(4, 1/3.))
             .default_value(0)
-            .units(kAudioUnitParameterUnit_LinearGain);
+            .units(kAudioUnitParameterUnit_LinearGain)
+            .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
 
         flt_drive.name("Drive")
             .min_max(-24, +12)
@@ -252,7 +253,7 @@ MVSParamSet::MVSParamSet()
             .assigns_mod(Mod::Wheel);
 
         mw_amount.name("Amount")
-            .min_max(0, 2)
+            .min_max(-2, 2)
             .default_value(0.05)
             .units(kAudioUnitParameterUnit_Generic);
     }
@@ -343,13 +344,13 @@ MVSParamSet::MVSParamSet()
         ParamClump env2("Envelope 2", "Env 2");
 
         env2_attack.name("Attack Time")
-            .min_max(0, 9.999)
+            .min_max(0, powf(9.999, 1/3.))
             .default_value(0.200)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
 
         env2_decay.name("Decay Time")
-            .min_max(0, 9.999)
+            .min_max(0, powf(9.999, 1/3.))
             .default_value(0.300)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -360,7 +361,7 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_LinearGain);
 
         env2_release.name("Release Time")
-            .min_max(0, 9.999)
+            .min_max(0, powf(9.999, 1/3.))
             .default_value(0.200)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -425,7 +426,6 @@ MVS::MVS(AudioUnit inComponentInstance)
     SetAFactoryPresetAsCurrent(kPresets[kPreset_Default]);
 
     for (size_t i = 0; i < kNumNotes; i++) {
-        mNotes[i].SetOversampleParams(kOversampleRatio, &mOversampleBufPtr);
         mNotes[i].AffixParams(&mParams);
         mNotes[i].AffixModBox(&mModBoxPtr);
     }
@@ -448,12 +448,20 @@ OSStatus MVS::Initialize()
     SetNotes(kNumNotes, kMaxActiveNotes, mNotes, sizeof(MVSNote));
 
     Float64 baseSampleRate = GetOutput(0)->GetStreamFormat().mSampleRate;
-    mDecimator.initialize(baseSampleRate, kDecimatorPassFreq, kOversampleRatio);
+    float passFreq = kDecimatorPassFreq;
+    // 0.91 barely clears 44100/20000.
+    if (passFreq > 0.91 * baseSampleRate / 2)
+        passFreq = 0.91 * baseSampleRate / 2;
+    mOversampleRatio = ceilf(2 * 4 * passFreq / baseSampleRate);
+    mDecimator.initialize(baseSampleRate, passFreq, mOversampleRatio);
     double oversample_rate = mDecimator.oversampleRate();
 
     mModWheel.initialize(oversample_rate);
     mLFO1.initialize(oversample_rate);
     mLFO2.initialize(oversample_rate);
+
+    for (size_t i = 0; i < kNumNotes; i++)
+        mNotes[i].SetOversampleParams(mOversampleRatio, &mOversampleBufPtr);
 
     return noErr;
 }
@@ -628,7 +636,7 @@ OSStatus MVS::Render(AudioUnitRenderActionFlags &ioActionFlags,
                                 // only does this for the first output element
 
     // Allocate and clear oversampleBuf.
-    UInt32 oversampleFrameCount = kOversampleRatio * inNumberFrames;
+    UInt32 oversampleFrameCount = mOversampleRatio * inNumberFrames;
     Float32 oversampleBuf[oversampleFrameCount];
     memset(&oversampleBuf, 0, sizeof oversampleBuf);
     mOversampleBufPtr = oversampleBuf;

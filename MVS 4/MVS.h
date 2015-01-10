@@ -258,6 +258,7 @@ public:
 
 private:
     MVSParamSet        mParams;
+    unsigned           mOversampleRatio;
     Float32           *mOversampleBufPtr;
     MVSModMatrix       mModMatrix;
     MVSModBox const   *mModBoxPtr;

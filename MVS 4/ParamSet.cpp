@@ -157,8 +157,15 @@ OSStatus EnumParamBase::set_value(float new_value)
     if (new_value < 1.0 && size > 1)
         new_value *= 127.0 / (size - 1);
     int intval = (int)(new_value + 0.5);
-    if (intval < 0 || intval >= size)
-        return kAudioUnitErr_InvalidPropertyValue;
+    if (intval < 0 || intval >= size) {
+        printf("%s:%u: param %u.%s, new_value=%g size=%zu intval=%d\n",
+               __func__, __LINE__,
+               mInfo.clumpID,
+               CFStringGetCStringPtr(mInfo.cfNameString,
+                                     kCFStringEncodingUTF8),
+               new_value, size, intval);
+        return noErr;
+    }
 
     mUnmappedValue = intval;
     mMappedValue = mValueStrings[intval].value;

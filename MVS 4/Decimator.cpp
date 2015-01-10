@@ -26,6 +26,9 @@ void Decimator::initialize(Float64  decimatedSampleRate,
     mDecimatedSampleRate = decimatedSampleRate;
     mRatio = oversampleRatio;
     mOversampleRate = decimatedSampleRate * oversampleRatio;
+    if (mRatio == 1)
+        return;           // The null decimator
+
     Float64 NyquistFreq = decimatedSampleRate / 2;
     assert(passFrequency < NyquistFreq);
 
@@ -95,6 +98,12 @@ void Decimator::initialize(Float64  decimatedSampleRate,
 
 void Decimator::decimate(Float32 *in, Float32 *out, size_t outCount)
 {
+    if (mRatio == 1) {
+        for (size_t i = 0; i < outCount; i++)
+            out[i] = in[i];
+        return;
+    }
+
     assert(!(mCursor % mRatio));
     assert(mCursor < mKernelSize);
     size_t cursor = mCursor;
