@@ -186,20 +186,15 @@ size_t Envelope::generate_exponential(float const *attack,
             if (samples_done == 0)
                 level = kInaudibleLevel;
             for ( ; i < count; i++) {
+                float t = (samples_done + i) * mInverseSampleRate;
                 float a = attack[i];
-                if (a)
-                    level *= 1 + scale / a;
-                else
-                    level = 1;
-                if (level >= 1) {
+                if (t >= a) {
                     level = 1;
                     mSegment = Decay;
-                    mAttackDuration = a;
-                    // printf("Attack done at %zu = %g\n",
-                    //        samples_done + i,
-                    //        (samples_done + i) * mInverseSampleRate);
+                    mAttackDuration = t;
                     break;
                 }
+                level = t / a;
                 amplitude = level * amount[i];
                 out[i] = amplitude;
             }
