@@ -175,14 +175,23 @@ MVSParamSet::MVSParamSet()
             .default_value(Filter::LowPass);
 
         flt_cutoff.name("Cutoff Frequency")
+#ifdef AULAB_BUG_COMPAT
             .min_max(logf(20), logf(20000))
             .default_value(logf(20000))
+#else
+            .min_max(20, 20000)
+            .default_value(20000)
+#endif
             .units(kAudioUnitParameterUnit_Hertz)
             .flag(kAudioUnitParameterFlag_DisplayLogarithmic)
             .flag(kAudioUnitParameterFlag_IsHighResolution);
 
         flt_resonance.name("Resonance")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(4, 1/3.))
+#else
+            .min_max(0, 4)
+#endif
             .default_value(0)
             .units(kAudioUnitParameterUnit_LinearGain)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -203,13 +212,21 @@ MVSParamSet::MVSParamSet()
         ParamClump amp("Amplifier", "Amp");
 
         amp_attack.name("Attack Time")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(9.999, 1/3.))
+#else
+            .min_max(0, 9.999)
+#endif
             .default_value(0.001)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
 
         amp_decay.name("Decay Time")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(9.999, 1/3.))
+#else
+            .min_max(0, 9.999)
+#endif
             .default_value(0.100)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -220,7 +237,11 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_LinearGain);
 
         amp_release.name("Release Time")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(9.999, 1/3.))
+#else
+            .min_max(0, 9.999)
+#endif
             .default_value(0.050)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -267,7 +288,11 @@ MVSParamSet::MVSParamSet()
             .default_value(LFO::Triangle);
 
         lfo1_speed.name("Speed")
+#ifdef AULAB_BUG_COMPAT
             .min_max(log(0.1), log(50))
+#else
+            .min_max(0.1, 50)
+#endif
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
             .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
@@ -304,7 +329,11 @@ MVSParamSet::MVSParamSet()
             .default_value(LFO::UpSaw);
 
         lfo2_speed.name("Speed")
+#ifdef AULAB_BUG_COMPAT
             .min_max(log(0.1), log(50))
+#else
+            .min_max(0.1, 50)
+#endif
             .default_value(3.0)
             .units(kAudioUnitParameterUnit_Hertz)
             .flag(kAudioUnitParameterFlag_DisplayLogarithmic);
@@ -344,13 +373,21 @@ MVSParamSet::MVSParamSet()
         ParamClump env2("Envelope 2", "Env 2");
 
         env2_attack.name("Attack Time")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(9.999, 1/3.))
+#else
+            .min_max(0, 9.999)
+#endif
             .default_value(0.200)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
 
         env2_decay.name("Decay Time")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(9.999, 1/3.))
+#else
+            .min_max(0, 9.999)
+#endif
             .default_value(0.300)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -361,7 +398,11 @@ MVSParamSet::MVSParamSet()
             .units(kAudioUnitParameterUnit_LinearGain);
 
         env2_release.name("Release Time")
+#ifdef AULAB_BUG_COMPAT
             .min_max(0, powf(9.999, 1/3.))
+#else
+            .min_max(0, 9.999)
+#endif
             .default_value(0.200)
             .units(kAudioUnitParameterUnit_Seconds)
             .flag(kAudioUnitParameterFlag_DisplayCubeRoot);
@@ -585,6 +626,9 @@ OSStatus MVS::NewFactoryPresetSet(const AUPreset &inNewFactoryPreset)
             SetParameter(i, kAudioUnitScope_Global, 0, v, 0);
         }
         mParams.set_defaults();
+        AUElement *glob = Globals();
+        for (size_t i = 0; i < mParams.size(); i++)
+            glob->SetParameter((AudioUnitParameterID)i, mParams.param_value(i));
         return noErr;
     }
     return kAudioUnitErr_InvalidProperty;
