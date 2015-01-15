@@ -88,6 +88,47 @@
 		9291A6D81A45D98B00AA6E18 /* ModWheel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9291A6D61A45D98B00AA6E18 /* ModWheel.cpp */; };
 		929D3C391A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
 		929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
+		92A723B71A67767B007EF2AF /* NoiseSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */; };
+		92A723B81A67767B007EF2AF /* SynthNote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B9A1A19A7DC00B87C38 /* SynthNote.cpp */; };
+		92A723B91A67767B007EF2AF /* ModWheel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9291A6D61A45D98B00AA6E18 /* ModWheel.cpp */; };
+		92A723BA1A67767B007EF2AF /* Mixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 923D02031A4BCAC30095A7DC /* Mixer.cpp */; };
+		92A723BB1A67767B007EF2AF /* AUScopeElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B861A19A7DC00B87C38 /* AUScopeElement.cpp */; };
+		92A723BC1A67767B007EF2AF /* MVS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD61A19A7DC00B87C38 /* MVS.cpp */; };
+		92A723BD1A67767B007EF2AF /* Amplifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE21A552CE300241D82 /* Amplifier.cpp */; };
+		92A723BE1A67767B007EF2AF /* ParamSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 926C8C091A4118050082B95A /* ParamSet.cpp */; };
+		92A723BF1A67767B007EF2AF /* AUOutputElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B801A19A7DC00B87C38 /* AUOutputElement.cpp */; };
+		92A723C01A67767B007EF2AF /* ComponentBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B891A19A7DC00B87C38 /* ComponentBase.cpp */; };
+		92A723C11A67767B007EF2AF /* AUBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B8D1A19A7DC00B87C38 /* AUBuffer.cpp */; };
+		92A723C21A67767B007EF2AF /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BA41A19A7DC00B87C38 /* MusicDeviceBase.cpp */; };
+		92A723C31A67767B007EF2AF /* CAMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BC51A19A7DC00B87C38 /* CAMutex.cpp */; };
+		92A723C41A67767B007EF2AF /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE61A56167400241D82 /* Filter.cpp */; };
+		92A723C51A67767B007EF2AF /* CAAudioChannelLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BB51A19A7DC00B87C38 /* CAAudioChannelLayout.cpp */; };
+		92A723C61A67767B007EF2AF /* SynthNoteList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B9D1A19A7DC00B87C38 /* SynthNoteList.cpp */; };
+		92A723C71A67767B007EF2AF /* SynthElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B961A19A7DC00B87C38 /* SynthElement.cpp */; };
+		92A723C81A67767B007EF2AF /* Envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE01A19B5DD00B87C38 /* Envelope.cpp */; };
+		92A723C91A67767B007EF2AF /* CAAUMIDIMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BAC1A19A7DC00B87C38 /* CAAUMIDIMap.cpp */; };
+		92A723CA1A67767B007EF2AF /* AUBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B791A19A7DC00B87C38 /* AUBase.cpp */; };
+		92A723CB1A67767B007EF2AF /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
+		92A723CC1A67767B007EF2AF /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C051A4691CC00B18028 /* Random.cpp */; };
+		92A723CD1A67767B007EF2AF /* CAXException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD11A19A7DC00B87C38 /* CAXException.cpp */; };
+		92A723CE1A67767B007EF2AF /* AUPluginDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B831A19A7DC00B87C38 /* AUPluginDispatch.cpp */; };
+		92A723CF1A67767B007EF2AF /* AUInputElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B7D1A19A7DC00B87C38 /* AUInputElement.cpp */; };
+		92A723D01A67767B007EF2AF /* CABufferList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BB91A19A7DC00B87C38 /* CABufferList.cpp */; };
+		92A723D11A67767B007EF2AF /* CAStreamBasicDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BC91A19A7DC00B87C38 /* CAStreamBasicDescription.cpp */; };
+		92A723D21A67767B007EF2AF /* AUInstrumentBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B911A19A7DC00B87C38 /* AUInstrumentBase.cpp */; };
+		92A723D31A67767B007EF2AF /* CAHostTimeBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BC11A19A7DC00B87C38 /* CAHostTimeBase.cpp */; };
+		92A723D41A67767B007EF2AF /* LFO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C021A468F2500B18028 /* LFO.cpp */; };
+		92A723D51A67767B007EF2AF /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BCD1A19A7DC00B87C38 /* CAVectorUnit.cpp */; };
+		92A723D61A67767B007EF2AF /* CAAUMIDIMapManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BAF1A19A7DC00B87C38 /* CAAUMIDIMapManager.cpp */; };
+		92A723D71A67767B007EF2AF /* CADebugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BBD1A19A7DC00B87C38 /* CADebugPrintf.cpp */; };
+		92A723D81A67767B007EF2AF /* AUBaseHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BA71A19A7DC00B87C38 /* AUBaseHelper.cpp */; };
+		92A723D91A67767B007EF2AF /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
+		92A723DA1A67767B007EF2AF /* AUMIDIBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BA11A19A7DC00B87C38 /* AUMIDIBase.cpp */; };
+		92A723DC1A67767B007EF2AF /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */; };
+		92A723DD1A67767B007EF2AF /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B721A19A7DC00B87C38 /* AudioUnit.framework */; };
+		92A723DE1A67767B007EF2AF /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B701A19A7DC00B87C38 /* CoreServices.framework */; };
+		92A723DF1A67767B007EF2AF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6E1A19A7DC00B87C38 /* AudioToolbox.framework */; };
+		92A723E11A67767B007EF2AF /* MVS 4_Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = 92717BD91A19A7DC00B87C38 /* MVS 4_Prefix.pch */; };
 		92AC4F551A2F6F3500C9DB82 /* NoiseSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */; };
 		92D8C57E1A63D29100AFF1D2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 92D8C57D1A63D29100AFF1D2 /* AppDelegate.m */; };
 		92D8C5801A63D29100AFF1D2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 92D8C57F1A63D29100AFF1D2 /* main.m */; };
@@ -214,6 +255,8 @@
 		9291A6D71A45D98B00AA6E18 /* ModWheel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModWheel.h; sourceTree = "<group>"; };
 		929D3C371A2A3DDC0049102A /* Decimator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decimator.cpp; sourceTree = "<group>"; };
 		929D3C381A2A3DDC0049102A /* Decimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decimator.h; sourceTree = "<group>"; };
+		92A723E81A67767B007EF2AF /* MVS 4 - AU Lab.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MVS 4 - AU Lab.component"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92A723E91A67767B007EF2AF /* MVS 4 - AU Lab-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "MVS 4 - AU Lab-Info.plist"; path = "/Users/kbob/Documents/Code/Audio/MVS 4/MVS 4 - AU Lab-Info.plist"; sourceTree = "<absolute>"; };
 		92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NoiseSource.cpp; sourceTree = "<group>"; };
 		92AC4F541A2F6F3500C9DB82 /* NoiseSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoiseSource.h; sourceTree = "<group>"; };
 		92D8C5781A63D29100AFF1D2 /* UI Mockup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "UI Mockup.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -281,6 +324,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		92A723DB1A67767B007EF2AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A723DC1A67767B007EF2AF /* CoreMIDI.framework in Frameworks */,
+				92A723DD1A67767B007EF2AF /* AudioUnit.framework in Frameworks */,
+				92A723DE1A67767B007EF2AF /* CoreServices.framework in Frameworks */,
+				92A723DF1A67767B007EF2AF /* AudioToolbox.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A723E31A67767B007EF2AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92D8C5751A63D29100AFF1D2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -308,6 +369,7 @@
 				92717B6B1A19A7DC00B87C38 /* Frameworks */,
 				92717B6A1A19A7DC00B87C38 /* Products */,
 				922E757D1A6772DA00E1FD3B /* MVS 4 - Logic-Info.plist */,
+				92A723E91A67767B007EF2AF /* MVS 4 - AU Lab-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -319,6 +381,7 @@
 				92D8C5781A63D29100AFF1D2 /* UI Mockup.app */,
 				92D8C58A1A63D29100AFF1D2 /* UI MockupTests.xctest */,
 				922E757C1A6772DA00E1FD3B /* MVS 4 — Logic.component */,
+				92A723E81A67767B007EF2AF /* MVS 4 - AU Lab.component */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -602,6 +665,26 @@
 			productReference = 92717BEA1A1B211600B87C38 /* One Note */;
 			productType = "com.apple.product-type.tool";
 		};
+		92A723B51A67767B007EF2AF /* MVS 4 AU Lab */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92A723E51A67767B007EF2AF /* Build configuration list for PBXNativeTarget "MVS 4 AU Lab" */;
+			buildPhases = (
+				92A723B61A67767B007EF2AF /* Sources */,
+				92A723DB1A67767B007EF2AF /* Frameworks */,
+				92A723E01A67767B007EF2AF /* Resources */,
+				92A723E21A67767B007EF2AF /* Sources */,
+				92A723E31A67767B007EF2AF /* Frameworks */,
+				92A723E41A67767B007EF2AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MVS 4 AU Lab";
+			productName = MVS;
+			productReference = 92A723E81A67767B007EF2AF /* MVS 4 - AU Lab.component */;
+			productType = "com.apple.product-type.bundle";
+		};
 		92D8C5771A63D29100AFF1D2 /* UI Mockup */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 92D8C5961A63D29100AFF1D2 /* Build configuration list for PBXNativeTarget "UI Mockup" */;
@@ -679,6 +762,7 @@
 				92D8C5771A63D29100AFF1D2 /* UI Mockup */,
 				92D8C5891A63D29100AFF1D2 /* UI MockupTests */,
 				922E75491A6772DA00E1FD3B /* MVS 4 Logic */,
+				92A723B51A67767B007EF2AF /* MVS 4 AU Lab */,
 			);
 		};
 /* End PBXProject section */
@@ -708,6 +792,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		92717B671A19A7DC00B87C38 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A723E01A67767B007EF2AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A723E11A67767B007EF2AF /* MVS 4_Prefix.pch in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A723E41A67767B007EF2AF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -843,6 +942,56 @@
 				92717BF11A1B2BC100B87C38 /* Envelope.cpp in Sources */,
 				929D3C3A1A2A3DDC0049102A /* Decimator.cpp in Sources */,
 				92717BF21A1B2BC500B87C38 /* Oscillator.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A723B61A67767B007EF2AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A723B71A67767B007EF2AF /* NoiseSource.cpp in Sources */,
+				92A723B81A67767B007EF2AF /* SynthNote.cpp in Sources */,
+				92A723B91A67767B007EF2AF /* ModWheel.cpp in Sources */,
+				92A723BA1A67767B007EF2AF /* Mixer.cpp in Sources */,
+				92A723BB1A67767B007EF2AF /* AUScopeElement.cpp in Sources */,
+				92A723BC1A67767B007EF2AF /* MVS.cpp in Sources */,
+				92A723BD1A67767B007EF2AF /* Amplifier.cpp in Sources */,
+				92A723BE1A67767B007EF2AF /* ParamSet.cpp in Sources */,
+				92A723BF1A67767B007EF2AF /* AUOutputElement.cpp in Sources */,
+				92A723C01A67767B007EF2AF /* ComponentBase.cpp in Sources */,
+				92A723C11A67767B007EF2AF /* AUBuffer.cpp in Sources */,
+				92A723C21A67767B007EF2AF /* MusicDeviceBase.cpp in Sources */,
+				92A723C31A67767B007EF2AF /* CAMutex.cpp in Sources */,
+				92A723C41A67767B007EF2AF /* Filter.cpp in Sources */,
+				92A723C51A67767B007EF2AF /* CAAudioChannelLayout.cpp in Sources */,
+				92A723C61A67767B007EF2AF /* SynthNoteList.cpp in Sources */,
+				92A723C71A67767B007EF2AF /* SynthElement.cpp in Sources */,
+				92A723C81A67767B007EF2AF /* Envelope.cpp in Sources */,
+				92A723C91A67767B007EF2AF /* CAAUMIDIMap.cpp in Sources */,
+				92A723CA1A67767B007EF2AF /* AUBase.cpp in Sources */,
+				92A723CB1A67767B007EF2AF /* Oscillator.cpp in Sources */,
+				92A723CC1A67767B007EF2AF /* Random.cpp in Sources */,
+				92A723CD1A67767B007EF2AF /* CAXException.cpp in Sources */,
+				92A723CE1A67767B007EF2AF /* AUPluginDispatch.cpp in Sources */,
+				92A723CF1A67767B007EF2AF /* AUInputElement.cpp in Sources */,
+				92A723D01A67767B007EF2AF /* CABufferList.cpp in Sources */,
+				92A723D11A67767B007EF2AF /* CAStreamBasicDescription.cpp in Sources */,
+				92A723D21A67767B007EF2AF /* AUInstrumentBase.cpp in Sources */,
+				92A723D31A67767B007EF2AF /* CAHostTimeBase.cpp in Sources */,
+				92A723D41A67767B007EF2AF /* LFO.cpp in Sources */,
+				92A723D51A67767B007EF2AF /* CAVectorUnit.cpp in Sources */,
+				92A723D61A67767B007EF2AF /* CAAUMIDIMapManager.cpp in Sources */,
+				92A723D71A67767B007EF2AF /* CADebugPrintf.cpp in Sources */,
+				92A723D81A67767B007EF2AF /* AUBaseHelper.cpp in Sources */,
+				92A723D91A67767B007EF2AF /* Decimator.cpp in Sources */,
+				92A723DA1A67767B007EF2AF /* AUMIDIBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		92A723E21A67767B007EF2AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1059,6 +1208,44 @@
 			};
 			name = Release;
 		};
+		92A723E61A67767B007EF2AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					CA_USE_AUDIO_PLUGIN_ONLY,
+					CA_AUTO_MIDI_MAP,
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "MVS 4 - AU Lab-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_NAME = "MVS 4 - AU Lab";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = component;
+			};
+			name = Debug;
+		};
+		92A723E71A67767B007EF2AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					CA_USE_AUDIO_PLUGIN_ONLY,
+					CA_AUTO_MIDI_MAP,
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "MVS 4 - AU Lab-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_NAME = "MVS 4 - AU Lab";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = component;
+			};
+			name = Release;
+		};
 		92D8C5921A63D29100AFF1D2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1158,6 +1345,15 @@
 			buildConfigurations = (
 				92717BEF1A1B211600B87C38 /* Debug */,
 				92717BF01A1B211600B87C38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		92A723E51A67767B007EF2AF /* Build configuration list for PBXNativeTarget "MVS 4 AU Lab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92A723E61A67767B007EF2AF /* Debug */,
+				92A723E71A67767B007EF2AF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

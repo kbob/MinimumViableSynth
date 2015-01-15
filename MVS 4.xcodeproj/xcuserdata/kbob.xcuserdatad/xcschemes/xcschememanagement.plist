@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>MVS 4 - AU Lab.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 		<key>MVS 4 - Logic.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -33,6 +38,11 @@
 			<true/>
 		</dict>
 		<key>92717BE91A1B211600B87C38</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>92A723B51A67767B007EF2AF</key>
 		<dict>
 			<key>primary</key>
 			<true/>
