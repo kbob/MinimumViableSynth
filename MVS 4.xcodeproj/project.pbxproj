@@ -7,6 +7,47 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		922E754B1A6772DA00E1FD3B /* NoiseSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92AC4F531A2F6F3500C9DB82 /* NoiseSource.cpp */; };
+		922E754C1A6772DA00E1FD3B /* SynthNote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B9A1A19A7DC00B87C38 /* SynthNote.cpp */; };
+		922E754D1A6772DA00E1FD3B /* ModWheel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9291A6D61A45D98B00AA6E18 /* ModWheel.cpp */; };
+		922E754E1A6772DA00E1FD3B /* Mixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 923D02031A4BCAC30095A7DC /* Mixer.cpp */; };
+		922E754F1A6772DA00E1FD3B /* AUScopeElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B861A19A7DC00B87C38 /* AUScopeElement.cpp */; };
+		922E75501A6772DA00E1FD3B /* MVS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD61A19A7DC00B87C38 /* MVS.cpp */; };
+		922E75511A6772DA00E1FD3B /* Amplifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE21A552CE300241D82 /* Amplifier.cpp */; };
+		922E75521A6772DA00E1FD3B /* ParamSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 926C8C091A4118050082B95A /* ParamSet.cpp */; };
+		922E75531A6772DA00E1FD3B /* AUOutputElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B801A19A7DC00B87C38 /* AUOutputElement.cpp */; };
+		922E75541A6772DA00E1FD3B /* ComponentBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B891A19A7DC00B87C38 /* ComponentBase.cpp */; };
+		922E75551A6772DA00E1FD3B /* AUBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B8D1A19A7DC00B87C38 /* AUBuffer.cpp */; };
+		922E75561A6772DA00E1FD3B /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BA41A19A7DC00B87C38 /* MusicDeviceBase.cpp */; };
+		922E75571A6772DA00E1FD3B /* CAMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BC51A19A7DC00B87C38 /* CAMutex.cpp */; };
+		922E75581A6772DA00E1FD3B /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92E00EE61A56167400241D82 /* Filter.cpp */; };
+		922E75591A6772DA00E1FD3B /* CAAudioChannelLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BB51A19A7DC00B87C38 /* CAAudioChannelLayout.cpp */; };
+		922E755A1A6772DA00E1FD3B /* SynthNoteList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B9D1A19A7DC00B87C38 /* SynthNoteList.cpp */; };
+		922E755B1A6772DA00E1FD3B /* SynthElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B961A19A7DC00B87C38 /* SynthElement.cpp */; };
+		922E755C1A6772DA00E1FD3B /* Envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE01A19B5DD00B87C38 /* Envelope.cpp */; };
+		922E755D1A6772DA00E1FD3B /* CAAUMIDIMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BAC1A19A7DC00B87C38 /* CAAUMIDIMap.cpp */; };
+		922E755E1A6772DA00E1FD3B /* AUBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B791A19A7DC00B87C38 /* AUBase.cpp */; };
+		922E755F1A6772DA00E1FD3B /* Oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BE31A1A498100B87C38 /* Oscillator.cpp */; };
+		922E75601A6772DA00E1FD3B /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C051A4691CC00B18028 /* Random.cpp */; };
+		922E75611A6772DA00E1FD3B /* CAXException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BD11A19A7DC00B87C38 /* CAXException.cpp */; };
+		922E75621A6772DA00E1FD3B /* AUPluginDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B831A19A7DC00B87C38 /* AUPluginDispatch.cpp */; };
+		922E75631A6772DA00E1FD3B /* AUInputElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B7D1A19A7DC00B87C38 /* AUInputElement.cpp */; };
+		922E75641A6772DA00E1FD3B /* CABufferList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BB91A19A7DC00B87C38 /* CABufferList.cpp */; };
+		922E75651A6772DA00E1FD3B /* CAStreamBasicDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BC91A19A7DC00B87C38 /* CAStreamBasicDescription.cpp */; };
+		922E75661A6772DA00E1FD3B /* AUInstrumentBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717B911A19A7DC00B87C38 /* AUInstrumentBase.cpp */; };
+		922E75671A6772DA00E1FD3B /* CAHostTimeBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BC11A19A7DC00B87C38 /* CAHostTimeBase.cpp */; };
+		922E75681A6772DA00E1FD3B /* LFO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92DD0C021A468F2500B18028 /* LFO.cpp */; };
+		922E75691A6772DA00E1FD3B /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BCD1A19A7DC00B87C38 /* CAVectorUnit.cpp */; };
+		922E756A1A6772DA00E1FD3B /* CAAUMIDIMapManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BAF1A19A7DC00B87C38 /* CAAUMIDIMapManager.cpp */; };
+		922E756B1A6772DA00E1FD3B /* CADebugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BBD1A19A7DC00B87C38 /* CADebugPrintf.cpp */; };
+		922E756C1A6772DA00E1FD3B /* AUBaseHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BA71A19A7DC00B87C38 /* AUBaseHelper.cpp */; };
+		922E756D1A6772DA00E1FD3B /* Decimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929D3C371A2A3DDC0049102A /* Decimator.cpp */; };
+		922E756E1A6772DA00E1FD3B /* AUMIDIBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92717BA11A19A7DC00B87C38 /* AUMIDIBase.cpp */; };
+		922E75701A6772DA00E1FD3B /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */; };
+		922E75711A6772DA00E1FD3B /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B721A19A7DC00B87C38 /* AudioUnit.framework */; };
+		922E75721A6772DA00E1FD3B /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B701A19A7DC00B87C38 /* CoreServices.framework */; };
+		922E75731A6772DA00E1FD3B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6E1A19A7DC00B87C38 /* AudioToolbox.framework */; };
+		922E75751A6772DA00E1FD3B /* MVS 4_Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = 92717BD91A19A7DC00B87C38 /* MVS 4_Prefix.pch */; };
 		923D02051A4BCAC30095A7DC /* Mixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 923D02031A4BCAC30095A7DC /* Mixer.cpp */; };
 		926C8C0B1A4118050082B95A /* ParamSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 926C8C091A4118050082B95A /* ParamSet.cpp */; };
 		92717B6D1A19A7DC00B87C38 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92717B6C1A19A7DC00B87C38 /* CoreMIDI.framework */; };
@@ -84,6 +125,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		922E757C1A6772DA00E1FD3B /* MVS 4 — Logic.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MVS 4 — Logic.component"; sourceTree = BUILT_PRODUCTS_DIR; };
+		922E757D1A6772DA00E1FD3B /* MVS 4 - Logic-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "MVS 4 - Logic-Info.plist"; path = "/Users/kbob/Documents/Code/Audio/MVS 4/MVS 4 - Logic-Info.plist"; sourceTree = "<absolute>"; };
 		923D02031A4BCAC30095A7DC /* Mixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mixer.cpp; sourceTree = "<group>"; };
 		923D02041A4BCAC30095A7DC /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mixer.h; sourceTree = "<group>"; };
 		926C8C091A4118050082B95A /* ParamSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParamSet.cpp; sourceTree = "<group>"; };
@@ -195,6 +238,24 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		922E756F1A6772DA00E1FD3B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				922E75701A6772DA00E1FD3B /* CoreMIDI.framework in Frameworks */,
+				922E75711A6772DA00E1FD3B /* AudioUnit.framework in Frameworks */,
+				922E75721A6772DA00E1FD3B /* CoreServices.framework in Frameworks */,
+				922E75731A6772DA00E1FD3B /* AudioToolbox.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		922E75771A6772DA00E1FD3B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92717B631A19A7DC00B87C38 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -246,6 +307,7 @@
 				92D8C58D1A63D29100AFF1D2 /* UI MockupTests */,
 				92717B6B1A19A7DC00B87C38 /* Frameworks */,
 				92717B6A1A19A7DC00B87C38 /* Products */,
+				922E757D1A6772DA00E1FD3B /* MVS 4 - Logic-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -256,6 +318,7 @@
 				92717BEA1A1B211600B87C38 /* One Note */,
 				92D8C5781A63D29100AFF1D2 /* UI Mockup.app */,
 				92D8C58A1A63D29100AFF1D2 /* UI MockupTests.xctest */,
+				922E757C1A6772DA00E1FD3B /* MVS 4 — Logic.component */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -482,6 +545,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		922E75491A6772DA00E1FD3B /* MVS 4 Logic */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 922E75791A6772DA00E1FD3B /* Build configuration list for PBXNativeTarget "MVS 4 Logic" */;
+			buildPhases = (
+				922E754A1A6772DA00E1FD3B /* Sources */,
+				922E756F1A6772DA00E1FD3B /* Frameworks */,
+				922E75741A6772DA00E1FD3B /* Resources */,
+				922E75761A6772DA00E1FD3B /* Sources */,
+				922E75771A6772DA00E1FD3B /* Frameworks */,
+				922E75781A6772DA00E1FD3B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MVS 4 Logic";
+			productName = MVS;
+			productReference = 922E757C1A6772DA00E1FD3B /* MVS 4 — Logic.component */;
+			productType = "com.apple.product-type.bundle";
+		};
 		92717B681A19A7DC00B87C38 /* MVS 4 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 92717BDD1A19A7DC00B87C38 /* Build configuration list for PBXNativeTarget "MVS 4" */;
@@ -595,11 +678,27 @@
 				92717BE91A1B211600B87C38 /* One Note */,
 				92D8C5771A63D29100AFF1D2 /* UI Mockup */,
 				92D8C5891A63D29100AFF1D2 /* UI MockupTests */,
+				922E75491A6772DA00E1FD3B /* MVS 4 Logic */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		922E75741A6772DA00E1FD3B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				922E75751A6772DA00E1FD3B /* MVS 4_Prefix.pch in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		922E75781A6772DA00E1FD3B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92717B641A19A7DC00B87C38 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -634,6 +733,56 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		922E754A1A6772DA00E1FD3B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				922E754B1A6772DA00E1FD3B /* NoiseSource.cpp in Sources */,
+				922E754C1A6772DA00E1FD3B /* SynthNote.cpp in Sources */,
+				922E754D1A6772DA00E1FD3B /* ModWheel.cpp in Sources */,
+				922E754E1A6772DA00E1FD3B /* Mixer.cpp in Sources */,
+				922E754F1A6772DA00E1FD3B /* AUScopeElement.cpp in Sources */,
+				922E75501A6772DA00E1FD3B /* MVS.cpp in Sources */,
+				922E75511A6772DA00E1FD3B /* Amplifier.cpp in Sources */,
+				922E75521A6772DA00E1FD3B /* ParamSet.cpp in Sources */,
+				922E75531A6772DA00E1FD3B /* AUOutputElement.cpp in Sources */,
+				922E75541A6772DA00E1FD3B /* ComponentBase.cpp in Sources */,
+				922E75551A6772DA00E1FD3B /* AUBuffer.cpp in Sources */,
+				922E75561A6772DA00E1FD3B /* MusicDeviceBase.cpp in Sources */,
+				922E75571A6772DA00E1FD3B /* CAMutex.cpp in Sources */,
+				922E75581A6772DA00E1FD3B /* Filter.cpp in Sources */,
+				922E75591A6772DA00E1FD3B /* CAAudioChannelLayout.cpp in Sources */,
+				922E755A1A6772DA00E1FD3B /* SynthNoteList.cpp in Sources */,
+				922E755B1A6772DA00E1FD3B /* SynthElement.cpp in Sources */,
+				922E755C1A6772DA00E1FD3B /* Envelope.cpp in Sources */,
+				922E755D1A6772DA00E1FD3B /* CAAUMIDIMap.cpp in Sources */,
+				922E755E1A6772DA00E1FD3B /* AUBase.cpp in Sources */,
+				922E755F1A6772DA00E1FD3B /* Oscillator.cpp in Sources */,
+				922E75601A6772DA00E1FD3B /* Random.cpp in Sources */,
+				922E75611A6772DA00E1FD3B /* CAXException.cpp in Sources */,
+				922E75621A6772DA00E1FD3B /* AUPluginDispatch.cpp in Sources */,
+				922E75631A6772DA00E1FD3B /* AUInputElement.cpp in Sources */,
+				922E75641A6772DA00E1FD3B /* CABufferList.cpp in Sources */,
+				922E75651A6772DA00E1FD3B /* CAStreamBasicDescription.cpp in Sources */,
+				922E75661A6772DA00E1FD3B /* AUInstrumentBase.cpp in Sources */,
+				922E75671A6772DA00E1FD3B /* CAHostTimeBase.cpp in Sources */,
+				922E75681A6772DA00E1FD3B /* LFO.cpp in Sources */,
+				922E75691A6772DA00E1FD3B /* CAVectorUnit.cpp in Sources */,
+				922E756A1A6772DA00E1FD3B /* CAAUMIDIMapManager.cpp in Sources */,
+				922E756B1A6772DA00E1FD3B /* CADebugPrintf.cpp in Sources */,
+				922E756C1A6772DA00E1FD3B /* AUBaseHelper.cpp in Sources */,
+				922E756D1A6772DA00E1FD3B /* Decimator.cpp in Sources */,
+				922E756E1A6772DA00E1FD3B /* AUMIDIBase.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		922E75761A6772DA00E1FD3B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92717B621A19A7DC00B87C38 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -736,6 +885,44 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		922E757A1A6772DA00E1FD3B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					CA_USE_AUDIO_PLUGIN_ONLY,
+					CA_AUTO_MIDI_MAP,
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "MVS 4 - Logic-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_NAME = "MVS 4 — Logic";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = component;
+			};
+			name = Debug;
+		};
+		922E757B1A6772DA00E1FD3B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MVS 4/MVS 4_Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					CA_USE_AUDIO_PLUGIN_ONLY,
+					CA_AUTO_MIDI_MAP,
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "MVS 4 - Logic-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_NAME = "MVS 4 — Logic";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = component;
+			};
+			name = Release;
+		};
 		92717BDB1A19A7DC00B87C38 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -939,6 +1126,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		922E75791A6772DA00E1FD3B /* Build configuration list for PBXNativeTarget "MVS 4 Logic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				922E757A1A6772DA00E1FD3B /* Debug */,
+				922E757B1A6772DA00E1FD3B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		92717B611A19A7DC00B87C38 /* Build configuration list for PBXProject "MVS 4" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -973,6 +1169,7 @@
 				92D8C5931A63D29100AFF1D2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		92D8C5971A63D29100AFF1D2 /* Build configuration list for PBXNativeTarget "UI MockupTests" */ = {
 			isa = XCConfigurationList;
@@ -981,6 +1178,7 @@
 				92D8C5951A63D29100AFF1D2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

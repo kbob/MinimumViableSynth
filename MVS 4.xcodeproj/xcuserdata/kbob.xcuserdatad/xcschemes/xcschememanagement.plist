@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>MVS 4 - Logic.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>MVS 4.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -17,6 +22,11 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>922E75491A6772DA00E1FD3B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>92717B681A19A7DC00B87C38</key>
 		<dict>
 			<key>primary</key>
