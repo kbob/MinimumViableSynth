@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>MVS 4 - AU Lab.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>MVS 4 - Logic.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>MVS 4.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+		<key>One Note.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>922E75491A6772DA00E1FD3B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>92717B681A19A7DC00B87C38</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>92717BE91A1B211600B87C38</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>92A723B51A67767B007EF2AF</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>92D8C5771A63D29100AFF1D2</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>92D8C5891A63D29100AFF1D2</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
