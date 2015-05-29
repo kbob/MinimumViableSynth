@@ -177,7 +177,7 @@ MVSParamSet::MVSParamSet()
         flt_cutoff.name("Cutoff Frequency")
 #ifdef AULAB_BUG_COMPAT
             .min_max(logf(20), logf(20000))
-            .default_value(logf(20000))
+            .default_value(20000)
 #else
             .min_max(20, 20000)
             .default_value(20000)
