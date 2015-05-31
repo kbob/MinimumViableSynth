@@ -1228,10 +1228,10 @@ COM-09938 (green, Vf = 3.4V, Ifmax = 20mA)&lt;br&gt;</description>
 <net name="N$23" class="0">
 <segment>
 <pinref part="U$1" gate="G$1" pin="13"/>
-<wire x1="10.16" y1="99.06" x2="86.36" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="10.16" y1="101.6" x2="86.36" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="JP1" gate="B" pin="3"/>
 <wire x1="17.78" y1="149.86" x2="10.16" y2="149.86" width="0.1524" layer="91"/>
-<wire x1="10.16" y1="149.86" x2="10.16" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="10.16" y1="149.86" x2="10.16" y2="101.6" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$24" class="0">
