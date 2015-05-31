@@ -264,7 +264,7 @@ can run 24 notes on one core of the MacBook.  That should scale nearly
 linearly to four cores, and if I rearrange the code to take advantage
 of the SSE instructions, there should be another factor of less than
 four available.  Intel's CPU designers and Apple's compiler team are
-hard to compute with.
+hard to compute^Wcompete with.
 
 The cheapest way to calculate tanh on an FPGA is with CORDIC.  The
 claim is, "CORDIC needs about as many gates as multiply."  That means
@@ -1594,6 +1594,11 @@ Minimum Viable Synth has worked pretty well.
 I'm thinking Model A.
 Update 12/23:
    ... or Tin Lizzie or Thin Lizzie.
+Update 2015-05-31:
+   ... Model A being a pun on Analog Modeling.
+       Wikipedia says Tin Lizzie was the Ford Model T, not the Model
+       A.  The Model A is also known as the A-Bone. (?)
+       
 
 ----------------------------------
 2014-12-14
