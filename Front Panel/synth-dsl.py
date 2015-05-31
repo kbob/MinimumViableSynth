@@ -55,20 +55,31 @@ pdfmetrics.registerFont(TTFont('Lato-Light', control_font_file))
 CHOICE_FONT = ('Helvetica', 7)
 CHOICE_FONT = ('Lato-Light', 7)
 
+LED_blue = (0.3, 0.3, 1.0)
+LED_amber = (1, 0.6, 0.2)
+LED_red = (1, 0.2, 0.2)
+LED_green = (0, 1, 0)
+
 paginate = False
-cutting_guide = True
+cutting_guide = False
 if cutting_guide:
     BG = (1, 1, 1)
     FG = (0.5, 0.5, 0.5)
     cut_width = 0.2 * mm;
     cut_color = (0, 1, 0)
 else:
-    BG = (0.12, 0.24, 0.24)
-    FG = (1, 0.8, 0.3)
-    # FG = (0.9, 0.9, 0.9)
-    # BG = (0.6, 0.6, 0.6)
-    FG = (1, 0.75, 0.2)
-    BG = (0.2, 0.2, 0.2)
+    # yellow on green
+    # BG = (0.12, 0.24, 0.24)
+    # FG = (1, 0.8, 0.3)
+
+    # gray on gray
+    FG = (0.9, 0.9, 0.9)
+    BG = (0.6, 0.6, 0.6)
+    BG = (0.3, 0.3, 0.3)
+
+    # yellow on red
+    # FG = (1, 0.75, 0.2)
+    # BG = (0.2, 0.2, 0.2)
     cut_width = 1
     cut_color = (0, 0, 0)
 
@@ -355,7 +366,7 @@ lf_waveforms = [triangle, saw_up, saw_down, square, random, sample_hold]
 
 def LFO(label, *args, **kwargs):
     return SourceModule(label,
-                        (Choice('Waveform', lf_waveforms),
+                        (Choice('Waveform', lf_waveforms, color=LED_blue),
                          DestKnob('Speed')),
                         **kwargs)
 
@@ -389,7 +400,7 @@ ctls = SourceModule('Controllers',
                     (Choice('Controller', ['Velocity',
                                           'Mod Wheel',
                                           'Aftertouch',
-                                           'Other']),
+                                           'Other'], color=LED_blue),
                      Blank()),
                     side=Layout.left)
 
@@ -398,25 +409,29 @@ title = Title('Minimum Viable Synth')
 screen = TouchScreen(dimensions=(121, 76))
 
 osc1 = Module('Oscillator 1',
-              (Choice('Waveform', af_waveforms),
+              (Choice('Waveform', af_waveforms, color=LED_amber),
                DestKnob('Width'),
                DestKnob('Pitch'),
                # Knob('Fine Pitch'),
                AmountKnob(align=Layout.right)))
 osc2 = Module('Oscillator 2',
-              (Choice('Waveform', af_waveforms),
+              (Choice('Waveform', af_waveforms, color=LED_amber),
                DestKnob('Width'),
                DestKnob('Pitch'),
                AmountKnob(align=Layout.left)))
 noise = Module('Noise',
-               (Choice('Spectrum', ['White', 'Pink', 'Red']),
+               (Choice('Spectrum', ['White', 'Pink', 'Red'], color=LED_amber),
                 AmountKnob()))
 mixer = Module('Mix',
-               (Choice('Operator', ['Mix', 'Ring Mod', 'Hard Sync']),
+               (Choice('Operator',
+                       ['Mix', 'Ring Mod', 'Hard Sync'],
+                       color=LED_green),
                 Blank()),
                align=Layout.center)
 filter = Module('Filter',
-                (Choice('Type', ['Low Pass', 'High Pass', 'Off']),
+                (Choice('Type',
+                        ['Low Pass', 'High Pass', 'Off'],
+                        color=LED_red),
                  DestKnob('Cutoff', align=Layout.stretch),
                  DestKnob('Resonance', align=Layout.stretch),
                  DestKnob('Drive', align=Layout.right),
@@ -1036,7 +1051,7 @@ def render_choice(c, box):
 
         # LEDs and labels
         if not cutting_guide:
-            c.setFillColorRGB(0.3, 0.3, 1)
+            c.setFillColorRGB(*(getattr(widget, 'color', (0.3, 0.3, 1))))
         c.setFont(*CHOICE_FONT)
         for i, label in enumerate(widget.choices):
             y = LED_pos[1] + (n - i - 1) * LED_spacing
