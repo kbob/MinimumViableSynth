@@ -1,0 +1,2083 @@
+2015-05-30
+Module Dimensions
+
+Each control is 21.5 mm wide.  (Too narrow, I know.)
+The module PCB is up to 43.5 mm high.
+The bottom left corner of the PCB is at the corner of the module.
+The top right corner is wherever it needs to be.
+The top of the paddles is at y = 38.25 mm
+
+    Teensy:
+        x = 9.08 mm   (approx)
+        y = 19.05 mm  (approx)
+
+    SPI header:
+        x = 7.79 mm   (approx)
+        y = 39.73 mm  (approx)
+
+    Title WS2812 LED:
+      x = 20.65 mm
+      y = 5.55833125 mm
+
+    Choice LED:
+        x = 7.08 mm
+        y = 25.471 mm
+
+    Choice button:
+        x = 9.035 mm
+        y = 7.451040625 mm
+
+    Potentiometer, WS2812, assign button position:
+        x = (N + 1/2) * 21.5 mm
+        y = 24.451 mm
+
+    Destination switch position:
+        x = (N + 1/2) * 21.5 mm
+        y = 7
+
+    Screw holes by assign button
+        x = (N + 1/2) * 21.5 mm
+        y = 10, 37
+
+    Spine:
+        y = 38.25 mm
+
+    Paddles:
+        left       = (N * 21.5 + 2) mm
+        right      = (N * 21.5 + 2) mm
+        top        = 30 mm
+        bottom     = 3.5 mm
+        radius     = 2.54 mm
+        stem width = 6 mm
+        
+The filter module is different.  The positions of the filter controls
+are not calculated yet.
+
+----------------------------------
+2015-05-30
+
+Pin assignments on the modules' Teensy-LC boards.
+
+Each module has a Teensy-LC microcontroller board.  I want to run the
+same firmware image on each board, so the pin assignments need to be
+the union of all the uses on all the modules.
+
+The required functions are:
+    4 SPI pins (SCK0, MOSI0, MISO0, CS0)
+    1 WS2812 strand (5V)
+    1 choice button
+    6 choice LEDs (PWM, not 20mA)
+    5 knob wipers (ADC)
+    4 destination buttons
+    1 assign button
+    1 assign LED (PWM)
+
+Here are the assignments.
+
+    Teensy     Attributes        Use
+     Pin        (subset)
+      0                          choice button
+      1                          destination button 3
+      2                          destination button 4
+      3        PWM               choice LED 1
+      4        PWM               choice LED 2
+      5        20mA              destination button 1
+      6        PWM               choice LED 3
+      7        MOSI0             destination button 2
+      8        MISO0             assign button
+      9        PWM               choice LED 4
+     10        PWM,CS0           SPI
+     11        MOSI0             SPI
+     12        MISO0             SPI
+     13        SCK0,LED          SPI
+     14/A0     ADC,SCK0          knob wiper 1
+     15/A1     ADC               knob wiper 2
+     16/A2     ADC,PWM,20mA      knob wiper 3
+     17/A3     ADC,PWM,5V,20mA   WS2812 strand
+     18/A4     ADC               knob wiper 4
+     19/A5     ADC               knob wiper 5
+     20/A6     ADC,PWM           choice LED 5
+     21/A7     ADC,20mA           -
+     22/A8     ADC,PWM           choice LED 6
+     23/A9     ADC,PWM           assign LED
+     24/A10    ADC                -
+     25/A11    ADC                -
+     26/A12    ADC                -
+
+
+----------------------------------
+2015-05-28
+Color scheme
+
+Since I have four colors of LED DIPs, I'll differentiate the modules
+by color.
+
+   BLUE:  LFOs and Controllers
+   AMBER: Oscillators and Noise
+   GREEN: Mixer
+   RED:   Filter
+
+
+2015-05-01
+
+Gauss Boys has this diametrically oriented ring magnet.
+http://www.gaussboys.com/store/index.php/magnet-shapes/rings/rd0906.html
+
+AMS has magnetic multipole rings.  Most interesting is the MR20-44.
+It has 44 poles.  Combined with the AS5311, that would give 2048 x 44
+points of rotational resolution.
+http://ams.com/eng/Products/Position-Sensors/Magnets/AS5000-MR20-44
+http://ams.com/eng/Products/Position-Sensors/Linear-Incremental-Magnetic-Position-Sensors/AS5311
+
+Even better, the AS5510 Linear Sensor can measure a single magnet
+(such as the Gauss Boys RD0906 above) with 10 bits' precision.  It has an
+i2c interface.
+
+----------------------------------
+2015-04-26
+
+At DorkBotPDX last Monday, I met Jeff Miller.  He showed me his servo
+that he modified to do continuous rotation under Bluetooth control.
+
+The project code and schematics are here.
+https://github.com/portlandrobotics/btServo
+
+The magnetic rotary encoder chip is an ams AS5050.
+ams has many encoders.  http://ams.com/eng/Products/Position-Sensors
+
+----------------------------------
+2015-03-22
+
+SPI communications
+
+The Teensy-LC has a system clock of 48 MHz.  Its SPI 1 can run at
+system clock / 4, or 12 MHz.  Its SPI 0 can run at bus clock / 4.
+The bus clock is the system clock divided by 1-8.
+
+The Beaglebone Black has 2 McSPI sections, each capable of ?? MHz.
+
+The STM32F429 has six SPI interfaces at up to 45 Mbit/sec and an
+additional four SPI-like UARTS at 5.62 Mbit/sec.
+
+
+----------------------------------
+2015-03-20
+
+interprocessor communication
+
+There will be a bunch of small uCs, probably Teensies, connected to a
+central CPU, probably a BeagleBone.  Each will have a SPI connection.
+The SPI connection will carry data bidirectionally.
+
+   inbound
+     button changes
+     pot readings
+     keyboard timing
+   outbound
+     knob LED colors/patterns
+     module LED colors/patterns
+     
+What LED patterns should there be?
+
+   assignable
+   assigned
+   active
+   inactive
+   locked in
+
+----------------------------------
+2015-03-20
+
+Ordered TE Micro-MaTch and E-Switch from Mouser.
+
+----------------------------------
+2015-03-16
+Shopping List
+
+Ordered 100 WS812B RGB LEDs.
+Need Micro-MaTch connectors.
+Need more TL-1220 halo buttons and more Alpha pots.
+Will need to order boards from OSHPark.
+May need a bunch of Teensy LC boards.
+
+
+ 6  TE MicroMaTch 1-215079-6    0.92  Mouser
+10  TE MicroMaTch 8-215083-6    0.84  Mouser
+
+15  E-Switch TL1220R1BBBRHALO   3.26  Mouser
+
+50  Alpha 1400F                1.20  Small Bear
+
+
+----------------------------------
+2015-03-13
+
+http://tangentsoft.net/elec/movies/
+
+Need some op amps.
+Need some voltage regulators, both 3.3v and 5v.
+Need capacitors.  220uF.
+
+----------------------------------
+2015-03-08
+
+Keyboard uses TE Micro-MaTch connectors.
+
+Female on board: 215079-16
+Male on wire: 215083-16
+Ribbon cable: 167019
+
+Get 10 of each.
+
+N.B., Piher PT-15 is a shaftless 360 degree potentiometer.
+
+Piher MTS-360 is a shaftless magnetic rotary encoder with 14 bits
+resolution.  $70 each, though.
+
+
+----------------------------------
+2015-03-04
+
+Analogue Haven order number 2375-7979-9624
+
+----------------------------------
+2015-03-01
+
+The 40 greatest synth sounds of all time… ever!
+http://www.musicradar.com/us/news/tech/the-40-greatest-synth-sounds-of-all-time-ever-306114
+
+----------------------------------      
+2015-02-28
+Letter to Piotr
+
+I have been looking at all kinds of options, including FPGA, Zynq,
+GPU, polynomial sigmoid functions, reading the glibc math intrinsics,
+and probably some other things.  Here is what I know.
+
+The centerpiece of the synth is the Moog ladder filter.  The ladder
+filter is unreasonably expensive to simulate.  It needs five (5) tanh
+calculations per sample.  Monophonic is fine -- the BeagleBone could
+do that, just barely.  But for polyphony, around 20 notes is the
+minimum, and if I go multitimbral, there should be another factor of
+several.  I've set 64 notes as my multitimbral target.  (Presently I
+can run 24 notes on one core of the MacBook.  That should scale nearly
+linearly to four cores, and if I rearrange the code to take advantage
+of the SSE instructions, there should be another factor of less than
+four available.  Intel's CPU designers and Apple's compiler team are
+hard to compute with.
+
+The cheapest way to calculate tanh on an FPGA is with CORDIC.  The
+claim is, "CORDIC needs about as many gates as multiply."  That means
+a CORDIC transcendental function is cheaper than a polynomial
+approximation or Taylor series. (But most FPGAs have
+multiply-accumulate blocks, which CORDIC wouldn't use.)
+
+There is no CORDIC function for tanh directly, but it can
+simultaneously calculate sinh and cosh, and tanh x = sinh x / cosh x.
+Division can be implemented as a second CORDIC block.  However, CORDIC
+hyperbolics only converge if the argument is less than 1.12.  I don't
+know what to do about that.
+
+A Taylor series needs about 20 terms to give 24 bit precision on tanh.
+
+There don't appear to be any insoluble problems implementing the
+ladder filter in an FPGA, though I don't know how many gates it would
+need.  I think the envelope generators, mixer, ring modulator, voltage
+controlled amplifiers (actually Numerically Controlled Amps, but VCA
+is the acronym I know), and noise sources also appear feasible.
+Loading MIDI events (or equivalent) into the FPGA is something I don't
+know how to do yet, but it shouldn't be too bad.
+
+The hard part is the oscillators.  The oscillators are band limited,
+and they potentially change frequency and/or waveform every sample.  I
+wrote a lot (a *lot*) of conditional code to handle all the edge
+cases.  A single sample could, in worst case, be the sum of five
+antialiasing polynomials, in addition to its base value.  I think I
+need a completely different oscillator algorithm.  I've started
+researching it, but don't have any conclusions yet.  (In software, the
+oscillators are cheap, as 99% of the samples don't require any
+antialiasing work.)
+
+I'm assuming that an FPGA solution would have a very fast, very
+pipelined "engine", and it would multiplex a bunch of different
+voices.  E.g., if it ran at 20 MHz, and sample rate is 0.2 MHz, then
+it could alternate between 100 different voices each sample period.
+That way, the whole FPGA could be dedicated to one instance of the
+engine.
+
+So that's FPGAs.
+
+I've been thinking about a hybrid where the oscillators and mixer run
+on the CPU and the filter and final amplifier run on an FPGA..  (See
+attached diagram.)  Each voice has four sample streams entering the
+FPGA.  At 192 KHz * 3 bytes/sample, that's 2.3 MB/sec per voice.  One
+of the sample streams is the actual audio from the mixer; the other
+three are control voltages (magenta in the diagram).  It would be
+possible to implement the LFOs and envelope generators in parallel
+both on the CPU and the FPGA (they're cheap, at least in software),
+and then it would only be necessary to pass a single sample stream and
+the much lower bandwidth MIDI event stream.  0.6 MB/sec/voice, 38
+MB/sec for 64 voices.  That's still a lot of data and a lot of
+synchronization to be done, but not impossible.
+
+Notes about the diagram and the synth architecture.  Yellow functional
+units and data flows are the audio path.  Yellow units are polyphonic
+-- one instance per note.  Blue units are monophonic.  Green are
+polyphonic.  "Control Voltages" (continuously varying signals) are
+magenta.  Each control voltage except Env 1 can be assigned to any of
+about 25 inputs to other units.  The LFOs also have CV inputs.
+"Wheel" is a stand-in for any of about 10 MIDI channel control
+messages -- my keyboard has a mod wheel, so that's the one I
+implemented first.  At present, each CV can drive a single input, but
+that is only a UI limitation.
+
+The LOGi-Bone (not sure about the capitalization) has a DMA interface
+to the BBB.  A friend who has one has pushed 40 MB/sec through it.
+
+So that's hybrids.
+
+As best I can tell, the BeagleBone Black's FPU just isn't very fast.
+But I've also been looking at whether glibc's math intrinsics are
+unoptimized.  I don't have any conclusions yet.  FYI, here are my
+benchmark results on the BBB.  This runs just the ladder filter and
+counts how many simultaneous notes it can process.
+
+Notes   Implementation
+-----   --------------
+
+ 1      #define TANHF(x) (tanhf((x)))
+ 1      #define TANHF(x) (my::tanhf((x)))
+ 3      #define TANHF(x) (lerp::tanhf((x)))
+ 4      #define TANHF(x) (lerp::tanhf2((x)))
+10      #define TANHF(x) (mclamp::clamp((x)))
+ 5      #define TANHF(x) (pade::tanh_approx((x)))
+ 5      #define TANHF(x) (isqrt::sigmoid((x)))
+ 7      #define TANHF(x) (isqrt::naive_sigmoid((x)))
+ 3      #define TANHF(x) (raphx::tanhf((x)))
+18      #define TANHF(x) (x)
+
+In each case, the data is 32 bit float.
+
+  tanhf is the libm intrinsic.
+  my::tanhf is (expf(2 * x) - 1) / (expf(2 * x) + 1)
+  lerp::tanhf uses linear interpolation tables, with frexpf() to unpack floats
+  lerp::tanhf2 is same, using union and bitfields to unpack floats.
+  mclamp is max(-1, min(x, +1))
+  pade is (x**3 + a) / (b x**2 + c)
+  sigmoid is x / sqrt(x * x + 1) using the SGI inverse sqrt trick.*
+  naive_sigmoid is same, using the sqrtf intrinsic.
+  raphx is { t = x + a x**3 + b x**5; return t / sqrt(1 + t**2); }
+using the fast sqrt trick*
+  (x) is just skipping the tanh calculation completely.
+
+  * https://en.wikipedia.org/wiki/Fast_inverse_square_root
+  I suspect that the ARM inverse sqrt instruction implements this.
+
+mclamp, sigmoid, and (x) are not acceptable substitutes.  tanhf,
+my::tanhf, lerp, and raphx are acceptable.  I don't know about pade;
+I'd need to do some spectral tests.  naive_raphx might be a little
+faster, since ARM has an inverse sqrt instruction.  it doesn't matter,
+though, because 1, 1, 3, 4, 5, and 3 are all far less than the minimal
+20.  I can't see how that gap will be closed.
+
+It's possible that gcc is emitting really bad code for ARM or that
+libm is really bad.  I looked at gcc's assembler for some simpler
+samples and verified that it's actually generating FP and NEON
+instructions, but didn't look at any of the benchmark code.  A few of
+the benchmarks skip libm completely, and none of them are fast.
+
+So I dunno.  I looked a little at the UDOO and ODroid offerings today.
+They are faster chips, and I found a benchmark somewhere that showed
+the ODroid about 3-4x faster than the BBB.  There's probably room to
+tune my code a little, once I know what target I'm tuning for.  I
+should talk to Brad Stewart (do you know him?) since he's a Freescale
+guy and he was recently making his own synth too.
+
+So that's ARM.
+
+I really don't know about Zynq or the Parallella.  In theory, 16
+FP-centric CPUs should be ideal for this problem.  It will cost me
+$200 to find out (and they're out of stock now anyway).
+
+The ARM core in a Zynq is a dual-core Cortex-A9 with NEON.  The
+version in the Parallella runs at 800 MHz.  A little better than the
+BBB.
+
+How are the tools for Parallella?  Does the Epiphany have a C
+compiler?  Is there documentation on running the ARM core sans OS?
+
+And I don't know much about DSPs.  As I understand it, they're general
+purpose CPUs optimized for integer vector and matrix multiplication.
+Not much of my code fits that criterion.
+
+I downloaded the documentation for the Raspberry Pi's GPU.  I didn't
+get a good sense of the GPU's capabilities, though.  I'm guessing that
+what I'm doing is far enough from what 3D renderers do that it's
+unlikely to go well.
+
+There are only 4 billion different floating point numbers.  tanh(x) ==
+x for small x, and tanh(x) == 1 for large x, and tanh(-x) == -tanh(x),
+so there are less than 128M cases where tanh needs to be looked up.
+How much is 512Mbytes of EPROM?
+
+So that's "other".
+
+The thing is, any of these is a major engineering effort.
+
+----------------------------------
+2015-01-19
+
+Annotated example code to configure LCD output.
+http://en.radzio.dxp.pl/stm32f429idiscovery/tft-lcd-controller.html
+
+----------------------------------
+
+Sparkfun has an interesting 7 inch, TFT display w/ touchscreen
+packaged as a BeagleBone cape.  $99.
+    https://www.sparkfun.com/products/12086
+
+It is available direct from the manufacturer for $10 less.
+    http://www.4dsystems.com.au/product/4DCAPE_70T
+
+And it is based on the CircuitCo LCD7, which is ~$150.
+
+Adafruit has:
+    1932     9.95   40-pin TFT Friend - FPC Breakout with LED Backlight Driver
+    1596    39.95   5.0" 40-pin TFT Display - 800x480 with Touchscreen
+    2098     4.50   40-pin FPC Extension Board + 200mm Cable
+
+----------------------------------
+2015-01-08
+
+Solder paste
+Kester R276 lead-free
+available at GoKimCo and at All-Spec.
+
+----------------------------------
+2015-01-06
+more knobs...
+
+http://www.okw.co.uk/en/Tuning-knobs-E-Mech-components/Tuning-knobs-with-LED-illumination.htm
+http://mutable-instruments.net/forum/discussion/1107/the-good-knob-and-pots-encoders-thread/p1
+
+----------------------------------
+2015-01-05
+
+Adafruit has TFT displays.
+
+1596 - 40 pin TFT display 800x480 with Touchscreen
+1571 - Resistive Touch Screen Controller - STMPE610
+1590 - RA8875 Driver Board for 40-pin TFT Touch Displays - 800x480 Max
+1932 - 40-pin TFT Friend - FPC Breakout with LED Backlight Driver
+
+----------------------------------
+2015-01-04
+Control Specifics
+
+Small knob, single turn smooth
+
+  3 Env.attack
+  3 Env.decay
+  3 Env.release
+  3 Env.keytrack
+  1 Flt.keytrack
+  1 MW.amount
+
+Small knob, single turn smooth, pushbutton, indicator
+
+  2 LFO.speed
+  3 Env.sustain
+  2 Osc.width
+  1 Flt.drive
+
+Small knob, single turn center detent, pushbutton, indicator
+
+  2 LFO.amount
+  3 Env.amount
+
+Big knob, single turn smooth, pushbutton, indicator
+
+  1 Flt.cutoff
+  1 Flt.resonance
+
+Switch/pushbutton
+
+  1 MW.destination
+  2 LFO.destination
+  3 Env.destination
+  2 LFO.waveform
+  2 Osc.waveform
+  1 Noise.spectrum
+  1 Mix.operator
+  1 Flt.type
+  
+Small ptr knob, single turn 8 clicks
+
+  2 Osc.octave
+
+Big ptr knob, infinite turn 12 clicks, pushbutton, indicator
+
+  2 Osc.semi
+
+Big knob, single turn center detent
+
+  2 Osc.fine
+
+Big ptr knob, lots of clicks
+
+  2 Osc.detune
+
+Slider
+
+  3 Mix.level
+  1 master volume
+
+----
+
+  Which controllers should be assignable?  I can see aftertouch,
+  mod wheel, breath, and expression (if that's the pedal).
+
+----------------------------------
+2015-01-04
+
+Shopping!
+
+        Mouser
+
+          STM32F4 Discovery boards
+          switches, potentiometers, encoders, misc.
+          
+
+ORDERED Small Bear Electronics
+          knobs
+          rotary switches
+          clear shaft pots
+
+NOSTOCK Stencils Unlimited
+          solder paste (Kester R276 lead-free)
+
+ORDERED Zephyrtronics
+          plunger
+          tips
+
+ORDERED Digilent
+          DAC
+          ADC
+
+NOSTOCK TME
+          SR knobs
+          SR chickenhead knobs
+
+        Adafruit
+          pyralux
+          toy motors
+
+        Sparkfun    
+          soft potentiometers
+          clear shaft rotary encoder
+          clear knob
+    
+----------------------------------
+2015-01-04
+Solder Pastes
+
+Discussion pages:
+https://learn.adafruit.com/smt-manufacturing/solder-paste-syringes
+https://forum.sparkfun.com/viewtopic.php?f=14&t=24745
+https://www.sparkfun.com/tutorials/58
+
+Recommended:
+Kester 256 (Sparkfun, Sparkfun commenter)
+
+
+Not recommended:
+Chipquik
+
+----------------------------------
+2014-12-31
+
+Bourns PRM16 series
+motorized potentiometers
+
+Bourns ES series
+shaftless rotary encoders
+
+I also might be able to use either a servo or a motor from a servo.
+
+Bajillions of 12 position rotary switches are available.
+
+Sparkfun has D-shafts and others.
+https://www.sparkfun.com/categories/250
+
+Google for "toy motor".  Adafruit has one.
+
+Sparkfun "soft potentiomeer"
+https://www.sparkfun.com/products/8678
+
+Digilent PMODI2S - i2s stereo output breakout
+
+Digilent PMODAD5 - 4 channel 24 bit A/D breakout
+
+I think I need to think about the exact requirements for each knob.
+
+----------------------------------
+2014-12-30
+
+Greg Norman says check out Parts Express for knobs and hardware.
+
+Taper found Piher potentiometers.
+http://piher.net/sensors/index.php?option=com_virtuemart&page=shop.product_details&flypage=flypage.tpl&product_id=41
+
+
+----------------------------------
+2014-12-29
+
+Piotr pointed me at these rotary encoders.
+
+http://www.megatron.de/en/products/hall-effect-singleturn-rotary-encoder/hall-effect-absolute-encoder-series-mab12ah.html
+
+He also recommended looking into brushless gimbal motors from the R/C
+world.
+
+And piezoelectric haptic actuators.
+
+----------------------------------
+2014-12-25
+
+On Christmas morning, instead of opening presents, I am unpacking
+the Oxygen's memory dump format.
+
+We get 100 SysEx messages in the dump.  Certain patterns can be
+observed.
+
+                   /---- checksummed: sum % 128 == 0 ----\
+f0  0  1  5 10 7f  2  1  13  0  0  0  0  0  0  0  ... 0 6a f7
+ ^  ^  ^  ^  ^  ^  ^  ^                                  ^  ^
+ |  |  |  |  |  |  |  |                                  |  |
+ |  |  |  |  |  |  |  |     checksum             --------+  |
+ |  |  |  |  |  |  |  |     f7: end SysEx        -----------+
+ |  |  |  |  |  |  |  +---  program number, 1-10
+ |  |  |  |  |  |  +------  counts from 2-b (10 messages per pgm)
+ |  |  |  |  |  +---------  device ID
+ |  |  |  |  +------------  always 10.  Oxygen?
+ |  +--+--+--+------------  always 0 1 5.  allegedly M-Audio's Mfr ID.
+ +------------------------  f0: begin SysEx
+
+Msg 7 byte 10: 0a for ctl 154, 09 for ctl 155
+Msg 8 byte  9: C18 CC number
+Msg 8 byte  3: ???
+
+
+P01 C1    14
+    C2    15
+    C3    16
+    C4    17
+    ---
+    C5    18
+    C6    19
+    C7    20
+    C8    21
+    ---
+    C9    22
+
+    C10   23   55  (23 drawbar)
+    C11   24   56  (24 drawbar)
+    C12   25   57
+    C13   26   58
+    ---
+    C14   27   59
+    C15   28   60
+    C16   29   61
+    C17   30   62
+
+    C18  102        0-12
+    C19  103        0-5
+    C20  104        0-12
+    C21  105  111   0-5, 0-4
+    ---
+    C22  106  112   0-14, 0-12
+    C23  107        0-2
+    C24  108        0-3
+    C25  109        0-3
+    ---
+    C26  110        0-2
+
+----------------------------------
+2014-12-24
+
+Knobs, buttons, and sliders again.
+
+The synth engine has 26 analog parameters and 12 multiple-choice
+parameters.  The keyboard has 9 sliders, 8 dials, and 9 buttons.
+
+Here's my proposed mapping, split across keyboard progrms 1 and 2.
+
+                 PGM 1                PGM 2
+
+   Slider C1     LFO 1 Amount         same               
+   Slider C2     LFO 2 Amount         "
+   Slider C3     Env 2 Amount         "
+   Slider C4     Filter Fc            "
+   ---
+   Slider C5     Filter Q             "
+   Slider C6     Filter Drive         "
+   Slider C7     Mix Osc 1            "
+   Slider C8     Mix Osc 2            "
+   ---
+   Slider C9     Mix Noise            "
+
+   Knob C10      Osc 1 Width          LFO 1 Speed
+   Knob C11      Osc 2 Width          LFO 2 Speed
+   Knob C12      Osc 2 Coarse         Env 2 Keytrack
+   Knob C13      Osc 2 Fine           Filter Keytrack    x
+   ---
+   Knob C14      Env 1 A              Env 2 A
+   Knob C15      Env 1 D              Env 2 D
+   Knob C16      Env 1 S              Env 2 S
+   Knob C17      Env 1 R              Env 2 R
+
+   Button C18    Mod Wheel Assign     "
+   Button C19    LFO 1 Waveform       "
+   Button C20    LFO 1 Dest           "
+   Button C21    LFO 2 Waveform       Filter Type
+   ---
+   Button C22    LFO 2 Dest           Env 2 Dest
+   Button C23    Mix Operator         "
+   Button C24    Osc 1 Waveform       "
+   Button C25    Osc 2 Waveform       "
+   ---
+   Button C26    Noise Spectrum       "
+
+Here are the default MIDI controller numbers.
+
+                 PGM 1                PGM 2
+   Slider  C1    74 Cutoff Freq       73 Attack Time
+   Slider  C2    71 Resonance         75 -
+   Slider  C3    91 Reverb Depth      72 Release Time
+   Slider  C4    93 Chorus Depth      74 Cutoff Freq
+   Slider  C5    73 Attack Time       79 -
+   Slider  C6    72 Release Time      84 Porta Ctrl
+   Slider  C7     5 Porta Time        91 Reverb Depth
+   Slider  C8    84 Porta Ctrl        93 Chorus Depth
+   Slider  C9     7 Channel Vol        7 Channel Vol
+
+   Knob   C10    75 -                 16 GP 1
+   Knob   C11    76 -                 17 GP 2
+   Knob   C12    92 Tremolo Depth     18 GP 3
+   Knob   C13    95 Phaser Depth      10 Pan
+   Knob   C14    10 Pan               19 GP 4
+   Knob   C15    77 -                 80 GP 5
+   Knob   C16    78 -                 81 GP 6
+   Knob   C17    79 -                 20 -
+
+   Button C18    0/32/0 Pgm Change    24/127 -
+   Button C19    0/32/1 Pgm Change    25/127 -
+   Button C20    0/32/2 Pgm Change    26/127 -
+   Button C21    0/32/3 Pgm Change    27/0   -
+   Button C22    0/32/4 Pgm Change    44/0   -
+   Button C23    0/32/5 Pgm Change    45/0   -
+   Button C24    0/32/6 Pgm Change    46/0   -
+   Button C25    0/32/7 Pgm Change    47/0   -
+   Button C26    0/32/8 Pgm Change   (dead)
+
+----------------------------------
+2014-12-24
+
+MVSNote::Render()
+{
+    const MVSParamSet *params = mParams;
+
+    // Copy the monophonic modbox.
+    MVSModBox     modbox      = **mModBoxPtrPtr;
+    size_t        nsamp       = modbox.sampleCount();
+    typedef float buf[nsamp];
+
+    // Initialize the polyphonic modbox by adding a buffer for env2.
+    buf           env2_values;
+    modbox.set_values(Mod::Env2, env2_values);
+
+    // Get the (oversampled) output buffer.
+    float        *render_out  = *mOversampleBufPtr;
+
+    float         sample_rate = SampleRate();
+    float         frequency   = Frequency();
+    float         norm_freq   = Frequency() / SampleRate();
+
+
+    // - - - - - - -        Envelope 2               - - - - - - - - - -
+
+    {
+        buf attack, decay, sustain, release, amount;
+
+        modbox.modulate(params->env2_attack,  Mod::Env2Attack,  attack);
+        modbox.modulate(params->env2_decay,   Mod::Env2Decay,   decay);
+        modbox.modulate(params->env2_sustain, Mod::Env2Sustain, sustain);
+        modbox.modulate(params->env2_release, Mod::Env2Release, release);
+        modbox.modulate(params->env2_amount,  Mod::Env2Amount,  amount);
+        mEnv2.generate(attack, decay, sustain, release, amount, env2_values);
+    }
+
+    // - - - - - - -        Oscillator 2             - - - - - - - - - -
+
+    buf osc2_out;
+    buf osc_sync;
+    {
+        buf freq, width;
+        float coarse_detune = params->osc2_coarse_detune;
+        float fine_detune   = params->osc2_fine_detune;
+        float detune        = coarse_detune + fine_detune / 100;
+        float base_freq     = norm_freq * powf(2.0, detune);
+        float base_width    = params->osc2_width / 100;
+
+        modbox.modulate(base_freq, Mod::Osc2Freq, freq);
+        modbox.modulate(base_width, Mod::Osc2Width, freq);
+        if (params->mix_operator == Mix::HardSync) {
+            buf sync_in;
+            sync_in[0] = nsamp + 1; // no sync events
+            mOsc2.generate_with_sync(params->osc2_waveform,
+                                     freq,
+                                     width,
+                                     osc2_out,
+                                     sync_in,
+                                     osc_sync,
+                                     nsamp);
+        } else {
+            mOsc2.generate_modulated(params->osc2_waveform,
+                                     freq,
+                                     width,
+                                     osc2_out,
+                                     nsamp);
+        }
+    }
+
+    // - - - - - - -        Oscillator 1             - - - - - - - - - -
+
+    buf osc1_out;
+    {
+        buf freq, width;
+        float base_freq = norm_freq;
+        float base_width = params->osc1_width / 100;
+
+        modbox.modulate(base_freq, Mod::Osc1Freq, freq);
+        modbox.modulate(base_width, Mod::Osc1Width, freq);
+        if (params->mix_operator == Mix::HardSync) {
+            buf sync_out_unused;
+            mOsc1.generate_with_sync(params->osc1_waveform,
+                                     freq,
+                                     width,
+                                     osc1_out,
+                                     osc_sync,
+                                     sync_out_unused,
+                                     nsamp);
+        } else {
+            mOsc1.generate_modulated(params->osc1_waveform,
+                                     freq,
+                                     width,
+                                     osc1_out,
+                                     nsamp);
+        }
+    }
+
+    // - - - - - - -        Noise Source             - - - - - - - - - -
+
+    buf noise_out;
+    mNoise.generate(params->noise_spectrum, noise_out, nsamp);
+
+    // - - - - - - -        Mixer                    - - - - - - - - - -
+
+    buf mixer_out;
+    {
+        float osc1_level  = scale_dB40(params->mix_osc1_level);
+        float osc2_level  = scale_dB40(params->mix_osc2_level);
+        float noise_level = scale_dB40(params->mix_noise_level);
+
+        mMixer.generate(params->mix_operator,
+                        osc1_out,
+                        osc1_level,
+                        osc2_out,
+                        osc2_level,
+                        noise_out,
+                        noise_level,
+                        mixer_out,
+                        nsamp);
+    }
+
+    // - - - - - - -        Filter                   - - - - - - - - - -
+
+    buf filter_out;
+    {
+        buf cutoff, resonance, drive;
+
+        modbox.modulate(params->flt_cutoff,    Mod:FltCutoff, cutoff);
+        modbox.modulate(params->flt_resonance, Mod:Resonance, cutoff);
+        modbox.modulate(params->flt_drive,     Mod:Drive,     cutoff);
+        mFilter.generate(params->flt_type,
+                         cutoff,
+                         resonance,
+                         drive,
+                         filter_out,
+                         nsamp);
+    }
+
+    // - - - - - - -        Envelope 1               - - - - - - - - - -
+
+    buf env1_values;
+    {
+        buf attack, decay, sustain, release, amount;
+
+        modbox.modulate(params->amp_attack,  Mod::AmpAttack,  attack);
+        modbox.modulate(params->amp_decay,   Mod::AmpDecay,   decay);
+        modbox.modulate(params->amp_sustain, Mod::AmpSustain, sustain);
+        modbox.modulate(params->amp_release, Mod::AmpRelease, release);
+        modbox.modulate(params->amp_level,   Mod::AmpLevel,   amount);
+        mEnv1.generate(attack, decay, sustain, release, amount, env1_values);
+    }
+
+    // - - - - - - -        Amplifier                - - - - - - - - - -
+
+    mAmplifier.generate_sum(filter_out, env1_values, render_out);
+
+    return noErr;
+}
+
+----------------------------------
+2014-12-22
+
+Categories for synth.
+
+    Synth Engine
+
+        signal
+           time-series data stream
+
+        monophonic signal
+        polyphonic signal
+           poly signals have one instance per active note.
+
+        operator
+           combines signals to create new signal
+
+        modulator
+           signal that affects another signal
+
+        monophonic modulator
+        polyphonic modulator
+
+        graph
+           network of signals and operators
+
+    External
+
+        parameter
+           user-visible setting
+
+        signal parameter
+           parameter whose value is a signal
+
+        routing parameter(?)
+           parameter
+
+        event
+           external stimulus that affects engine state.
+
+        controller
+           event source
+           (i.e., MIDI message type)
+
+    I have no idea where I'm going with this...
+
+
+----------------------------------
+2014-12-21
+
+Connecting to an STM32F4.
+
+    I see nine peripherals.  Did I miss any?
+        Audio Out
+        Keyboard in
+        Knobs in
+        Buttons in
+        Velocity in
+        Aftertouch in
+        MIDI in/out
+        USB in/out
+        LEDs out
+
+    How do aftertouch and velocity work?
+    I think the aftertouch is just another potentiometer.
+    I think the velocity is derived from timing of the key switches.
+    They appears to have separate make/break contacts.
+
+    Assume several AD7193s for the knobs in.  I don't know what does the
+    buttons.
+
+    Interfaces
+        Audio Out: i2s
+        Keyboard in: GPIOs?
+        Knobs In:  SPI
+        Buttons in: ????
+        Velocity in: ????
+        Aftertouch in: SPI (via AD7193)
+        MIDI in/out: USART
+        USB in/out: HS USB OTA
+        LEDs out: GPIO
+
+    Several of these could/should use DMA:
+        Audio out
+        Knobs in (including aftertouch)
+        MIDI in/out (optional)
+        USB in/out
+        LEDS out
+    But the STM32F4 only has 3 DMA channels, plus a dedicated channel
+    for USB.
+
+    The key switches need 24 pins.  8 outputs and 16 inputs.  Maybe
+    I need a Teensy for the keyboard. (-:
+
+----------------------------------
+2014-12-21
+
+Today's fun fact: Monophony and Polyphony are examples of musical "Textures".
+
+    enum Texture {
+        Monophony,
+        Polyphony,
+        Biphony,
+        Homophony,
+        Heterophony,
+        // etc.
+    };
+
+----------------------------------
+2014-12.20
+
+How about this?
+
+    class Modulator {
+    public:
+        modulate_freq(freq_buf, nsamp);
+        modulate_linear(scale, buf, nsamp);
+        modulate_dB(scale, buf, nsamp);
+    };
+
+    class LFO : public modulator {
+        // ...
+    };
+
+A modulator can either be a vector of values or it can be a
+vector of values with a vector of scale factors.
+
+No, we just need to know whether we need a bipolar or unipolar output.
+
+Let's have the modulation source map.
+
+srcmap[NDEST][NMOD];
+mapcount[NDEST];
+memset(srcmap, 0, sizeof srcmap);
+memset(mapcount, 0, sizeof mapcount);
+for (i = 0; i < Mod::Destination::Count; i++)
+    srcmap[mod_dest][mapcount[mod_dest]++] = mod;
+
+How to add a frequency?
+    freq[i] *= powf(2.0, mod[i]);
+
+The caller wants to say something like
+
+    fill_param(params->osc1freq, modifiers[Mod::Osc1Freq], buf, nsamp);
+
+(probably with one more parameter to establish whether param is
+linear, exponential, etc.)
+
+Then MVSNote::Render has this structure.
+
+{
+    float env2_values[nsamp];
+    if (env2_mods_itself)
+       fill(0,env2_values, nsamp);
+    else {
+        // Do env2;
+
+        float attack[nsamp];
+        float decay[nsamp];
+        float sustain[nsamp];
+        float release[nsamp];
+        float amount[nsamp];
+        fill_param(params->env2_attack, Mod::env2_attack, attack, nsamp);
+        fill_param(params->env2_decay, Mod::env2_decay, decay, nsamp);
+        fill_param(params->env2_sustain, Mod::env2_sustain, sustain, nsamp);
+        fill_param(params->env2_release, Mod::env2_release, release, nsamp);
+        mEnv2.generate(... ??? ...);
+    }
+
+    if (params->mix_operator != Mix::HardSync) {
+        float osc1_values[nsamp];
+        {
+            float freq[nsamp], width[nsamp];
+            fill_param(params->osc1_freq, Mod::Osc1Freq, freq, nsamp);
+            if (waveform_has_width(params->osc1_waveform)) {
+               fill_param(params->osc1_width, Mod::Osc1Width, width, nsamp);
+            mOsc1.generate(...);
+        }
+
+        float osc2_values[nsamp];
+        {
+            float freq[nsamp];
+            float width[nsamp];
+            fill_param(params->osc2_freq, Mod::Osc2Freq, freq, nsamp);
+            if (waveform_has_width(params->osc2_waveform)) {
+               fill_param(params->osc2_width, Mod::Osc2Width, width, nsamp);
+            mOsc2.generate(...);
+        }
+        float o1level[nsamp], o2level[nsamp];
+        fill_param(params->mix_osc1_level, Mod::Osc1Level, o1level, nsamp);
+        fill_param(params->mix_osc2_level, Mod::Osc2Level, o2level, nsamp);
+        if (params->operator == Mix::RingModulate)
+            for (size_t i = 0; i < nsamp; i++)
+                mix_values[i] = (o1level[i] * o2level[i] *
+                                 osc1_values[i] * osc2_values[i]);
+        else
+            for (size_t i = 0; i < nsamp; i++)
+                mix_values[i] = (o1level[i] * osc1_values[i] +
+                                 o2level[i] * osc2_values[i]);
+    } else {
+        // get parameters...
+        mOsc2.gen_with_sync(...);
+        mOsc1.gen_with_sync(...);
+
+    }
+
+    // Generate the noise source.
+    float noise_values[nsamp];
+    mNoise.generate(params->noise_spectrum, noise_values, nsamp);
+
+    // add in the noise source.
+    float nlevel[nsamp];
+    fill_param(params->mix_noise_level, Mod::Noiselevel, nlevel, nsamp);
+    for (size_t i = 0; i < nsamp; i++)
+        mix_values[i] += nlevel[i] * noise_values[i];
+
+    // XXX filter goes here
+
+    // XXX need envelope generator with continuous modulation.
+    // XXX for now, fudge it.
+
+void ModBox::fill_param(const FloatParam& scalar, Mod::Destination mods, float
+*values_out, size_t count)
+{
+    fill(scalar, values_out, count);
+    if (mw_dest == dest) {
+       add(param->wheel_amount, wheel_values, values_out, count);
+    }
+    if (lfo1_dest == dest)
+       add(1, LFO1_values, values_out, count);
+    if (lfo2_dest == dest)
+       add(1, LFO2_values, values_out, count);
+    if (env2_dest == dest)
+       add(1, env2_values, values_out, count);
+
+
+struct ModBox {
+    const float *matrix[Mod::DestinationCount][MOD_COUNT + 1];
+};
+
+Now the matrix needs to have a longer lifetime and be updated only
+when the assignments change.  Where to put it?
+
+class ModMatrix {
+
+public:
+
+    void set_mod(mod, dest)
+    {
+        old_dest = dest_vec[mod];
+        if (old_dest)
+            remove_mod(mod, dest);
+        if (dest_vec[mod])
+           for (i = 0; i < MOD_COUNT && src{matrix[dest][i]; i++)
+               continue;
+           src_matrix[dest][i] = mod;
+    }
+
+    void remove_mod(mod, dest)
+    {
+        for (i = 0; i < MOD_COUNT && src_matrix[dest][i]; i++)
+            if (src_matrix[dest][i] == mod) {
+                break;
+            }
+    }
+
+private:
+    // map dest -> [modulator]
+    size_t src_matrix[Mod::DestinationCOunt][MOD_COUNT + 1];
+    // map modulator -> dest;
+    Mod::Destination dest_vec[MOD_COUNT];
+
+};
+
+----------------------------------
+2014-12-19
+
+How are we going to connect all this stuff up?
+
+MVS::Render allocates and fills the LFO buffers.
+Checks whether LFO2 modifies LFO1.
+
+There are dependencies.
+
+There are 2 oscillators, 1 noise source, 1 mixer, 1 filter, 1 amp, 1
+mod wheel, 2 LFOs, and 2 envelope generators.  11 modules in all.
+(The hard-sync mixer kind of breaks that model, but ignore that for now.)
+
+They form a graph.  Each node has 0 or more inputs and 1 output.
+Each output is another node's input.
+
+There are 25 modulable inputs.  Some are summed with fixed inputs.
+
+
+
+----------------------------------
+2014-12-19
+
+LFO
+
+    The Nord Lead manual says that some LFO waveforms are bipolar
+    and some are unipolar.
+
+        The modulation of the LFOs are unipolar, with a few
+        exceptions. Pitch (OSC1, OSC2) and PW modulations with
+        triangle, S&H and Random waveforms are bipolar. Pan modulation
+        with all waveforms are bipolar.
+
+    I could adopt a similar thing.
+
+    I don't think LFOs need to be antialiased.
+
+    Nord Lead 4's LFO destinations:
+       Filter
+       OSC MOD
+       OSC MIX
+       OSC 1
+       OSC 2
+       OSC 1 + 2
+       Amplitude
+       Pulse Width
+       Pan
+       Effects
+
+    StudioLogic Sledge's LFO destinations:
+        Osc 1
+        Osc 1 + 2
+        Osc 1 + 2 + 3
+        Osc 2 + 3
+        Osc 3
+        PWM  (doesn't say which oscillator(s))
+        Volume
+        Cutoff
+
+    I have:
+       Osc 1 freq
+       Osc 1 width
+       Osc 2 freq
+       Osc 2 width
+       Noise level
+       Filter cutoff
+       Filter resonance
+       Filter Drive
+       Env 2 amount
+
+    I should add:
+      Osc 1+2 freq
+      Osc 1+2 width
+      LFO 1 speed   (from LFO2 only)
+      LFO 1 amount  (  "    "   "  )
+
+----------------------------------
+2014-12-19
+
+Parameters.
+We have two types: floats and enums.
+
+Render needs to be able to fetch a float or an enum instantly.
+We have inline functions operator float() and operator E().
+Renderer always knows the parameter's actual type.
+
+The host has a different idea of the param's value.
+Host never knows a parameter's actual type.
+
+A float param is simple: there is just one value.
+An enum param has both the renderer's value, e.g., Saw,
+and the host's value, e.g., 0.
+
+operator E returns the render's value.
+get_value() returns the host's value.
+
+The enum param also needs a way to back map from render values to
+host.
+
+So let's deprecate IntParam (but leave it in for now) and define
+EnumParam<T> and EnumParamBase.  The mValue field moves from Param
+to FloatParam.
+
+mType and enum Type can go away too.
+
+----------------------------------
+2014-12-18
+
+A/D modules
+Digilent PmodAD5 - 8 channels, 24 bits, 4.8 KHz.
+Analog Devices AD7193 - the chip: 10 channels.
+
+----------------------------------
+2014-12-17
+
+Sometimes easy things seem hard.
+
+Parameters...
+
+   * goal: describe each parameter once.
+   * goal: access each parameter quickly from MVSNote::Render().
+
+Currently, MVSNote::Render() calls GetGlobalParameter(index).
+The call tree looks like this.
+
+    MVSNote::Render
+        SynthNote::GetGlobalParameter -- not inline
+            AUElement::GetAudioUnit   -- inline
+            AUBase::Globals           -- inline
+                AUScope::GetElement   -- not inline
+            AUElement::GetParameter   -- not inline
+
+So Render needs some kind of constant-time reference thing.
+Maybe paramset has fixed fields.
+
+    struct ParamSet {
+        struct {
+            Param waveform;
+            Param width;
+        } osc1;
+        struct {
+            Param coarse_detune;
+            Param fine_detune;
+            Param waveform;
+            Param width;
+        } osc2;
+        // ...
+    };
+
+Then each note can have a ParamSet reference.
+
+Or maybe I go back to the big enum.  There are so many ways to solve
+this in Python...
+
+Oh, wait.  Objects are initialized in decl order.  All I have to do is
+have them register themselves as they initialize.
+
+Param::Param()
+{
+    the_registry.add_param(this);
+    ...
+}
+
+Then ParamSet is a singleton, and the MVS and the MVSNote both refer
+to it.
+
+I think there's something there that would work...
+
+
+----------------------------------
+2014-12-16
+
+Parameter definitions:
+
+    MVS::MVS()
+    {
+        Clump *osc1 = mParams.add_clump("Oscillator 1", "Osc1");
+
+        osc1->add_param("Waveform")
+            .value_strings(AR_osc_waveform_strings)
+            .default_value(SAW);
+
+        osc1->add_param("Width")
+            .min_max(0, 1)
+            .default_value(0)
+            .display(PERCENT);
+
+
+        Clump *osc2 = mParams.add_clump("Oscillator 2", "Osc2");
+
+        osc2->add_param("Coarse Detune")
+            .min_max(-64, +64)
+            .default_value(0)
+            .display(MIDI_NOTE);
+
+        osc2->add_param("Fine Detune")
+            .min_max(-100, +100)
+            .default_value(0)
+            .display(CENTS);
+
+        osc2->add_param("Waveform")
+            .value_strings(AR_osc_waveform_strings)
+            .default_value(SQUARE);
+
+        osc2->add_param("Width")
+            .min_max(0, 1)
+            .default_value(0)
+            .display(PERCENT);
+
+
+        Clump *noise = mParams.add_clump("Noise Source", "Noi");
+
+        noise->add_param("Spectrum")
+            .value_strings(noise_spectrum_strings)
+            .default_value(WHITE);
+
+
+        Clump *mixer = mParams.add_clump("Mixer", "Mix");
+
+        mixer->add_param("Combiner")
+            .value_strings(mix_combiner_strings)
+            .default_value(MIX);
+
+        mixer->add_param("Oscillator 1 Level")
+            .min_max(-40, 0)
+            .default_value(0)
+            .display(DECIBELS);
+
+        mixer->add_param("Oscillator 2 Level")
+            .min_max(-40, 0)
+            .default_value(-40)
+            .display(DECIBELS);
+
+        mixer->add_param("Noise Level")
+            .min_max(-40, 0)
+            .default_value(-40)
+            .display(DECIBELS);
+
+
+        // filter...
+        // amp...
+        // LFO 1...
+        // LFO 2...
+    }
+
+----------------------------------
+2014-12-15
+
+Using the Oxygen 49's controls.
+
+9 Sliders:
+         LFO 1 amount
+         LFO 2 amount
+         env 2 amount
+         filter Fc
+         filter resonance
+         filter drive
+         mix osc1
+         mix osc2
+         mix noise
+
+9 Buttons:
+        LFO 1 waveform
+        LFO 1 assign
+          LFO 2 waveform    P01 only
+          LFO 2 assign      P01 only
+            env 2 assign    P02 only
+        osc 1 waveform
+        osc 2 waveform
+        noise spectrum
+        mix operator
+            filter type    P02 only
+        mod wheel assign
+
+8 Knobs:
+            LFO 1 speed          P02
+            LFO 2 speed          P02
+            env 2 A              P02
+            env 2 D              P02
+            env 2 S              P02
+            env 2 R              P02
+
+            env 2 keytrack       P02
+        osc 1 width          P01
+        osc 2 width          P01
+        osc 2 coarse detune  P01
+        osc 2 fine detune    P01
+            filter keytrack      P02
+        amp A                P01
+        amp D                P01
+        amp S                P01
+        amp R                P01
+
+I think the sliders should have those fixed functions, and the
+keyboard's Programs should switch the functions of the buttons
+and knobs.  Maybe P1 should have LFOs 1 and 2, and P2 should
+have LFO 1 and env 2.
+
+----------------------------------
+2014-12-15
+
+The param data structure.
+
+    AR_osc_waveform_map = {
+                        { SAW,    "Saw" },
+                        { SQUARE, "Square/Pulse" },
+                        NULL
+                        };
+
+    Clump osc1("Oscillator 1");
+    IndexedParam(osc1, "Waveform", AR_osc_waveform_map)
+        .default_value(SAW);
+    Param(osc1, "Width")
+        .min(0)
+        .max(1)
+        .display(PERCENT);
+
+Does this go in the constructor?  Are Clump and Param factories?
+Have a parent "root" object that the clumps attach to?
+
+Param and IndexedParam are functions that put children into the clump.
+Clump is likewise.  The whole thing comes out as a root object.
+
+ParamSet has Clumps.
+Clump has Params.
+
+    ParamSet mParams;
+    Clump *osc1 = mParams.add_clump("Oscillator 1", "Osc1");
+    osc1->add_param("Waveform")
+        .value_strings(AR_osc_waveform_strings)
+        .default_value(SAW);
+    osc1->add_param("Width")
+        .min_max(0, 1)
+        .default_value(0)
+        .display(PERCENT);
+
+    Param& AddParam(Clump&, const char *name);
+
+This can also pick up some of the MIDI mapping / LFO assignment stuff.
+
+----------------------------------
+2014-12-15
+
+Status:
+    oscillators can change waveform on the fly.
+    oscillators are ready for hard sync.
+    I feel the need for a global LFO pool.
+
+Next Steps:
+
+  * Create a parameter data structure.  Migrate the current params
+    into it.
+
+      - Collect all info about a param in one place.
+      - Make it obvious how params are grouped.
+      - Make it easier for MVSNote::Render to get the current settings.
+      - Implement centralized de-zippering.
+
+  * Create two global LFOs.  Render them in MVS::Render() and make
+    linkage so MVSNote::Render can find them.  Give each LFO an assign
+    parameter.  (At first, the only assignment destinations will be
+    OSC1 freq and OSC2 freq.)
+
+  * Make the mod wheel assignable.
+
+  * Create the Mixer.  Have it drive the oscillators.
+
+      - Work hard to keep the logic in MVS::Render() tidy.
+
+  * Investigate high-, band-, notch-pass ladder filters.
+
+----------------------------------
+2014-12-14
+
+Naming the synth.
+Minimum Viable Synth has worked pretty well.
+I'm thinking Model A.
+Update 12/23:
+   ... or Tin Lizzie or Thin Lizzie.
+
+----------------------------------
+2014-12-14
+
+My waveforms don't line up.
+
+There is audible clicking when switching between sine and triangle
+because the absolute amplitude change is big.  I think I need to
+adjust the phase of all waveforms so that they click less on
+transitions.  Either that or I need to briefly mute the oscillator on
+transitions.
+
+----------------------------------
+2014-12-12
+
+Clear knobs
+http://smallbear-electronics.mybigcommerce.com/fluted-miniature-colored-pointer/
+https://www.sparkfun.com/products/10597
+http://www.tme.eu/en/details/gtp6m-13x16-s/shaft-resistors-knobs/sr-passives/#
+Albs DK16-190V3
+
+Clear chickenhead knobs
+http://www.tme.eu/en/details/gw6m-20x14-p/shaft-resistors-knobs/sr-passives/#
+
+Clear shaft potentiometers
+http://smallbear-electronics.mybigcommerce.com/alpha-clear-shaft-pots-w-bushing/
+
+Clear shaft rotary encoder
+https://www.sparkfun.com/products/10982
+
+Pushbuttons
+NKK HB series: 9mm round or square, single-color LED (but LED is separate)
+HKK HB2 series: bicolor LED
+E-Switch TL 1220 7-10mm, tactile, ring illuminated, bicolor
+E-Switch TL 1265 4.5-8mm, tactile
+
+Pushbutton with bitmap display!
+NKK ISC15ANP4
+(obsolete: NKK IS01DBFRGB)
+
+----------------------------------
+2014-12-10
+
+Analogue Haven sells raw Fatar keyboards.
+www.analoguehaven.com
+
+----------------------------------
+2014-12-10
+
+Modulation architecture
+
+Instead of having a dedicated modulator (LFO and/or envelope
+generator) for every parameter that might need one, most synths have a
+small number of LFOs and some kind of routing capability.
+
+Studiologic Sledge has three LFOs.  Each can be routed to one of eight
+destinations:
+        OSC 1
+        OSC 1+2
+        OSC 1+2+3
+        OSC 2+3
+        OSC 3
+        PWM/WAVE FM
+        VOLUME
+        CUTOFF
+It has two envelope generators hardwired to the amplifier and the
+filter cutoff.
+
+Nord Lead 4 has two LFOs.  They can be routed to one destination at a time.
+        filter    - filter frequency
+        OSC MOD   - modulates the oscillator modulation amount
+                    (when osc 1 frequency modulates osc 2)
+        OSC MIX   - oscillator mixer
+        OSC 1     - pitch of oscillator 1
+        OSC 2     - pitch of oscillator 2
+        OSC 1 & 2 - pitch of both oscillators
+        AM        - amplitude
+        Pan       - left/right
+        PW        - oscillator pulse width
+        FX        0 effect amount
+
+N.B., Nord Lead 4 LFOs are positive-only in most cases.
+N.B., Nord Lead 4 LFOs don't do sine waves.
+
+Nord Lead 4 has one modulation envelope gnerator.  It has seven
+destinations:
+        OSCMIX
+        OSCMOD
+        OSC1
+        OSC2
+        OSC1 + OSC2
+        FX
+        LFO2
+
+----------------------------------
+2014-12-03
+
+Issues
+
+Q: Noise source has no bass.  Designed for 44.1 KHz, running at 176.4 KHz.
+A: Fixed.
+
+Q: How can I have noise release slower than the tones?
+A: Don't need to.
+
+Q: Need better resolution on osc. 2 detune.  How about two parameters:
+   detune notes and detune cents?
+A: Fixed.
+
+Q: Need better sync/unsync of LFOs.
+A: N.B., Nord Lead 4's LFOs are monophonic.
+
+----------------------------------
+2014-11-30
+Strategy for Ring-Mod
+
+Ring mod generates sum and difference frequencies.  For every
+frequency A and B present in the two sources, ringmod(A, B) produces A
++ B and A - B.  So, if the highest frequencies present are Fs/2, then
+ringmod produces Fs.
+
+I need to filter the oscillators down to Fs/4, then the ring mod can't
+produce higher frequency than Fs/2.  A good way to do that would be to
+use a higher-order polyBLEP with a lower cutoff.  Instead of sinc(x),
+approximate sinc(x/2).  I don't know how high the polygon order needs
+to be.
+
+When mixing oscillators, the current BLEP/BLAM is good.  When ring
+modulating, use the bigger filter.
+
+
+----------------------------------
+2014-11-29
+What's next?
+
+We have an oscillator with four waveforms and modifications on two.
+We have an LFO.
+We've fixed up the ADSR envelope generator.
+We've got 500 voice polyphony (maybe).
+So what's next?
+
+Noise source.
+Second oscillator.
+Ladder filter.
+Ring mod.
+Hard sync.
+Sample & Hold
+Monophony.
+Arpeggiator
+Alternate tunings.
+
+----------------------------------
+2014-11-29
+LFO
+
+Call the LFO for oscillator 1 vibrato.
+Parameters:
+  osc 1 vibrato depth
+  osc 1 vibrato speed
+  osc 1 vibrato waveform
+
+depth: 0 - +/- 600 cents.  Default: 0
+speed: 0.1 Hz - 30 Hz.  Default: 3 Hz?
+waveforms: saw, square/pulse, triangle, sine.  Default: sine
+Leave out pulse width/triangle skew for now.
+
+----------------------------------
+2014-11-23
+Plumbing for oversampling
+
+Override AUInstrumentBase::Render.
+  Find/allocate/clear new buffer 4X bigger.
+  Call super::Render()
+  Decimate/copy into output buffers.
+
+In MyNote::Render,
+  Ignore buffer(s) passed in.
+  Ignore SampleRate().
+  Get pointer to 4X buffer.  (How?)
+
+----------------------------------
+2014-11-17
+
+OSStatus MVS::Note::Render(UInt64            inAbsoluteSampleFrame,
+                           UInt32            inNumFrames,
+                           AudioBufferList **inBufferList,
+                           UInt32            inOutBusCount)
+{
+    // get 1st bus
+
+}
+
+----------------------------------
+
+class Oscillator {
+
+public:
+    enum OscillatorType {
+        OT_Sine,
+        OT_Saw,
+        OT_Triangle,
+        OT_Pulse,
+    };
+
+    Oscillator(OscillatorType type, Float64 basefreq);
+
+    void generate(float *sampBuf, UInt32 count);
+    void generate_modulated(float *sampBuf, Float64 *freqs, UInt32 count);
+
+private:
+    const OscillatorType mType;
+    const Float64        mBaseFreq;
+
+};
+
+----------------------------------
+2014-11-16
+
+class Envelope {
+
+public:
+    enum EnvelopeType {
+        ET_Linear,
+        ET_Exponential
+    };
+    Envelope(float        attackTime,
+             float        delayTime,
+             float        sustainLevel,
+             float        releaseTime,
+             EnvelopeType type = ET_Exponential);
+    void release();
+
+    void generate(float *sampBuf, UInt32 count);
+
+private:
+    enum EnvelopeSegment {
+        ES_Attack,
+        ES_Decay,
+        ES_Sustain,
+        ES_Release
+    };
+    bool         mIsReleased;
+    EnvelopeType mType;
+    float        mLevel;
+    float        mAttackTime;
+    float        mDelayTime;
+    float        mSustainLevel;
+    float        mReleaseTime;
+};
+
+----------------------------------
+2014-11-12
+
+VCA parameters.
+    Amp Attack Time (msec: 0 - 5000)
+    Amp Decay Time (msec: 0 - 5000)
+    Amp Sustain Level (dB: -inf -- 0)
+    Amp Release Time (msec: 0 - 5000)
+    Amp LF form
+    Amp LF speed
+    Amp LF depth
+    Amp Volume
+
+
+----------------------------------
+2014-11-12
+
+It's time to enumerate the parameters.
+
+MVS: Minimum Viable Synth.
+
+No parameters.
+VCO just does sawtooth.
+VCA just does boxcar envelopes.  Jaggy ones.
+
+----------------------------------
+2014-11-07
+
+Simplified Audio Unit Class Hierarchy
+
+AUBase
+  AUEffectBase
+  AUMidiBase
+    AUInstrumentBase
+      AUMonotimbralInstrumentBase
+      AUMultitimbralInstrumentBase
+    AUMIDIEffectBase
+
+Project templates:
+
+Audio Unit
+  Generic Audio Unit
+  Audio Effect           ('aufx')
+  Monotimbral Instrument ('aumu')
+  MIDI Effect            ('aumf')
+
+Audio Unit Constants
+    'auou' Output           (kAudioUnitType_Output)
+    'aumu' Music Device
+    'aumf' Music Effect
+    'aufc' Format Converter
+    'aufx' Effect
+    'aumx' Mixer
+    'aupn' Panner
+    'auol' Offline Effect
+    'augn' Generator
+
+TemplateInfo keys in Bundle.xctemplate:
+    Ancestors
+    Concrete
+    Definitions
+    Identifier
+    Kind
+    Nodes
+    Options
+    SortOrder
+    Targets
+
+
+----------------------------------
+2014-10-25
+Synth architecture - general idea
+
+Four module types:
+  VCO
+  Noise Source
+  VCF
+  VCA
+
+Connections:
+
+  VCO --(+)-- VCF -- VCA -> out
+  VCO -- |
+  VCO -- |
+  noise -'
+
+There is a modifier block controlling each module.
+
+      VCO modifiers
+  switch: sin/pulse/saw
+  hardwired: MIDI note number, MIDI pitch bend
+  pulse width (pulse wave)
+  ADSR envelope (exponential)
+  LFO, max gain */- 600 cents
+  gain
+  microtuning controls?
+
+Noise modifiers
+  switch: pink/white
+  gain  (0 .. 1)
+
+VCF modifiers
+  hardwired: none?
+  ADSR envelope (exponential)
+  LFO
+  gain (-1 .. +1)
+
+VCA modifiers
+  hardwired: note on, note off, note velocity
+  ADSR envelope (exponential)
+  LFO
+  gain (0 .. 1)
+
+LFO controls
+  switch: sine/saw/triangle/pulse (default sine)
+  rate (0.1 Hz .. 20 Hz)
+  depth (default 0)
+
+So how does a VCO work?
+  Each sample adds Fo/Fs to the phase (where 0 <= phase <= 1)
+  From the phase, can calculate amplitude.
+  saw: amplitude = phase * 2 - 1
+  pulse: amplitude = phase < pulsewidth ? low : high
+         (calc low and high so there is no DC offset.
+         I think that means high = (1-pw), low = -pw.)
+  sin: amplitude = sin(2 * pi * phase)
+  Now, run the wave through a bandwidth limiter.
+     a = 2 * Fs * (a - a[n-1])
+
+How does an envelope generator work?
+  It has five parameters: P, A, D, S, R.
+     Peak level, Attack time, Decay time, Sustain level, Release time.
+  Use Bresenham to generate straight lines, then convert the lines
+  to exponential.
+
+How does a VCF work?
+  See D'Angelo amd Valimaki.
+  (Sheesh!)
+
+What's the minimum needed?
+  VCO tied to MIDI note
+    no envelope, no LFO, no pitch bend, just straight even-tempered pitches.
+  VCA
+    envelope generator fixed at A=0, D=0, S=1, R=0.  P = f(MIDI velocity).
+  The null VCF is a passthrough.
+  The null LFO is a zero.
+
+Where to start?
+  class MyNote : public SynthNote;
+  have a processing graph?
+  class VCO { Render(...);
+  define scopes
+    vco1 = 1025
+
+
+----------------------------------
+Open Source Software
+
+  Aeolus - pipe organ emulator
+
+  Ardour - Audio and MIDI recording and editing
+
+  Audacity - recorder/editor
+
+  Fluidsynth - wavetable synthesizer
+    - QSynth is a front end
+
+  HammerSound - free instrument samples
+
+  horgand - organ synth
+
+  JACK
+
+  Jacker - sequences/tracker
+    by paniq
+
+  LADSPA - Linux Audio Developer's Simple Plugin API
+
+  WildMIDI - wavetable synth
+    part of GStreamer
+
+Commercial Software
+
+  DLS (Downloadable Sounds) - file format for sound banks
+
+  SoundFont - file format for samples
+    v1, v2, and v2.04
+    from E-mu and Creative Labs
+
+Keyboard Controllers
+
+  Akai Synthstation
+
+  M-Audio Axiom A.I.R.
+    premium controllers
+
+  M-Audio Oxygen
+    budget controllers
+
+  M-Audio KeyStation
+    semi-weighted controllers
+
+  M-Audio Axiom Pro
+   older premium controllers
+
+  M-Audio Axiom
+    older semi-weighted controllers
+
+  Novation SL-11 Mk2
+    premium controllers
+
+  Novation LaunchKey
+    midrange controllers
+
+  Novation Impulse
+    budget controllers
+
+Commercial Synths
+
+  Access Virus TI2
+  Nord Lead 2X, 3, 4
+  StudioLogic Sledge
+
+Projects
+
+  Beyond Good and Evil by paniq
+  http://music.paniq.cc/album/beyond-good-and-evil
+  http://www.the-album.cc/pages/archive/index.html
+
+Further Reading
+
+  DPW bandlimited sawtooth algorithm
+    Välimäki, V.
+    "Discrete-time synthesis of the sawtooth waveform with reduced aliasing"
+     IEEE Signal Processing Letters 12(3): 214– 217, 2005
+
+  http://www.acoustics.hut.fi/publications/papers/dafx2004-moog/
