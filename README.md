@@ -2,4 +2,4 @@
 
 A virtual analog synthesizer with lots of knobs and buttons.
 
-![front panel image](image/Synth_Panel.png?raw=true)
+![front panel image](image/Synth Panel.png?raw=true)
