@@ -792,7 +792,7 @@ COM-09938 (green, Vf = 3.4V, Ifmax = 20mA)&lt;br&gt;</description>
 <part name="FRAME1" library="frames" deviceset="LETTER_L" device="" value="FRAME1"/>
 <part name="U$1" library="SynthLib" deviceset="TEENSY_LC_BASIC" device=""/>
 <part name="JP1" library="jumper" deviceset="JP3Q" device="" value="SPI_POWER"/>
-<part name="D1" library="SynthLib" deviceset="LED_BARGRAPH_6" device="" value="Red"/>
+<part name="D1" library="SynthLib" deviceset="LED_BARGRAPH_6" device="" value="Amber"/>
 <part name="GND1" library="SynthLib" deviceset="GND2" device=""/>
 <part name="GND2" library="SynthLib" deviceset="GND2" device=""/>
 <part name="GND3" library="SynthLib" deviceset="GND2" device=""/>

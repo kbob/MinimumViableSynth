@@ -645,7 +645,7 @@ Please make sure your boards conform to these design rules.</description>
 </autorouter>
 <elements>
 <element name="D1" library="SynthLib" package="LED_BARGRAPH_6" value="Red" x="7.08" y="25.471" smashed="yes" rot="R270">
-<attribute name="VALUE" x="5.611665625" y="26.867665625" size="1.27" layer="27"/>
+<attribute name="VALUE" x="5.611665625" y="26.867665625" size="1.27" layer="21"/>
 </element>
 <element name="JP1" library="jumper" package="JP3Q" value="SPI_POWER" x="7.67" y="39.603334375" smashed="yes" rot="MR180"/>
 <element name="L1" library="SynthLib" package="WS2812B" value="WS2812B" x="20.65" y="5.55833125" smashed="yes" rot="R90"/>
