@@ -92,9 +92,14 @@ module base() {
 }
 
 module spine() {
-    lx = header_cx + header_w / 2 + clr;
-    translate([lx, spine_y, eps])
-        round_rect([board_w - lx, board_h - spine_y, top_z - eps], r=board_r);
+    lx = teensy_rx;
+    difference() {
+        translate([lx, spine_y, eps])
+            round_rect([board_w - lx, board_h - spine_y, top_z - eps], r=board_r);
+        // strain relief
+        translate([board_w - 12, spine_y - eps, base_z])
+            cube([2, board_h, deck_z - base_z - 1]);
+    }
 }
 
 module bulkheads() {
@@ -200,8 +205,9 @@ module under_teensy() {
 }
 
 module header_cutout() {
-    translate([-eps, header_cy - header_h / 2 - clr, -eps])
-        round_rect([header_cx + header_w / 2 + clr, board_h, deck_z + 2 * eps],
+    hdr_clr = 2;
+    translate([-eps, header_cy - header_h / 2 - hdr_clr, -eps])
+        round_rect([header_cx + header_w / 2 + hdr_clr, board_h, deck_z + 2 * eps],
                    r=0.5);
 }
 
@@ -229,27 +235,42 @@ module substrate() {
     };
 }
 
-module clip() {
+module clips() {
     clip_t = 7;
+    od = hole_d + 5;
+    x0 = spine_cx1 - od/2;
+    x1 = spine_cx3 + od/2;
     y = board_h - spine_screw_y;
+    y1 = spine_y - spine_screw_y;
+    y2 = board_h - spine_y;
+
     difference() {
-        hull() {
-            cylinder(d=hole_d + 5, h=clip_t);
-            translate([-hole_d / 2 - 2.5, y - eps, 0])
-                cube([hole_d + 5, eps, clip_t]);
+        union() {
+            for (x = [spine_cx1, spine_cx2, spine_cx3])
+                translate([x, 0, 0])
+                    hull() {
+                        cylinder(d=od, h=clip_t);
+                        translate([-od/2, y - eps, 0])
+                            cube([od, eps, clip_t]);
+                    }
+            translate([x0, y1, 0])
+                cube([x1 - x0, y2, clip_t]);
         }
-        cylinder(d=hole_d + hole_clr + 2 * clr, h=3 * clip_t, center=true);
-        translate([0, 0, clip_t - 2])
-            cylinder(d=6.5, h=3);
+        for (x = [spine_cx1, spine_cx2, spine_cx3])
+            translate([x, 0, 0]) {
+                cylinder(d=hole_d + hole_clr + 2 * clr, h=3 * clip_t, center=true);
+                translate([0, 0, clip_t - 2])
+                    cylinder(d=6.5, h=3);
+            }
     }
 }
 
+//module clips() {
+//    for (x = [20, 40, 60])
+//        translate([x, -10, 0])
+//            clip();
+//}
 
-module clips() {
-    for (x = [20, 40, 60])
-        translate([x, -10, 0])
-            clip();
-}
-
-clips();
+translate([0, -10, 0])
+    clips();
 substrate();
