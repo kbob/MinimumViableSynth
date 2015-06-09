@@ -3,3 +3,7 @@ Synth Panel.pdf
 *.s#?
 *.b#?
 *.l#?
+*.o
+*.d
+*.elf
+*.map
