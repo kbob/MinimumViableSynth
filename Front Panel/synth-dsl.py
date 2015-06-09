@@ -61,12 +61,19 @@ LED_red = (1, 0.2, 0.2)
 LED_green = (0, 1, 0)
 
 paginate = False
+detail = False
+flip = False
 cutting_guide = False
 if cutting_guide:
+    FG = (1, 0, 0)
     BG = (1, 1, 1)
-    FG = (0.5, 0.5, 0.5)
-    cut_width = 0.2 * mm;
+    cut_width = 0.001;
     cut_color = (0, 1, 0)
+    cut_color = (0, 0, 1)
+
+    do_cut = True
+    do_text = True
+    do_engrave = True
 else:
     # yellow on green
     # BG = (0.12, 0.24, 0.24)
@@ -74,14 +81,14 @@ else:
 
     # gray on gray
     FG = (0.9, 0.9, 0.9)
-    BG = (0.6, 0.6, 0.6)
     BG = (0.3, 0.3, 0.3)
 
-    # yellow on red
-    # FG = (1, 0.75, 0.2)
-    # BG = (0.2, 0.2, 0.2)
     cut_width = 1
     cut_color = (0, 0, 0)
+    do_cut = True
+    do_text = True
+    do_engrave = True
+
 
 @unique
 class Layout(Enum):
@@ -449,7 +456,12 @@ col1 = PanelColumn([osc1, osc2, PanelRow([noise, mixer])])
 col3 = PanelColumn([title, screen, filter])
 col4 = PanelColumn([env1, env2, PanelRow([amp, env3])])
 
-panel = Panel([col0, col1, col3, col4], early=True)
+if detail:
+    PANEL_WIDTH = 4 * Fraction('21.5') + 2 * MODULE_MARGINS[0] + PANEL_MARGINS[0]
+    PANEL_HEIGHT = Fraction('44.50') - Fraction(1, 32) * inch2mm
+    panel = Panel([PanelColumn([lfo1])], early=True)
+else:
+    panel = Panel([col0, col1, col3, col4], early=True)
 
 # print('panel min size', panel.min_size)
 # print('panel grid size', panel.grid_size)
@@ -675,8 +687,13 @@ def render(boxes):
     else:
         pagesize = (PANEL_WIDTH*mm + 1*inch, PANEL_HEIGHT*mm + 1*inch)
         c = canvas.Canvas('Synth Panel.pdf', pagesize=pagesize)
-        c.translate((pagesize[0] - PANEL_WIDTH * mm) / 2,
-                    (pagesize[1] - PANEL_HEIGHT * mm) / 2)
+        if flip:
+            c.translate((pagesize[0] + PANEL_WIDTH * mm) / 2,
+                        (pagesize[1] - PANEL_HEIGHT * mm) / 2)
+            c.scale(-1, +1)
+        else:
+            c.translate((pagesize[0] - PANEL_WIDTH * mm) / 2,
+                        (pagesize[1] - PANEL_HEIGHT * mm) / 2)
         render_boxes(c, boxes, early=True)
         render_boxes(c, boxes)
         c.showPage()
@@ -720,7 +737,8 @@ def render_panel(c, box):
         c.setFillColorRGB(*BG)
         c.setLineWidth(cut_width)
         c.setStrokeColorRGB(*cut_color)
-        c.rect(box.x * mm, box.y * mm, box.w * mm, box.h * mm, fill=1)
+        if do_cut:
+            c.rect(box.x * mm, box.y * mm, box.w * mm, box.h * mm, fill=1)
     
 def render_title(c, box):
     w = box.widget
@@ -768,15 +786,18 @@ def render_source_module(c, box):
         c.setStrokeColorRGB(*FG)
         c.setFillColorRGB(*FG)
         c.scale(mm, mm)
-        c.circle(assign_cx, assign_cy, assign_radius, stroke=0, fill=1)
+        if do_engrave:
+            c.circle(assign_cx, assign_cy, assign_radius, stroke=0, fill=1)
         if assign_index:
             c.translate(assign_cx - assign_radius, assign_cy)
             c.rotate(135)
-            c.rect(0, 0, 10, 10, stroke=0, fill=1)
+            if do_engrave:
+                c.rect(0, 0, 10, 10, stroke=0, fill=1)
         else:
             c.translate(assign_cx + assign_radius, assign_cy)
             c.rotate(-45)
-            c.rect(0, 0, 10, 10, stroke=0, fill=1)
+            if do_engrave:
+                c.rect(0, 0, 10, 10, stroke=0, fill=1)
 
 
 def render_module_dest(c, box):
@@ -808,17 +829,23 @@ def render_module_dest(c, box):
             c.translate(tip_x, tip_y)
             c.rotate(atan(dy / dx) * 180/pi)
             c.setLineWidth(arrow_width)
-            c.line(arrow_width / 2, 0, amount_cx - tip_x, 0)
+            if do_engrave:
+                c.line(arrow_width / 2, 0, amount_cx - tip_x, 0)
             with state(c):
                 c.rotate(-45)
-                c.rect(0, 0,
-                       arrow_width/ sqrt(2), arrow_width / sqrt(2),
-                       stroke=0, fill=1)
+                if do_engrave:
+                    c.rect(0, 0,
+                           arrow_width/ sqrt(2), arrow_width / sqrt(2),
+                           stroke=0, fill=1)
         c.setLineWidth(0.5)
         c.setDash(1, 1)
-        c.line(tip_x, tip_y, dest_cx, dest_cy)
+        if do_engrave:
+            c.line(tip_x, tip_y, dest_cx, dest_cy)
 
 def render_module(c, box):
+
+    if not do_engrave:
+        return
 
     # Dims: dimension that change between outer and inner outline
     # x0: left edge
@@ -959,19 +986,19 @@ def render_module(c, box):
                              margin[1] + label_pos[1] +
                              label_pad[1])*mm,
                             mod)
-        if mod == filter:
-            print('Filter')
-            print('  box origin = (%s, %s)' % (box.x, box.y))
-            print('  box size   = (%g, %g)' % (box.w, box.h))
-            print()
-            print('  Label')
-            lxo = box.x + label_x0 + label_pad[0]
-            lyo = box.y + margin[1] + label_pos[1] + label_pad[1]
-            lxmid = lxo + label_w / 2
-            lymid = box.y + (margin[1] + base_y + thickness[1]) / 2
-            print('    origin = (%g, %g)' % (lxo, lyo))
-            print('    mid    = (%g, %g)' % (lxmid, lymid))
-            print()
+        # if mod == filter:
+        #     print('Filter')
+        #     print('  box origin = (%s, %s)' % (box.x, box.y))
+        #     print('  box size   = (%g, %g)' % (box.w, box.h))
+        #     print()
+        #     print('  Label')
+        #     lxo = box.x + label_x0 + label_pad[0]
+        #     lyo = box.y + margin[1] + label_pos[1] + label_pad[1]
+        #     lxmid = lxo + label_w / 2
+        #     lymid = box.y + (margin[1] + base_y + thickness[1]) / 2
+        #     print('    origin = (%g, %g)' % (lxo, lyo))
+        #     print('    mid    = (%g, %g)' % (lxmid, lymid))
+        #     print()
 
     # # outline module label
     # with state(c):
@@ -1047,11 +1074,12 @@ def render_choice(c, box):
             fill_outline=1
         c.setLineWidth(cut_width)
         c.setStrokeColorRGB(*cut_color)
-        c.rect(LED_box_pos[0],
-               LED_box_pos[1],
-               0.4*inch,
-               n * LED_spacing,
-               fill=fill_outline)
+        if do_cut:
+            c.rect(LED_box_pos[0],
+                   LED_box_pos[1],
+                   0.4*inch,
+                   n * LED_spacing,
+                   fill=fill_outline)
 
         # LEDs and labels
         if not cutting_guide:
@@ -1066,7 +1094,11 @@ def render_choice(c, box):
 
             # LED label
             c.setFillColorRGB(*FG)
-            render_label(c, (label_pos[0], y), label_width, widget, label)
+            render_choice_label(c,
+                                (label_pos[0], y),
+                                label_width,
+                                widget, 
+                                label)
             if not cutting_guide:
                 c.setFillColorRGB(1, 1, 1)
                 c.setFillColorRGB(0.4, 0.4, 0.4)
@@ -1077,9 +1109,10 @@ def render_choice(c, box):
         else:
             fill_button = True
             c.setFillGray(0.2)
-        c.circle(button_pos[0], button_pos[1],
-                 button_diam / 2,
-                 fill=fill_button)
+        if do_cut:
+            c.circle(button_pos[0], button_pos[1],
+                     button_diam / 2,
+                     fill=fill_button)
 
         # with state(c):
         #     c.setStrokeColorRGB(0, 1, 0)
@@ -1099,7 +1132,7 @@ def render_assign_button(c, box):
     with state(c):
         c.translate((box.x + box.w/2) * mm, (box.y + box.h/2) * mm)
 
-        # Base
+        # Basea
         if cutting_guide:
             fill_base = 0
         else:
@@ -1107,7 +1140,8 @@ def render_assign_button(c, box):
             fill_base = 1
         c.setLineWidth(cut_width);
         c.setStrokeColorRGB(*cut_color)
-        c.circle(0, 0, base_diam / 2, fill=fill_base)
+        if do_cut:
+            c.circle(0, 0, base_diam / 2, fill=fill_base)
 
         # Red Ring
         if not cutting_guide:
@@ -1116,6 +1150,7 @@ def render_assign_button(c, box):
             c.circle(0, 0, ring_diam / 2)
 
         # Label
+        c.setStrokeColorRGB(*FG)
         c.setFillColorRGB(*FG)
         render_control_label(c, box)
 
@@ -1141,7 +1176,8 @@ def render_knob(c, box, label_color=FG):
         if cutting_guide:
             c.setLineWidth(cut_width)
             c.setStrokeColorRGB(*cut_color)
-            c.circle(0, 0, 5*mm)
+            if do_cut:
+                c.circle(0, 0, 5*mm)
         else:
             # Base
             c.setFillGray(1)
@@ -1162,6 +1198,7 @@ def render_knob(c, box, label_color=FG):
                        fill=1)
 
         # Label
+        c.setStrokeColorRGB(*label_color)
         c.setFillColorRGB(*label_color)
         render_control_label(c, box)
 
@@ -1176,26 +1213,53 @@ def render_control_label(c, box):
     control = box.widget
     with state(c):
         c.setFont(*CONTROL_FONT)
-        c.drawCentredString(label_pos[0], label_pos[1], str(control.name))
+        c.setLineWidth(cut_width * 0.1)
+        if isinstance(box.widget, AmountKnob):
+            do_render = do_engrave
+            mode = 0
+        else:
+            do_render = do_text
+            mode = 1
+        if do_render:
+            c.drawCentredString(label_pos[0], label_pos[1],
+                                str(control.name),
+                                mode)
 
-def render_label(c, pos, w, widget, label):
+def render_choice_label(c, pos, w, widget, label):
     if label is None:
         return
-    if isinstance(widget, Choice):
-        c.drawString(pos[0], pos[1], str(label))
-    elif isinstance(widget,  Control):
-        c.drawCentredString((pos[0] + w / 2) * mm, pos[1] * mm + 5, str(label))
-        # c.drawString(x * mm + 3, y * mm + 5, str(label))
-    elif isinstance(widget, Module):
-        x = pos[0] + MODULE_MARGINS.l
-        if isinstance(widget.controls[0], Choice):
-            x += 14
-        c.drawString(x * mm,
-                     (pos[1] + 6) * mm,
-                     str(label))
+    with state(c):
+        c.setFillGray(1)
+        c.setStrokeColorRGB(*FG)
+        c.setLineWidth(cut_width * 0.2)
+        if do_text:
+            c.drawString(pos[0], pos[1], str(label), 1)
+
+def render_label_XXX_deprecated(c, pos, w, widget, label):
+    if label is None:
+        return
+    with state(c):
+        c.setFillGray(1)
+        c.setStrokeColorRGB(*FG)
+        c.setLineWidth(cut_width * 0.2)
+        if isinstance(widget, Choice):
+            c.drawString(pos[0], pos[1], str(label), 1)
+        elif isinstance(widget,  Control):
+            c.drawCentredString((pos[0] + w / 2) * mm,
+                                pos[1] * mm + 5,
+                                str(label))
+            # c.drawString(x * mm + 3, y * mm + 5, str(label))
+        elif isinstance(widget, Module):
+            x = pos[0] + MODULE_MARGINS.l
+            if isinstance(widget.controls[0], Choice):
+                x += 14
+            c.drawString(x * mm,
+                         (pos[1] + 6) * mm,
+                         str(label))
+
 
 boxes = layout_panel(panel)
 print('grid width %g' % g_grid_width)
-import pprint
-pprint.pprint(boxes)
+# import pprint
+# pprint.pprint(boxes)
 render(boxes)
