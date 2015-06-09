@@ -731,20 +731,24 @@ def render_title(c, box):
         width = c.stringWidth(s, None, None)
         c.translate((box.x + box.w / 2) * mm, (box.y + 3) * mm)
         c.scale((box.w - MODULE_MARGINS.l - MODULE_MARGINS.r) * mm / width, 1)
-        c.drawCentredString(0, 0, s)
+        if do_engrave:
+            c.drawCentredString(0, 0, s)
 
 def render_touchscreen(c, box):
     with state(c):
         if cutting_guide:
             fill = 0
-            stroke=1
+            stroke = 1
         else:
             fill = 1
-            stroke=0
+            stroke = 0
             c.setFillGray(0.9)
         c.setLineWidth(cut_width)
         c.setStrokeColorRGB(*cut_color)
-        c.rect(box.x*mm, box.y*mm, box.w*mm, box.h*mm, stroke=stroke, fill=fill)
+        if do_cut:
+            c.rect(box.x*mm, box.y*mm,
+                   box.w*mm, box.h*mm,
+                   stroke=stroke, fill=fill)
 
 def render_source_module(c, box):
 
