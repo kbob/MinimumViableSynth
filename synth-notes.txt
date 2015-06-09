@@ -1,3 +1,101 @@
+2015-06-05
+Master-Slave protocol
+
+The master (STM32F429i-Discovery) and the slaves (Teensy-LC)
+communicate over the SPI bus.  The master sends a MOSI message, and
+the slave simultaneously sends a MISO message.  The messages are
+exchanged at frequent intervals.  (I intended it to be once a
+millisecond but the SPI buses are getting noise about 250 KHz, so it's
+more like once every 3 msec.)
+
+Each slave runs the exact same firmware image, so it does not know
+what type of module it is until the master tells it.
+
+MOSI message format
+
+  STX : 1 byte
+  config 0 : 1 byte
+    bit 0:      c1 = nonzero if choice one lit
+    bit 1:      c2 = nonzero if choice two lit
+    bit 2:      c3 = nonzero if choice three lit
+    bit 3:      c4 = nonzero if choice four lit
+    bit 4:      c5 = nonzero if choice five lit
+    bit 5:      c6 = nonzero if choice six lit
+    bit 6:       (not used)
+    bit 7:      ap = nonzero if assign LED lit
+  config 1: 1 byte
+    bits 0-2:   np = number of pixels
+    bits 3-5:   na = number of analog inputs
+    bits 6-7:   unused
+  choice LED pwm: 1 byte per lit choice
+  assign LED pwm: 1 byte
+  pixels: 3 * np bytes
+    1st: title
+    2nd - np'th: knobs
+    red, green, blue order
+  checksum : 2 bytes
+  ETX : 1 byte
+
+MISO message format
+
+  STX : 1 byte
+  switches: 1 byte
+    bit 0: c0 clicked
+    bit 1: assign clicked
+    bit 2: destination button 1 clicked
+    bit 3: destination button 2 clicked
+    bit 4: destination button 3 clicked
+    bit 5: destination button 4 clicked
+  analog: 1 byte
+    bit 0: analog 1 changed
+    bit 1: analog 2 changed
+    bit 2: analog 3 changed
+    bit 3: analog 4 changed
+    bit 4: analog 5 changed
+  analog values:  1 byte per changed value
+  checksum : 2 bytes
+  ETX : 1 byte
+
+The checksums are Fletcher16 and are calculated over the 2nd through
+n-4th bytes.  (i.e., starting after the initial STX, up through the
+byte before the checksum.)  The checksum is MSByte first.
+
+
+----------------------------------
+2015-06-01
+
+Board Prices
+
+I designed six boards and had each fabricated by OSHPark.  OSHPark
+gives you three copies for $5/square inch.  I designed the controls so
+that I can use more than one of some of the boards.  That helped reduce
+the fabrication cost, though it raised the system complexity.
+
+    Board              Number           Price
+                        Used
+    LFO Small 1.0         3             27.55
+    Filter 1.0            1             39.45
+    Oscillator 1.0        2             29.00
+    Duo 1.0               2             14.50
+    Envelope 1.0          3             37.00
+    Master Volume 1.0     1              9.65
+                                      -------
+    TOTAL                              159.15
+
+The synth uses twelve boards, six designs.
+
+The easier approach would have been to fabricate one board at 17.25 x
+5.25.  OSHPark would have charged $453.  I probably could have gotten
+it somewhat cheaper elsewhere, but OSHPark's 3fer pricing worked out.
+
+The other way to look at it is that one big board is 90.5 square
+inches, and the smaller boards (ignoring duplicates) total 32 square
+inches.
+
+Anyway, now I have to attach all those boards to a chassis and make a
+whole lot of cables.
+
+----------------------------------
 2015-05-30
 Module Dimensions
 
@@ -49,7 +147,7 @@ The top of the paddles is at y = 38.25 mm
         bottom     = 3.5 mm
         radius     = 2.54 mm
         stem width = 6 mm
-        
+
 The filter module is different.  The positions of the filter controls
 are not calculated yet.
 
@@ -176,7 +274,7 @@ The SPI connection will carry data bidirectionally.
    outbound
      knob LED colors/patterns
      module LED colors/patterns
-     
+
 What LED patterns should there be?
 
    assignable
@@ -246,7 +344,7 @@ Analogue Haven order number 2375-7979-9624
 The 40 greatest synth sounds of all time… ever!
 http://www.musicradar.com/us/news/tech/the-40-greatest-synth-sounds-of-all-time-ever-306114
 
-----------------------------------      
+----------------------------------
 2015-02-28
 Letter to Piotr
 
@@ -510,7 +608,7 @@ Switch/pushbutton
   1 Noise.spectrum
   1 Mix.operator
   1 Flt.type
-  
+
 Small ptr knob, single turn 8 clicks
 
   2 Osc.octave
@@ -546,7 +644,7 @@ Shopping!
 
           STM32F4 Discovery boards
           switches, potentiometers, encoders, misc.
-          
+
 
 ORDERED Small Bear Electronics
           knobs
@@ -572,11 +670,11 @@ NOSTOCK TME
           pyralux
           toy motors
 
-        Sparkfun    
+        Sparkfun
           soft potentiometers
           clear shaft rotary encoder
           clear knob
-    
+
 ----------------------------------
 2015-01-04
 Solder Pastes
@@ -714,7 +812,7 @@ Here's my proposed mapping, split across keyboard progrms 1 and 2.
 
                  PGM 1                PGM 2
 
-   Slider C1     LFO 1 Amount         same               
+   Slider C1     LFO 1 Amount         same
    Slider C2     LFO 2 Amount         "
    Slider C3     Env 2 Amount         "
    Slider C4     Filter Fc            "
@@ -1598,7 +1696,7 @@ Update 2015-05-31:
    ... Model A being a pun on Analog Modeling.
        Wikipedia says Tin Lizzie was the Ford Model T, not the Model
        A.  The Model A is also known as the A-Bone. (?)
-       
+
 
 ----------------------------------
 2014-12-14
