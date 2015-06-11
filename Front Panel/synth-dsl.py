@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 from abc import ABCMeta
 from collections import namedtuple
 from contextlib import contextmanager
@@ -16,25 +15,25 @@ from reportlab.pdfgen import canvas
 
 # TODO:
 # X   dataflow graphics for CV
-#     dataflow graphics for audio
+# v   dataflow graphics for audio
 # X   graphic labels
 # X   highlight the cutoff knob
-#     test-fit the LCD screen
-#     make the filter envelope arrow swoopy.
+# X   test-fit the LCD screen
+# X   make the filter envelope arrow swoopy.
 
 # Notes from 6/5
-# X   cut lines:    use 0.001 pt. width.
-#     engraving:    try cutting engraving edge.
-# X   choice LEDs:  make slot 0.5mm longer at each end.
-# X   knobs:        add rectangular cutout.
-# X                 add holes for alignment pins.
-# X                 make circular hole 1mm bigger diameter.
-#     amount knobs: change text to white on black.
-# X   control text: increase kerning to 0.5.
-# X                 use bigger font size.
-# X   choice text:  use much bigger font size.
-# X                 use more leading.
-# X                 use graphics where possible.
+# X   cut lines:       use 0.001 pt. width.
+#     engraving:       try cutting engraving edge.
+# X   choice LEDs:     make slot 0.5mm longer at each end.
+# X   knobs:           add rectangular cutout.
+# X                    add holes for alignment pins.
+# X                    make circular hole 1mm bigger diameter.
+#     amount knobs:    change text to white on black.
+# X   control text:    increase kerning to 0.5.
+# X                    use bigger font size.
+# X   choice text:     use much bigger font size.
+# X                    use more leading.
+# X                    use graphics where possible.
 #     module outlines: make assign arrow integral part.
 
 
@@ -79,7 +78,7 @@ LED_green = (0, 1, 0)
 paginate = False
 detail = False
 flip = False
-cutting_guide = True
+cutting_guide = False
 if cutting_guide:
     FG = (1, 0, 0)
     BG = (1, 1, 1)
@@ -99,7 +98,7 @@ else:
     FG = (0.9, 0.9, 0.9)
     BG = (0.3, 0.3, 0.3)
 
-    cut_width = 1
+    cut_width = 0.3
     cut_color = (0, 0, 0)
     do_cut = True
     do_text = True
@@ -535,7 +534,7 @@ def layout_panel(panel):
     ms = panel.min_size
     gs = panel.grid_size
     grid_width = (PANEL_WIDTH - ms[0]) / gs[0]
-    print("grid_width = (%g - %g) / %g\n" % (PANEL_WIDTH, ms[0], gs[0]))
+    # print("grid_width = (%g - %g) / %g\n" % (PANEL_WIDTH, ms[0], gs[0]))
     global g_grid_width
     g_grid_width = grid_width
     grid_height = (PANEL_HEIGHT - ms[1]) / gs[1]
@@ -799,10 +798,12 @@ def render_title(c, box):
         c.setFont(*TITLE_FONT)
         c.setFillColorRGB(*FG)
         width = c.stringWidth(s, None, None)
-        c.translate((box.x + box.w / 2) * mm, (box.y + 3) * mm)
-        c.scale((box.w - MODULE_MARGINS.l - MODULE_MARGINS.r) * mm / width, 1)
+        c.translate(box.x * mm, (box.y + 3) * mm)
         if do_engrave:
-            c.drawCentredString(0, 0, s)
+            t = c.beginText()
+            t.setHorizScale(box.w * mm / width * 100)
+            t.textOut(s)
+            c.drawText(t)
 
 def render_touchscreen(c, box):
     with state(c):
@@ -837,19 +838,18 @@ def render_source_module(c, box):
     with state(c):
         c.setStrokeColorRGB(*FG)
         c.setFillColorRGB(*FG)
-        c.scale(mm, mm)
         if do_engrave:
-            c.circle(assign_cx, assign_cy, assign_radius, stroke=0, fill=1)
+            c.circle(assign_cx*mm, assign_cy*mm, assign_radius*mm, stroke=0, fill=1)
         if assign_index:
-            c.translate(assign_cx - assign_radius, assign_cy)
+            c.translate((assign_cx - assign_radius)*mm, assign_cy*mm)
             c.rotate(135)
             if do_engrave:
-                c.rect(0, 0, 10, 10, stroke=0, fill=1)
+                c.rect(0, 0, 10*mm, 10*mm, stroke=0, fill=1)
         else:
-            c.translate(assign_cx + assign_radius, assign_cy)
+            c.translate((assign_cx + assign_radius)*mm, assign_cy*mm)
             c.rotate(-45)
             if do_engrave:
-                c.rect(0, 0, 10, 10, stroke=0, fill=1)
+                c.rect(0, 0, 10*mm, 10*mm, stroke=0, fill=1)
 
 
 def render_module_dest(c, box):
@@ -868,31 +868,50 @@ def render_module_dest(c, box):
     tip_x = amount_box.x - amount_box.w / 2 + assign_radius
     dest_cx = dest_box.x + dest_box.w / 2
     dest_cy = dest_box.y + dest_box.h / 2
-    dx = dest_cx - amount_cx
-    dy = dest_cy - amount_cy
-    tip_y = amount_cy + (tip_x - amount_cx) * dy / dx
+    # dx = dest_cx - amount_cx
+    # dy = dest_cy - amount_cy
+    # tip_y = amount_cy + (tip_x - amount_cx) * dy / dx
+    tip_y = amount_cy
     arrow_width = (amount_box.x - tip_x) * 2
     with state(c):
         c.setStrokeColorRGB(*FG)
         c.setFillColorRGB(*FG)
-        c.scale(mm, mm)
-        # c.circle(assign_cx, assign_cy, assign_radius, stroke=0, fill=1)
         with state(c):
-            c.translate(tip_x, tip_y)
-            c.rotate(atan(dy / dx) * 180/pi)
-            c.setLineWidth(arrow_width)
+            c.translate(tip_x*mm, tip_y*mm)
+            # c.rotate(atan(dy / dx) * 180/pi)
+            c.setLineWidth(arrow_width*mm)
             if do_engrave:
-                c.line(arrow_width / 2, 0, amount_cx - tip_x, 0)
+                c.line((arrow_width / 2)*mm, 0, (amount_cx - tip_x)*mm, 0)
             with state(c):
                 c.rotate(-45)
                 if do_engrave:
-                    c.rect(0, 0,
-                           arrow_width/ sqrt(2), arrow_width / sqrt(2),
+                    wr2 = arrow_width / sqrt(2)
+                    c.rect(0, 0, wr2*mm, wr2*mm,
+                           # (arrow_width / sqrt(2))*mm, (arrow_width / sqrt(2))*mm,
                            stroke=0, fill=1)
-        c.setLineWidth(0.5)
-        c.setDash(1, 1)
+        c.setLineWidth(0.5*mm)
+        c.setDash(1*mm, 1*mm)
         if do_engrave:
-            c.line(tip_x, tip_y, dest_cx, dest_cy)
+            with path(c) as p:
+                if abs(tip_y - dest_cy) < 0.00001:
+                    p.moveTo(tip_x*mm, tip_y*mm)
+                    p.lineTo(dest_cx*mm, dest_cy*mm)
+                else:
+                    mid_x = tip_x - 16.5
+                    mid_y = (tip_y + dest_cy) / 2 - 4
+                    p.moveTo(tip_x*mm, tip_y*mm)
+                    p.curveTo((tip_x - 12)*mm, tip_y*mm,
+                              (mid_x + 10)*mm, (mid_y + 10)*mm,
+                              mid_x*mm, mid_y*mm)
+                    p.curveTo((mid_x - 15)*mm, (mid_y - 15)*mm,
+                              (dest_cx + 20)*mm, (dest_cy + 25)*mm,
+                              dest_cx*mm, dest_cy*mm)
+                    with state(c):
+                        c.setStrokeColorRGB(0, 1, 0)
+                        c.setLineWidth(0.1)
+                        c.setDash(100)
+                        c.circle(mid_x*mm, mid_y*mm, 1.5*mm)
+
 
 def render_module(c, box):
 
@@ -933,24 +952,22 @@ def render_module(c, box):
 
         with state(c), path(c, stroke=0, fill=1) as p:
             c.setFillColorRGB(*color)
-            c.scale(mm, mm)
-            c.translate(box.x, box.y)
-            c.setLineWidth(1/mm)
-            p.moveTo(x0 + hr, y1)
-            p.arcTo(x1 - hd, y1, x1, y1 - vd, 90, -90)
-            p.arcTo(x1, d.by + vd, x1 - hd, d.by, 0, -90)
+            c.translate(box.x*mm, box.y*mm)
+            p.moveTo((x0 + hr)*mm, y1*mm)
+            p.arcTo((x1 - hd)*mm, y1*mm, x1*mm, (y1 - vd)*mm, 90, -90)
+            p.arcTo(x1*mm, (d.by + vd)*mm, (x1 - hd)*mm, d.by*mm, 0, -90)
             if d.by != y0:
-                p.arcTo(c1[0] - tab_hr, c1[1] - tab_vr,
-                        c1[0] + tab_hr, c1[1] + tab_vr,
+                p.arcTo((c1[0] - tab_hr)*mm, (c1[1] - tab_vr)*mm,
+                        (c1[0] + tab_hr)*mm, (c1[1] + tab_vr)*mm,
                         90, a)
-                p.arcTo(c0[0] - tab_hr, c0[1] - tab_vr,
-                        c0[0] + tab_hr, c0[1] + tab_vr,
+                p.arcTo((c0[0] - tab_hr)*mm, (c0[1] - tab_vr)*mm,
+                        (c0[0] + tab_hr)*mm, (c0[1] + tab_vr)*mm,
                         270 + a, -a)
                 if c1[0] > x1 - hr:
                     print('%s: c1.x=%g > x1=%g - hr=%g' %
                           (mod.name, c1[0], x1, hr))
-            p.arcTo(x0 + hd, y0, x0, y0 + vd, 270, -90)
-            p.arcTo(x0, y1 - vd, x0 + hd, y1, 180, -90)
+            p.arcTo((x0 + hd)*mm, y0*mm, x0*mm, (y0 + vd)*mm, 270, -90)
+            p.arcTo(x0*mm, (y1 - vd)*mm, (x0 + hd)*mm, y1*mm, 180, -90)
 
     # Independent variables
     margin = (MODULE_MARGINS[0], 1)
@@ -1146,7 +1163,7 @@ def render_choice(c, box):
             label_y = LED_y
             if True or isinstance(label, TextLabel):
                 label_y += ((n-1)/2 - i) * (label_extra_leading)
-            print(str(label), label_y)
+            # print(str(label), label_y)
 
             # LED
             if not cutting_guide:
@@ -1494,32 +1511,33 @@ def render_control_label(c, box):
             mode = 1
         if do_render:
             if control == filter.controls[-1]:
-                c.translate(-7, 0)
+                c.translate(-2*mm, 0)
             with text(c, label_pos[0], label_pos[1]) as t:
+                txt = str(control.name)
                 t.setTextRenderMode(mode)
                 t.setCharSpace(control_char_space)
-                t.textOut(str(control.name))
-                c.translate(-t.getX() / 2, 0)
+                t.textOut(txt)
+                lw = t.getX()
+                lw += (len(txt) - 1) * control_char_space
+                c.translate(-lw / 2, 0)
 
 
 def render_choice_label(c, pos, w, widget, label):
-    if isinstance(label, TextLabel):
-        with state(c):
-            c.setFillGray(1)
-            c.setStrokeColorRGB(*FG)
-            c.setLineWidth(cut_width)
+    with state(c):
+        c.setFillGray(1)
+        c.setStrokeColorRGB(*FG)
+        c.setLineWidth(cut_width)
+        if isinstance(label, TextLabel):
             if do_text:
                 c.drawString(pos[0], pos[1], str(label), 1)
-    elif isinstance(label, WaveformLabel):
-        with state(c):
-            # bbox = pos + (21.5*mm - pos[0], 0.1*inch)
+        elif isinstance(label, WaveformLabel):
             bbox = pos + (21.5*mm, pos[1] + 0.1*inch)
             try:
                 curve = path_funcs[label.waveform](c, bbox)
+                c.setStrokeColorRGB(*FG)
                 c.drawPath(curve)
             except KeyError:
                 pass
-            # c.roundRect(*bbox, radius=0.05*inch)
             pass
     
 
