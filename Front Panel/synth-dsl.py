@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
+
 from abc import ABCMeta
 from collections import namedtuple
 from contextlib import contextmanager
 from enum import Enum, unique
 from fractions import Fraction
-from math import atan, pi, sin, sqrt, tan
+from math import atan, ceil, floor, pi, sin, sqrt, tan
 
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.units import inch, mm
@@ -14,16 +15,35 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
 # TODO:
-# X dataflow graphics for CV
-#   dataflow graphics for audio
-#   graphic labels
-#   highlight the cutoff knob
+# X   dataflow graphics for CV
+#     dataflow graphics for audio
+# X   graphic labels
+# X   highlight the cutoff knob
+#     test-fit the LCD screen
+#     make the filter envelope arrow swoopy.
+
+# Notes from 6/5
+# X   cut lines:    use 0.001 pt. width.
+#     engraving:    try cutting engraving edge.
+# X   choice LEDs:  make slot 0.5mm longer at each end.
+# X   knobs:        add rectangular cutout.
+# X                 add holes for alignment pins.
+# X                 make circular hole 1mm bigger diameter.
+#     amount knobs: change text to white on black.
+# X   control text: increase kerning to 0.5.
+# X                 use bigger font size.
+# X   choice text:  use much bigger font size.
+# X                 use more leading.
+# X                 use graphics where possible.
+#     module outlines: make assign arrow integral part.
+
+
+
 
 
 # Use fractions here and force all size calculations to rational arithmetic.
 inch2mm = Fraction('25.4')
 rack_unit = Fraction('1.75') * inch2mm
-# PANEL_WIDTH = Fraction('17.25') * inch2mm   # 19" rack
 PANEL_WIDTH = Fraction('438')  # 438mm makes grid_width an even 21.5mm.
 PANEL_HEIGHT = 3 * Fraction('44.50') - Fraction(1, 32) * inch2mm
 # print("PANEL_HEIGHT %g" % PANEL_HEIGHT)
@@ -41,19 +61,15 @@ TITLE_HEIGHT = 10 + Fraction(7, 30)
 TITLE_FONT = ('Jupiter', 40)
 title_font_file = '/Users/kbob/Library/Fonts/jupiter.ttf'
 pdfmetrics.registerFont(TTFont(TITLE_FONT[0], title_font_file))
-# TITLE_FONT = ('Helvetica', 27)
 
-# MODULE_FONT = ('Helvetica', 12)
 MODULE_FONT = ('Jupiter', 20)
 
-# CONTROL_FONT = ('Helvetica', 10)
-# CONTROL_FONT = ('Jupiter', 14)
-CONTROL_FONT = ('Lato-Light', 10)
+CONTROL_FONT = ('Lato-Light', 11)
 control_font_file = '/Users/kbob/Library/Fonts/Lato-Light.ttf'
 pdfmetrics.registerFont(TTFont('Lato-Light', control_font_file))
+control_char_space = 0.5
 
-CHOICE_FONT = ('Helvetica', 7)
-CHOICE_FONT = ('Lato-Light', 7)
+CHOICE_FONT = ('Lato-Light', 9)
 
 LED_blue = (0.3, 0.3, 1.0)
 LED_amber = (1, 0.6, 0.2)
@@ -63,7 +79,7 @@ LED_green = (0, 1, 0)
 paginate = False
 detail = False
 flip = False
-cutting_guide = False
+cutting_guide = True
 if cutting_guide:
     FG = (1, 0, 0)
     BG = (1, 1, 1)
@@ -139,8 +155,8 @@ class TextLabel(Label):
     pass
 
 class WaveformLabel(Label):
-    def __init__(self, name, waveform):
-        super(WaveformLabel, self).__init__(name)
+    def __init__(self, name, waveform, **kwargs):
+        super(WaveformLabel, self).__init__(name, **kwargs)
         self.waveform = waveform
 
 def MakeLabel(name, **kwargs):
@@ -343,33 +359,63 @@ class Panel(Widget):
 
 ##############################################################################
 
-saw = WaveformLabel('Saw', lambda x: 2*x%2-1)
-square = WaveformLabel('Square', lambda x: +1 if x%1 < 1/2 else -1)
-triangle = WaveformLabel('Triangle',
-                         lambda x: 4*x%4-1 if x%1 < 1/2 else 3-4*x%4)
-sine = WaveformLabel('Sin', lambda x: sin(x * 2 * pi))
+# saw = WaveformLabel('Saw', lambda x: 2*x%2-1)
+# square = WaveformLabel('Square', lambda x: +1 if x%1 < 1/2 else -1)
+# triangle = WaveformLabel('Triangle',
+#                          lambda x: 4*x%4-1 if x%1 < 1/2 else 3-4*x%4)
+# sine = WaveformLabel('Sin', lambda x: sin(x * 2 * pi))
 
-# pulse = ['Pulse', lambda x: +1 if x < 1/4 else -1]
-# skew_tri = ['Skew Triangle',
-#             lambda x: 8*x%8-1 if x%1 < 1/4 else 5/3 - 8/3*(x%1)]
+# # pulse = ['Pulse', lambda x: +1 if x < 1/4 else -1]
+# # skew_tri = ['Skew Triangle',
+# #             lambda x: 8*x%8-1 if x%1 < 1/4 else 5/3 - 8/3*(x%1)]
 
-saw_up = WaveformLabel('Saw Up', lambda x: 2*x%2-1)
-saw_down = WaveformLabel('Saw Down', lambda x: 1-2*x%2)
-random = WaveformLabel('Random',
-                       lambda x: rand_noise(3*x, 9) / -rand_noise(2, 9))
-sample_hold = WaveformLabel('Sample and Hold',
-                            lambda x: rand_noise(int(3 * x), 5))
+# saw_up = WaveformLabel('Saw Up', lambda x: 2*x%2-1)
+# saw_down = WaveformLabel('Saw Down', lambda x: 1-2*x%2)
+# random = WaveformLabel('Random',
+#                        lambda x: rand_noise(3*x, 9) / -rand_noise(2, 9))
+# sample_hold = WaveformLabel('Sample and Hold',
+#                             lambda x: rand_noise(int(3 * x), 5))
 
-def rand_noise(x, b):
-    def bigrand(n): return bigrand(n - 1) * 48271 % 0x7fffffff if n else b
-    def random(n): return bigrand(n) % 23 / 23
-    a = random(int(x))
-    b = random(int(x) + 1)
-    return (a + x%1 * (b - a)) * 2 - 1
+# def rand_noise(x, b):
+#     def bigrand(n): return bigrand(n - 1) * 48271 % 0x7fffffff if n else b
+#     def random(n): return bigrand(n) % 23 / 23
+#     a = random(int(x))
+#     b = random(int(x) + 1)
+#     return (a + x%1 * (b - a)) * 2 - 1
+
+class Waveform(Enum):
+    saw = 1
+    square = 2
+    triangle = 3
+    sine = 4
+    # pulse = 5
+    # skew_triangle = 6
+    saw_up = saw
+    saw_down = 7
+    random = 8
+    sample_hold = 9
+
+saw = WaveformLabel('Saw', Waveform.saw)
+square = WaveformLabel('Square', Waveform.square)
+triangle = WaveformLabel('Triangle', Waveform.triangle)
+sine = WaveformLabel('Sine', Waveform.sine)
+
+# pulse = WaveformLabel('Pulse', Waveform.pulse)
+# skew_tri = WaveformLabel('Skew Triangle', Waveform.skew_triangle)
+
+saw_up = WaveformLabel('Saw Up', Waveform.saw_up)
+saw_down = WaveformLabel('Saw Down', Waveform.saw_down)
+random = WaveformLabel('Random', Waveform.random)
+sample_hold = WaveformLabel('Sample and Hold', Waveform.sample_hold)
 
 af_waveforms = [saw, square, triangle, sine]
 # mod_waveforms = [pulse, skew_tri]
-lf_waveforms = [triangle, saw_up, saw_down, square, random, sample_hold]
+lf_waveforms = [triangle,
+                saw_up,
+                saw_down,
+                square,
+                random,
+                sample_hold]
 
 def LFO(label, *args, **kwargs):
     return SourceModule(label,
@@ -439,7 +485,7 @@ filter = Module('Filter',
                 (Choice('Type',
                         ['Low Pass', 'High Pass', 'Off'],
                         color=LED_red),
-                 DestKnob('Cutoff', align=Layout.stretch),
+                 DestKnob('Cutoff', align=Layout.stretch, highlight=270),
                  DestKnob('Resonance', align=Layout.stretch),
                  DestKnob('Drive', align=Layout.right),
                  DestKnob('Key Track', align=Layout.right)),
@@ -657,6 +703,12 @@ def path(c, stroke=1, fill=0):
     c.drawPath(p, stroke=stroke, fill=fill)
 
 @contextmanager
+def text(c, x=0, y=0):
+    t = c.beginText(x, y)
+    yield t
+    c.drawText(t)
+
+@contextmanager
 def state(c):
     c.saveState()
     yield c
@@ -858,7 +910,8 @@ def render_module(c, box):
     # vr: vertical radius
     # by: baseline y
     # tw: tab width
-    dims = namedtuple('dims', 'x0 y0 x1 y1 hr vr by tw')
+    # mode: drawing mode
+    dims = namedtuple('dims', 'x0 y0 x1 y1 hr vr by tw mode')
 
     def outline(d, color):
         x0 = d.x0
@@ -963,7 +1016,8 @@ def render_module(c, box):
                       hr=radius[0],
                       vr=radius[1],
                       by=base_y,
-                      tw=label_x0 + label_w + 2 * label_pad[0] - outer_x0)
+                      tw=label_x0 + label_w + 2 * label_pad[0] - outer_x0,
+                      mode=0)
     outline(outer_dims, color=FG)
 
     if n_controls:
@@ -974,7 +1028,8 @@ def render_module(c, box):
                           hr=radius[0] - thickness[0],
                           vr=radius[1] - thickness[1],
                           by=base_y + thickness[1],
-                          tw=tab_x0 - margin[0] - thickness[0])
+                          tw=tab_x0 - margin[0] - thickness[0],
+                          mode=0)
         outline(inner_dims, color=BG)
 
     # module label
@@ -1019,7 +1074,7 @@ def render_choice(c, box):
     # LED carrier 0.4 inch by 1 inch
     # button 7mm at y = -.55inch
 
-    LED_box_pos = (0*mm, -6.6*mm)
+    LED_box_pos = (0*mm, -7.0*mm)
     LED_pos = ((LED_box_pos[0] - 2.5)*mm + 0.2*inch, -6.6*mm)
     LED_size = (5*mm, 2*mm)
     LED_spacing = 2.54*mm
@@ -1078,24 +1133,29 @@ def render_choice(c, box):
             c.rect(LED_box_pos[0],
                    LED_box_pos[1],
                    0.4*inch,
-                   n * LED_spacing,
+                   n * LED_spacing + 0.8*mm,
                    fill=fill_outline)
 
         # LEDs and labels
         if not cutting_guide:
             c.setFillColorRGB(*(getattr(widget, 'color', (0.3, 0.3, 1))))
         c.setFont(*CHOICE_FONT)
+        label_extra_leading = 1.6*mm
         for i, label in enumerate(widget.choices):
-            y = LED_pos[1] + (n - i - 1) * LED_spacing
+            LED_y = LED_pos[1] + (n - i - 1) * LED_spacing
+            label_y = LED_y
+            if True or isinstance(label, TextLabel):
+                label_y += ((n-1)/2 - i) * (label_extra_leading)
+            print(str(label), label_y)
 
             # LED
             if not cutting_guide:
-                c.rect(LED_pos[0], y, LED_size[0], LED_size[1], fill=1)
+                c.rect(LED_pos[0], LED_y, LED_size[0], LED_size[1], fill=1)
 
             # LED label
             c.setFillColorRGB(*FG)
             render_choice_label(c,
-                                (label_pos[0], y),
+                                (label_pos[0], label_y),
                                 label_width,
                                 widget, 
                                 label)
@@ -1177,7 +1237,14 @@ def render_knob(c, box, label_color=FG):
             c.setLineWidth(cut_width)
             c.setStrokeColorRGB(*cut_color)
             if do_cut:
-                c.circle(0, 0, 5*mm)
+                c.circle(0, 0, 5.5*mm)
+                c.rect(-3.5*mm, -5.5*mm, +7*mm, +11*mm)
+
+            # Alignment pinholes
+            if do_engrave:
+                c.setFillColorRGB(*FG)
+                c.circle(-4.8*mm, -5.4*mm, r=0.5*mm, stroke=0, fill=1)
+                c.circle(+4.8*mm, +5.4*mm, r=0.5*mm, stroke=0, fill=1)
         else:
             # Base
             c.setFillGray(1)
@@ -1197,10 +1264,215 @@ def render_knob(c, box, label_color=FG):
                        indicator_size[0], indicator_size[1],
                        fill=1)
 
+        # Highlight
+        if getattr(box.widget, 'highlight', None) == 270:
+            c.setStrokeColorRGB(*FG)
+            c.setLineWidth(3*mm)
+            c.arc(-8*mm, -8*mm, +8*mm, +8*mm, -60, 300)
+
         # Label
         c.setStrokeColorRGB(*label_color)
         c.setFillColorRGB(*label_color)
         render_control_label(c, box)
+
+
+def saw_path(c, bbox):
+    xmin = 0.5
+    xmax = 2.5
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    curve = c.beginPath()
+    x = xmin
+    curve.moveTo(sx(x), sy(x % 1 * 2 - 1))
+    while x < xmax:
+        if x == int(x):
+            curve.lineTo(sx(x), sy(+1))
+            curve.lineTo(sx(x), sy(-1))
+            x = x + 1
+        else:
+            x = ceil(x)
+        if x > xmax:
+            x = xmax
+            curve.lineTo(sx(x), sy(x % 1 * 2 - 1))
+    return curve
+
+
+def saw_down_path(c, bbox):
+    xmin = 0.5
+    xmax = 2.5
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    curve = c.beginPath()
+    x = xmin
+    curve.moveTo(sx(x), sy(-(x % 1 * 2 - 1)))
+    while x < xmax:
+        if x == int(x):
+            curve.lineTo(sx(x), sy(-1))
+            curve.lineTo(sx(x), sy(+1))
+            x = x + 1
+        else:
+            x = ceil(x)
+        if x > xmax:
+            x = xmax
+            curve.lineTo(sx(x), sy(-(x % 1 * 2 - 1)))
+    return curve
+
+
+def square_path(c, bbox):
+    xmin = -0.25
+    xmax = 1.75
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    curve = c.beginPath()
+    x = xmin
+    curve.moveTo(sx(x), sy(+1 if 2 * x % 2 < 1 else -1))
+    while x < xmax:
+        if 2 * x % 2 == 0:
+            curve.lineTo(sx(x), sy(-1))
+            curve.lineTo(sx(x), sy(+1))
+            x += 1/2
+        elif 2 * x % 2 == 1:
+            curve.lineTo(sx(x), sy(+1))
+            curve.lineTo(sx(x), sy(-1))
+            x += 1/2
+        else:
+            x = ceil(2 * x) / 2
+        if x > xmax:
+            x = xmax
+            curve.lineTo(sx(x), sy(+1 if 2 * x % 2 < 1 else -1))
+            
+    return curve
+
+
+def tri_path(c, bbox):
+    xmin = 0.25
+    xmax = 2.25
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    curve = c.beginPath()
+    x = xmin
+    curve.moveTo(sx(x), sy((2*x % 1 if 2 * x % 2 < 1 else 1 - 2*x % 1) * 2 - 1))
+    while x < xmax:
+        if 2 * x % 2 == 0:
+            curve.lineTo(sx(x), sy(-1))
+            x += 1/2
+        elif 2 * x % 2 == 1:
+            curve.lineTo(sx(x), sy(+1))
+            x += 1/2
+        else:
+            x = ceil(2 * x) / 2
+        if x > xmax:
+            x = xmax
+            xx = 2 * x
+            curve.lineTo(sx(x),
+                         sy((xx % 1 if xx % 2 < 1 else 1 - xx % 1) * 2 - 1))
+    return curve
+
+
+def sin_path(c, bbox):
+    xmin = 0
+    xmax = 2
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    basis = ((0, 0), (0.5251 / pi / 2, 0.5251), (1.005 / pi / 2, 1), (1 / 4, 1))
+    segments = range(floor(xmin * 4), ceil(xmax * 4))
+
+    curve = c.beginPath()
+    curve.moveTo(sx(xmin), sy(sin(xmin*2*pi)))
+    for s in segments:
+        q = s % 4
+        x0 = s / 4
+        if q == 0:
+            p1, p2, p3 = basis[1:]
+        elif q == 1:
+            p1 = (1/4 - basis[2][0], basis[2][1])
+            p2 = (1/4 - basis[1][0], basis[1][1])
+            p3 = (1/4 - basis[0][0], basis[0][1])
+        elif q == 2:
+            p1 = (basis[1][0], -basis[1][1])
+            p2 = (basis[2][0], -basis[2][1])
+            p3 = (basis[3][0], -basis[3][1])
+            pass
+        else:
+            assert q == 3
+            p1 = (1/4 - basis[2][0], -basis[2][1])
+            p2 = (1/4 - basis[1][0], -basis[1][1])
+            p3 = (1/4 - basis[0][0], -basis[0][1])
+        curve.curveTo(sx(x0 + p1[0]), sy(p1[1]),
+                      sx(x0 + p2[0]), sy(p2[1]),
+                      sx(x0 + p3[0]), sy(p3[1]))
+    return curve
+
+
+def rand_noise(x, b):
+    def bigrand(n): return bigrand(n - 1) * 48271 % 0x7fffffff if n else b
+    def random(n): return bigrand(n) % 23 / 23
+    a = random(int(x))
+    b = random(int(x) + 1)
+    return (a + x%1 * (b - a)) * 2 - 1
+
+
+def rand_path(c, bbox):
+    xmin = 0
+    xmax = 6
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    curve = c.beginPath()
+    curve.moveTo(sx(xmin), sy(rand_noise(0, 9)))
+    for x in range(xmin + 1, xmax + 1):
+        curve.lineTo(sx(x), sy(rand_noise(x, 9)))
+    return curve
+
+
+def snh_path(c, bbox):
+    xmin = 0
+    xmax = 6
+
+    def sx(x):
+        return bbox[0] + (bbox[2] - bbox[0]) * (x - xmin) / (xmax - xmin)
+    def sy(y):
+        return (bbox[1] + bbox[3] + y * (bbox[3] - bbox[1])) / 2
+
+    curve = c.beginPath()
+    curve.moveTo(sx(xmin), sy(rand_noise(0, 5)))
+    for x in range(xmin, xmax):
+        curve.lineTo(sx(x), sy(rand_noise(x, 5)))
+        curve.lineTo(sx(x + 1), sy(rand_noise(x, 5)))
+    return curve
+
+path_funcs = {
+    Waveform.saw: saw_path,
+    Waveform.square: square_path,
+    Waveform.triangle: tri_path,
+    Waveform.sine: sin_path,
+    Waveform.saw_down: saw_down_path,
+    Waveform.random: rand_path,
+    Waveform.sample_hold: snh_path,
+}
 
 
 def render_module_label(c, x, y, module):
@@ -1213,7 +1485,7 @@ def render_control_label(c, box):
     control = box.widget
     with state(c):
         c.setFont(*CONTROL_FONT)
-        c.setLineWidth(cut_width * 0.1)
+        c.setLineWidth(cut_width)
         if isinstance(box.widget, AmountKnob):
             do_render = do_engrave
             mode = 0
@@ -1221,45 +1493,37 @@ def render_control_label(c, box):
             do_render = do_text
             mode = 1
         if do_render:
-            c.drawCentredString(label_pos[0], label_pos[1],
-                                str(control.name),
-                                mode)
+            if control == filter.controls[-1]:
+                c.translate(-7, 0)
+            with text(c, label_pos[0], label_pos[1]) as t:
+                t.setTextRenderMode(mode)
+                t.setCharSpace(control_char_space)
+                t.textOut(str(control.name))
+                c.translate(-t.getX() / 2, 0)
+
 
 def render_choice_label(c, pos, w, widget, label):
-    if label is None:
-        return
-    with state(c):
-        c.setFillGray(1)
-        c.setStrokeColorRGB(*FG)
-        c.setLineWidth(cut_width * 0.2)
-        if do_text:
-            c.drawString(pos[0], pos[1], str(label), 1)
-
-def render_label_XXX_deprecated(c, pos, w, widget, label):
-    if label is None:
-        return
-    with state(c):
-        c.setFillGray(1)
-        c.setStrokeColorRGB(*FG)
-        c.setLineWidth(cut_width * 0.2)
-        if isinstance(widget, Choice):
-            c.drawString(pos[0], pos[1], str(label), 1)
-        elif isinstance(widget,  Control):
-            c.drawCentredString((pos[0] + w / 2) * mm,
-                                pos[1] * mm + 5,
-                                str(label))
-            # c.drawString(x * mm + 3, y * mm + 5, str(label))
-        elif isinstance(widget, Module):
-            x = pos[0] + MODULE_MARGINS.l
-            if isinstance(widget.controls[0], Choice):
-                x += 14
-            c.drawString(x * mm,
-                         (pos[1] + 6) * mm,
-                         str(label))
+    if isinstance(label, TextLabel):
+        with state(c):
+            c.setFillGray(1)
+            c.setStrokeColorRGB(*FG)
+            c.setLineWidth(cut_width)
+            if do_text:
+                c.drawString(pos[0], pos[1], str(label), 1)
+    elif isinstance(label, WaveformLabel):
+        with state(c):
+            # bbox = pos + (21.5*mm - pos[0], 0.1*inch)
+            bbox = pos + (21.5*mm, pos[1] + 0.1*inch)
+            try:
+                curve = path_funcs[label.waveform](c, bbox)
+                c.drawPath(curve)
+            except KeyError:
+                pass
+            # c.roundRect(*bbox, radius=0.05*inch)
+            pass
+    
 
 
 boxes = layout_panel(panel)
 print('grid width %g' % g_grid_width)
-# import pprint
-# pprint.pprint(boxes)
 render(boxes)
