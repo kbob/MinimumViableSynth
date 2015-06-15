@@ -6,6 +6,8 @@ from contextlib import contextmanager
 from enum import Enum, unique
 from fractions import Fraction
 from math import atan, ceil, cos, floor, pi, sin, sqrt, tan
+from optparse import OptionParser
+from sys import argv, exit
 
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.units import inch, mm
@@ -43,11 +45,12 @@ from reportlab.pdfgen import canvas
 # Use fractions here and force all size calculations to rational arithmetic.
 inch2mm = Fraction('25.4')
 rack_unit = Fraction('1.75') * inch2mm
-PANEL_WIDTH = Fraction('438')  # 438mm makes grid_width an even 21.5mm.
-PANEL_HEIGHT = 3 * Fraction('44.50') - Fraction(1, 32) * inch2mm
+FULL_PANEL_WIDTH = Fraction('438')  # 438mm makes grid_width an even 21.5mm.
+FULL_PANEL_HEIGHT = 3 * Fraction('44.50') - Fraction(1, 32) * inch2mm
 # print("PANEL_HEIGHT %g" % PANEL_HEIGHT)
-assert type(PANEL_WIDTH) is Fraction
-assert type(PANEL_HEIGHT) is Fraction
+assert type(FULL_PANEL_WIDTH) is Fraction
+assert type(FULL_PANEL_HEIGHT) is Fraction
+
 
 Margins = namedtuple('Margins', 'l r t b')
 
@@ -56,6 +59,13 @@ CONTROL_LABEL_HEIGHT = 6
 CONTROL_LABEL_Y = -13
 PANEL_MARGINS = Margins(2, 2, 2, 2)
 MODULE_MARGINS = Margins(2, 2, 4, 10)
+
+DETAIL_PANEL_WIDTH = (4 * Fraction('21.5') +
+                      2 * (MODULE_MARGINS[0] + PANEL_MARGINS[0]))
+DETAIL_PANEL_HEIGHT = Fraction('44.50') - Fraction(1, 32) * inch2mm
+assert type(DETAIL_PANEL_WIDTH) is Fraction
+assert type(DETAIL_PANEL_HEIGHT) is Fraction
+
 TITLE_HEIGHT = 10 + Fraction(7, 30)
 
 TITLE_FONT = ('Jupiter', 40)
@@ -82,33 +92,24 @@ ASSIGN_RADIUS = 8.5 / 2
 paginate = False
 detail = False
 flip = False
-cutting_guide = False
-if cutting_guide:
-    FG = (0, 1, 0)
-    BG = (1, 1, 1)
-    cut_width = 0.001;
-    VEC_COLOR = (1, 0, 0)
-    CUT_COLOR = (0, 0, 1)
+# cutting_guide = False
+VEC_COLOR = (1, 0, 0)
+ENGRAVE_COLOR = (0, 1, 0)
+INV_ENG_COLOR = (1, 1, 1)
+CUT_COLOR = (0, 0, 1)
+cut_width = 0.001
 
-    do_cut = True
-    do_vector = True
-    do_engrave = True
-else:
-    # yellow on green
-    # BG = (0.12, 0.24, 0.24)
-    # FG = (1, 0.8, 0.3)
+# gray on gray
+FG = (0.9, 0.9, 0.9)
+BG = (0.3, 0.3, 0.3)
 
-    # gray on gray
-    FG = (0.9, 0.9, 0.9)
-    BG = (0.3, 0.3, 0.3)
+    # VEC_COLOR = FG
 
-    VEC_COLOR = FG
-
-    cut_width = 0.3
-    CUT_COLOR = (0, 0, 0)
-    do_cut = True
-    do_vector = True
-    do_engrave = True
+    # cut_width = 0.3
+    # CUT_COLOR = (0, 0, 0)
+    # do_cut = True
+    # do_vector = True
+    # do_engrave = True
 
 
 @unique
@@ -507,12 +508,8 @@ col1 = PanelColumn([osc1, osc2, PanelRow([noise, mixer])])
 col3 = PanelColumn([title, screen, filter])
 col4 = PanelColumn([env1, env2, PanelRow([amp, env3])])
 
-if detail:
-    PANEL_WIDTH = 4 * Fraction('21.5') + 2 * MODULE_MARGINS[0] + PANEL_MARGINS[0]
-    PANEL_HEIGHT = Fraction('44.50') - Fraction(1, 32) * inch2mm
-    panel = Panel([PanelColumn([lfo1])], early=True)
-else:
-    panel = Panel([col0, col1, col3, col4], early=True)
+full_panel = Panel([col0, col1, col3, col4], early=True)
+detail_panel = Panel([PanelColumn([lfo1])], early=True)
 
 # print('panel min size', panel.min_size)
 # print('panel grid size', panel.grid_size)
@@ -535,25 +532,25 @@ else:
 class Box(namedtuple('Box', 'x y w h widget')):
     pass
 
-def layout_panel(panel):
+def layout_panel(panel, panel_size):
     # print('Layout')
     ms = panel.min_size
     gs = panel.grid_size
-    grid_width = (PANEL_WIDTH - ms[0]) / gs[0]
+    grid_width = (panel_size[0] - ms[0]) / gs[0]
     # print("grid_width = (%g - %g) / %g\n" % (PANEL_WIDTH, ms[0], gs[0]))
     global g_grid_width
     g_grid_width = grid_width
-    grid_height = (PANEL_HEIGHT - ms[1]) / gs[1]
+    grid_height = (panel_size[1] - ms[1]) / gs[1]
     grid_size = (grid_width, grid_height)
     # print('panel grid: %g x %g' % (grid_width, grid_height))
     x = PANEL_MARGINS.l
-    boxes = [Box(0, 0, PANEL_WIDTH, PANEL_HEIGHT, panel)]
+    boxes = [Box(0, 0, panel_size[0], panel_size[1], panel)]
     for column in panel.columns:
         cms = column.min_size
         cgs = column.grid_size
         pos = (x, PANEL_MARGINS.b)
         col_size = (cms[0] + cgs[0] * grid_width,
-                    PANEL_HEIGHT - PANEL_MARGINS.t - PANEL_MARGINS.b)
+                    panel_size[1] - PANEL_MARGINS.t - PANEL_MARGINS.b)
         boxes += layout_column(column, pos, col_size, grid_size)
         x += col_size[0]
     return boxes
@@ -770,7 +767,8 @@ def state(c):
 
 
 def graphics(c):
-    if not cutting_guide:
+    # if not cutting_guide:
+    if do_art:
         with state(c):
             yield c.canvas
 
@@ -791,12 +789,14 @@ def cutter(c):
 def engraver(c):
     egv = c.canvas.beginPath()
     yield egv
-    if do_vector or do_engrave:
+    if do_art or do_vector or do_engrave:
         with state(c):
-            c.canvas.setFillColorRGB(*FG)
+            c.canvas.setFillColorRGB(*(FG if do_art else ENGRAVE_COLOR))
             c.canvas.setLineWidth(cut_width)
-            c.canvas.setStrokeColorRGB(*VEC_COLOR)
-            c.canvas.drawPath(egv, stroke=do_vector, fill=do_engrave)
+            c.canvas.setStrokeColorRGB(*(FG if do_art else VEC_COLOR))
+            c.canvas.drawPath(egv,
+                              stroke=do_art or (do_vector and outline_all),
+                              fill=do_art or do_engrave)
 
 @contextmanager
 def stroke_engraver(c):
@@ -804,40 +804,76 @@ def stroke_engraver(c):
         egv = c.canvas.beginPath()
         yield egv
         if do_engrave:
-            c.canvas.setFillColorRGB(*FG)
-            c.canvas.setStrokeColorRGB(*FG)
+            # color = ENGRAVE_COLOR if cutting_guide else FG
+            color = FG if do_art else ENGRAVE_COLOR
+            c.canvas.setFillColorRGB(*color)
+            c.canvas.setStrokeColorRGB(*color)
             c.canvas.drawPath(egv, stroke=1, fill=0)
 
 @contextmanager
 def vector_engraver(c):
+    c.canvas.setLineWidth(cut_width)
     egv = c.canvas.beginPath()
     yield egv
-    if do_vector:
+    if do_art or do_vector:
         with state(c):
-            c.canvas.setFillColorRGB(*FG)
-            c.canvas.setLineWidth(cut_width)
-            c.canvas.setStrokeColorRGB(*VEC_COLOR)
+            # c.canvas.setFillColorRGB(*FG)
+            c.canvas.setStrokeColorRGB(*(FG if do_art else VEC_COLOR))
             c.canvas.drawPath(egv, stroke=1, fill=0)
             
 
 @contextmanager
-def text_engraver(c, x=0, y=0, fill=0):
-    if fill and not do_vector:
-        mode = 0
-    elif do_vector and not fill:
-        mode = 1
-    elif fill and do_vector:
-        mode = 2
+def text_engraver(c, x=0, y=0, fill=0, inverse=False):
+
+    # fill art vec eng
+    #
+    #   0   0   0   0   invis
+    #   0   0   0   1   invis
+    #   0   0   1   0   stroke
+    #   0   0   1   1   stroke
+    #
+    #   0   1   0   0   stroke
+    #   0   1   0   1   stroke
+    #   0   1   1   0   stroke
+    #   0   1   1   1   stroke
+    #
+    #   1   0   0   0   invis
+    #   1   0   0   1   fill
+    #   1   0   1   0   stroke
+    #   1   0   1   1   f+s
+    #
+    #   1   1   0   0   f+s
+    #   1   1   0   1   f+s
+    #   1   1   1   0   f+s
+    #   1   1   1   1   f+s
+  
+    if do_art:
+        mode = 2 if fill else 1 # fill+stroke or stroke
     else:
-        mode = 3
-    
+        if fill:
+            if do_vector:
+                if do_engrave:
+                    mode = 2 if outline_all else 1 # fill+stroke
+                else:
+                    mode = 1 if outline_all else 3 # stroke or invisible
+            else:
+                if do_engrave:
+                    mode = 0    # fill
+                else:
+                    mode = 3    # invisible
+        else:
+            mode = 1 if do_vector else 3 # stroke or invisible
+
     t = c.canvas.beginText(x, y)
     t.setTextRenderMode(mode)
     yield t
-    if do_engrave:
+    if do_art or do_engrave or do_vector:
         with state(c):
-            c.canvas.setFillColorRGB(*FG)
-            c.canvas.setStrokeColorRGB(*VEC_COLOR)
+            fill_color = FG if do_art else ENGRAVE_COLOR
+            if inverse:
+                fill_color = BG if do_art else INV_ENG_COLOR
+            c.canvas.setFillColorRGB(*(fill_color))
+            c.canvas.setStrokeColorRGB(*(FG if do_art else VEC_COLOR))
             c.canvas.setLineWidth(cut_width)
             c.canvas.drawText(t)
             # t.setTextRenderMode(0)
@@ -845,37 +881,38 @@ def text_engraver(c, x=0, y=0, fill=0):
             # c.canvas.setStrokeColorRGB(0, 1, 0)
             # c.canvas.drawText(t)
 
-@contextmanager
-def inverse_text_engraver(c, x=0, y=0, fill=0):
-    if fill and not do_vector:
-        mode = 0
-    elif do_vector and not fill:
-        mode = 1
-    elif fill and do_vector:
-        mode = 2
-    else:
-        mode = 3
+# @contextmanager
+# def inverse_text_engraver(c, x=0, y=0, fill=0):
+#     if fill and do_engrave and not do_vector:
+#         mode = 0                # fill
+#     elif do_vector and (not fill or not do_engrave):
+#         mode = 1                # stroke
+#     elif fill and do_engrave and do_vector:
+#         mode = 2                # fill, then stroke
+#     else:
+#         mode = 3                # invisible
 
-    t = c.canvas.beginText(x, y)
-    t.setTextRenderMode(mode)
-    yield t
-    if do_engrave:
-        with state(c):
-            c.canvas.setFillColorRGB(*BG)
-            c.canvas.setLineWidth(cut_width)
-            c.canvas.setStrokeColorRGB(*VEC_COLOR)
-            c.canvas.drawText(t)
-            # t.setTextRenderMode(0)
-            # c.setStrokeColorRGB(*VEC_COLOR)
-            # c.canvas.drawText(t)
+#     t = c.canvas.beginText(x, y)
+#     t.setTextRenderMode(mode)
+#     yield t
+#     if do_engrave or do_vector:
+#         with state(c):
+#             # color = INV_ENG_COLOR if cutting_guide else BG
+#             c.canvas.setFillColorRGB(*(BG if do_art else INV_ENG_COLOR))
+#             c.canvas.setLineWidth(cut_width)
+#             c.canvas.setStrokeColorRGB(*VEC_COLOR)
+#             c.canvas.drawText(t)
+#             # t.setTextRenderMode(0)
+#             # c.setStrokeColorRGB(*VEC_COLOR)
+#             # c.canvas.drawText(t)
             
 
-def render(boxes):
+def render(boxes, output_file, panel_size):
     if paginate:
         pagesize = landscape(letter)
-        c = canvas.Canvas('Synth Pages.pdf', pagesize=pagesize)
+        c = canvas.Canvas(output_file, pagesize=pagesize)
         c = CanvasGuard(c)
-        for x in (1, 10 - PANEL_WIDTH / inch2mm):
+        for x in (1, 10 - panel_size[0] / inch2mm):
             c.translate(x * inch,
                         (pagesize[1] - PANEL_HEIGHT * mm) / 2)
             render_boxes(c, boxes, early=True)
@@ -883,16 +920,17 @@ def render(boxes):
             c.showPage()
         c.save()
     else:
-        pagesize = (PANEL_WIDTH*mm + 1*inch, PANEL_HEIGHT*mm + 1*inch)
-        c = canvas.Canvas('Synth Panel.pdf', pagesize=pagesize)
+        pagesize = (panel_size[0] * mm + 1 * inch,
+                    panel_size[1] * mm + 1 * inch)
+        c = canvas.Canvas(output_file, pagesize=pagesize)
         c = CanvasGuard(c)
         if flip:
-            c.translate((pagesize[0] + PANEL_WIDTH * mm) / 2,
-                        (pagesize[1] - PANEL_HEIGHT * mm) / 2)
+            c.translate((pagesize[0] + panel_size[0] * mm) / 2,
+                        (pagesize[1] - panel_size[1] * mm) / 2)
             c.scale(-1, +1)
         else:
-            c.translate((pagesize[0] - PANEL_WIDTH * mm) / 2,
-                        (pagesize[1] - PANEL_HEIGHT * mm) / 2)
+            c.translate((pagesize[0] - panel_size[0] * mm) / 2,
+                        (pagesize[1] - panel_size[1] * mm) / 2)
         render_boxes(c, boxes, early=True)
         render_boxes(c, boxes)
         c.showPage()
@@ -1097,8 +1135,8 @@ def render_module_dest(c, box):
 
 def render_module(c, box):
 
-    if not do_engrave:
-        return
+    # if not do_engrave:
+    #     return
 
     # Dims: dimension that change between outer and inner outline
     # x0: left edge
@@ -1116,7 +1154,7 @@ def render_module(c, box):
     # ay: assign button y
     dims = namedtuple('dims', 'x0 y0 x1 y1 hr vr by tw ax0 ax1 ay')
 
-    def outline(egv, d, color):
+    def outline(egv, d):
         x0 = d.x0
         y0 = d.y0
         x1 = d.x1
@@ -1263,7 +1301,7 @@ def render_module(c, box):
                           ax0=assign_cx0,
                           ax1=assign_cx1,
                           ay=assign_cy)
-        outline(egv, outer_dims, color=FG)
+        outline(egv, outer_dims)
 
         if n_controls:
             inner_dims = dims(x0=inner_x0,
@@ -1277,11 +1315,13 @@ def render_module(c, box):
                               ax0=0,
                               ax1=0,
                               ay=0)
-            outline(egv, inner_dims, color=BG)
+            outline(egv, inner_dims)
         if has_amount:
             aly0 = amount_box.y - box.y + amount_box.h / 2 + CONTROL_LABEL_Y - 3
             aly0 = base_y + thickness[1] * 1.5
+            aly0 = base_y + thickness[1] * 3
             aly1 = amount_box.y - box.y + amount_box.h / 2 + CONTROL_LABEL_Y + al_height + 3
+            aly1 = box.h - margin[1] - thickness[1] * 3
             alhr = radius[0] - thickness[0]
             alvr = radius[1] - thickness[1]
             alhd = 2 * alhr
@@ -1554,7 +1594,7 @@ def render_assign_button(c, box):
 
 
 def render_amount_knob(c, box):
-    render_knob(c, box, engrave_alignments=False)
+    render_knob(c, box, engrave_alignments=True)
 
 def render_knob(c, box, engrave_alignments=True):
 
@@ -1860,7 +1900,8 @@ def render_module_label(c, x, y, module):
     # with state(c):
     #     c.setFont(*MODULE_FONT)
     #     c.drawString(x, y, str(module.name))
-    with inverse_text_engraver(c, x, y, fill=1) as t:
+#    with inverse_text_engraver(c, x, y, fill=1) as t:
+    with text_engraver(c, x, y, fill=1, inverse=1) as t:
         t.setFont(*MODULE_FONT)
         t.textOut(str(module.name))
 
@@ -1934,7 +1975,75 @@ def render_choice_label(c, pos, w, widget, label):
     
 
 
-boxes = layout_panel(panel)
-print('grid width %g' % g_grid_width)
-# render(boxes[:47] + boxes[48:55] + boxes[56:])
-render(boxes)
+# boxes = layout_panel(panel)
+# print('grid width %g' % g_grid_width)
+# # render(boxes[:47] + boxes[48:55] + boxes[56:])
+# render(boxes)
+
+def create_panel(output_file):
+    global boxes
+    if detail:
+        panel = detail_panel
+        panel_size = (DETAIL_PANEL_WIDTH, DETAIL_PANEL_HEIGHT)
+    else:
+        panel = full_panel
+        panel_size = (FULL_PANEL_WIDTH, FULL_PANEL_HEIGHT)
+    boxes = layout_panel(panel, panel_size)
+    print('grid width %g' % (g_grid_width))
+    render(boxes, output_file, panel_size)
+
+def main(argv):
+
+    parser = OptionParser()
+    parser.add_option('-o', '--output', help='output file')
+    parser.add_option('--paginate', action='store_true', help='span pages')
+    parser.add_option('--flip', action='store_true')
+    parser.add_option('--detail', action='store_true')
+    parser.add_option('--outline', choices=['all', 'vec'])
+    parser.add_option('--engrave', action='store_true')
+    parser.add_option('--cuts', action='store_true')
+    (options, args) = parser.parse_args()
+
+    global detail, flip, paginate
+    global do_vector, do_engrave, do_cut
+    global do_art, outline_all
+    # global cutting_guide
+
+    detail = bool(options.detail)
+    flip = bool(options.flip)
+    paginate = bool(options.paginate)
+
+                
+    if options.outline == 'all':
+        do_vector = True
+        outline_all = True
+    elif options.outline == 'vec':
+        do_vector = True
+        outline_all = False
+    else:
+        do_vector = False
+    do_vector = bool(options.outline)
+    do_engrave = bool(options.engrave)
+    do_cut = bool(options.cuts)
+    do_art = not any((do_cut, do_vector, do_engrave))
+    # cutting_guide = 
+    # if cutting_guide:
+    #     global FG
+    #     FG = ENGRAVE_COLOR
+    # else:
+    #     do_engrave = True
+    #     do_vector = True
+    #     ENGRAVE_COLOR = FG
+    #     VEC_COLOR = FG
+
+    output = options.output
+    if not output:
+        if paginate:
+            output = 'Synth Pages.pdf'
+        else:
+            output = 'Synth Panel.pdf'
+    create_panel(output)
+
+
+if __name__ == '__main__':
+    exit(main(argv))
