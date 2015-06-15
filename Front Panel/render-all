@@ -1,0 +1,29 @@
+#!/bin/sh
+
+VERSION=0.3
+PRE=bob-synth-
+POST="${VERSION+-${VERSION}}.pdf"
+
+all="--outline=all --engrave --cut"
+
+R="python synth-dsl.py"
+# R="echo $R"
+
+function render {
+    echo $R "$@"
+    $R "$@"
+}
+
+render                               -o "${PRE}full-art${POST}"
+render          --flip --outline=all -o "${PRE}full-allvec${POST}"
+render          --flip --outline=vec -o "${PRE}full-somevec${POST}"
+render          --flip --engrave     -o "${PRE}full-engrave${POST}"
+render          --flip --cut         -o "${PRE}full-cut${POST}"
+render          --flip ${all}        -o "${PRE}full-all${POST}"
+
+render --detail                      -o "${PRE}detail-art${POST}"
+render --detail --flip --outline=all -o "${PRE}detail-allvec${POST}"
+render --detail --flip --outline=vec -o "${PRE}detail-somevec${POST}"
+render --detail --flip --engrave     -o "${PRE}detail-engrave${POST}"
+render --detail --flip --cut         -o "${PRE}detail-cut${POST}"
+render --detail --flip ${all}        -o "${PRE}detail-all${POST}"
