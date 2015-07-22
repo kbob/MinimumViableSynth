@@ -1207,7 +1207,8 @@ def render_module(c, box):
     radius = (5, 4)
     tab_angle = 55
     tab_x0 = 13
-    label_pad = (2.5, 1)
+    # adjust label_pad[0] so the tightest label almost meets the outline.
+    label_pad = (2.5 - 0.24, 1)
     label_pos = (tab_x0 + label_pad[0], 0)
     label_height = 6
     al_height = 3
@@ -1237,6 +1238,13 @@ def render_module(c, box):
     has_amount = amount_index is not None
     assign_cx0 = assign_cx1 = 0
     assign_cy = 0
+
+    if has_choice:
+        outer_x0 += 2
+        inner_x0 += 2
+        label_x0 = label_pos[0] + 2
+    else:
+        inner_y0 = base_y + thickness[1]
 
     if has_assign:
         n_controls -= 1
@@ -1281,12 +1289,6 @@ def render_module(c, box):
         left_box = find_box(mod.controls[0])
         assign_cx0 = left_box.x - box.x - left_box.w / 2 + ASSIGN_RADIUS
         assign_cy = left_box.y - box.y + left_box.h / 2
-
-    if has_choice:
-        choice_box = find_box(controls[choice_index])
-        label_x0 = label_pos[0]
-    else:
-        inner_y0 = base_y + thickness[1]
 
     with state(c), engraver(c) as egv:
         c.translate(box.x*mm, box.y*mm)
@@ -1416,11 +1418,12 @@ def render_choice(c, box):
     # button 7mm at y = -.55inch
 
     LED_box_pos = (0*mm, -7.0*mm)
-    LED_pos = ((LED_box_pos[0] - 2.5)*mm + 0.2*inch, -6.6*mm)
+    LED_box_pos = (2*mm, -7.0*mm)
+    LED_pos = (LED_box_pos[0] - 2.5*mm + 0.2*inch, -6.6*mm)
     LED_size = (5*mm, 2*mm)
     LED_spacing = 2.54*mm
     button_diam = 6.25*mm
-    button_pos = (0.4*inch - button_diam / 2, -17*mm)
+    button_pos = (LED_box_pos[0] + 0.4*inch - button_diam / 2, -17*mm)
     label_pos = (LED_pos[0] + 9*mm, -4*mm)
     label_width = 10*mm
 
