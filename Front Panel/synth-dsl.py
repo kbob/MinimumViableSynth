@@ -914,7 +914,7 @@ def render(boxes, output_file, panel_size):
         c = CanvasGuard(c)
         for x in (1, 10 - panel_size[0] / inch2mm):
             c.translate(x * inch,
-                        (pagesize[1] - PANEL_HEIGHT * mm) / 2)
+                        (pagesize[1] - panel_size[1] * mm) / 2)
             render_boxes(c, boxes, early=True)
             render_boxes(c, boxes)
             c.showPage()
