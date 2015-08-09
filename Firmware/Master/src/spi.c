@@ -62,7 +62,7 @@
 // SPI 5 TX: 2/4/2, 2/6/7
 
 #define RX_DMA 1
-#define TX_DMA 0
+#define TX_DMA 1
 
 typedef struct gpio_pin {
     uint32_t gp_port;
@@ -259,6 +259,11 @@ void spi_start_transfer(int            spi,
     uint8_t rx_stream = config->sc_rx_dma.dc_stream;
     uint32_t rx_channel = config->sc_rx_dma.dc_channel;
 #endif
+#if TX_DMA
+    uint32_t tx_dma = config->sc_tx_dma.dc_dma;
+    uint8_t tx_stream = config->sc_tx_dma.dc_stream;
+    uint32_t tx_channel = config->sc_tx_dma.dc_channel;
+#endif
     
 #if RX_DMA
     //  1. Clear SxCR_EN.  Wait until SxCR_EN == 0.
@@ -280,7 +285,7 @@ void spi_start_transfer(int            spi,
     dma_channel_select(rx_dma, rx_stream, rx_chsel);
 
     //  6. Set SxCR.PFCTRL.
-    dma_set_peripheral_flow_control(rx_dma, rx_stream);
+    // dma_set_peripheral_flow_control(rx_dma, rx_stream);
 
     //  7. Set the stream priority.
     dma_set_priority(rx_dma, rx_stream, DMA_SxCR_PL_LOW);
@@ -315,26 +320,97 @@ void spi_start_transfer(int            spi,
 
     // 10. Set SxCR_EN.
     dma_enable_stream(rx_dma, rx_stream);
-    
+#endif
+#if TX_DMA
+    //  1. Clear SxCR_EN.  Wait until SxCR_EN == 0.
+    dma_stream_reset(tx_dma, tx_stream);
+    while (DMA_SCR(tx_dma, tx_stream) & DMA_SxCR_EN)
+        continue;
+
+    //  2. Set peripheral port address register, SxPAR.
+    dma_set_peripheral_address(tx_dma, tx_stream, (uint32_t)&SPI_DR(base));
+
+    //  3. Set memory address register, SxMA0R.
+    dma_set_memory_address(tx_dma, tx_stream, (uint32_t)tx_buf);
+
+    //  4. Set number of data items, SxNDTR
+    dma_set_number_of_data(tx_dma, tx_stream, count);
+
+    //  5. Set the dma channel using SxCR.CHSEL[2:0].
+    uint32_t tx_chsel = (uint32_t)tx_channel << DMA_SxCR_CHSEL_SHIFT;
+    dma_channel_select(tx_dma, tx_stream, tx_chsel);
+
+    //  6. Set SxCR.PFCTRL.
+    // dma_set_peripheral_flow_control(tx_dma, tx_stream);
+
+    //  7. Set the stream priority.
+    dma_set_priority(tx_dma, tx_stream, DMA_SxCR_PL_LOW);
+
+    //  8. Set FIFO mode: disabled.
+    dma_enable_direct_mode(tx_dma, tx_stream);
+
+    //  9. Set data transfer direction,
+    //         peripheral and memory increment/fixed mode,
+    //         single or burst transactions,
+    //         peripheral and memory data widths,
+    //         circular mode,
+    //         double buffer mode,
+    //         and interrupts
+    //     in the SxCR register.
+    dma_disable_peripheral_increment_mode(tx_dma, tx_stream);
+    dma_enable_memory_increment_mode(tx_dma, tx_stream);
+    dma_set_peripheral_burst(tx_dma, tx_stream, DMA_SxCR_PBURST_SINGLE);
+    dma_set_memory_burst(tx_dma, tx_stream, DMA_SxCR_MBURST_SINGLE);
+    dma_set_peripheral_size(tx_dma, tx_stream, DMA_SxCR_PSIZE_8BIT);
+    dma_set_memory_size(tx_dma, tx_stream, DMA_SxCR_MSIZE_8BIT);
+    dma_set_transfer_mode(tx_dma, tx_stream, DMA_SxCR_DIR_MEM_TO_PERIPHERAL);
+    dma_disable_double_buffer_mode(tx_dma, tx_stream);
+    dma_disable_transfer_error_interrupt(tx_dma, tx_stream);
+    dma_disable_half_transfer_interrupt(tx_dma, tx_stream);
+    dma_disable_transfer_complete_interrupt(tx_dma, tx_stream);
+    dma_disable_direct_mode_error_interrupt(tx_dma, tx_stream);
+    dma_disable_fifo_error_interrupt(tx_dma, tx_stream);
+    printf("%s:%d: %s: DMA_S%dCR = %#lx\n",
+           __FILE__, __LINE__, __func__,
+           tx_stream, DMA_SCR(tx_dma, tx_stream));
+
+    // 10. Set SxCR_EN.
+    dma_enable_stream(tx_dma, tx_stream);
+    // printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
 #endif
     spi_enable(config->sc_reg_base);
+    // printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
     for (size_t i = 0; i < count; i++) {
-	while (!(SPI_SR(base) & SPI_SR_TXE))
+        // printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+#if !TX_DMA
+        while (!(SPI_SR(base) & SPI_SR_TXE))
             continue;
-	SPI_DR(base) = tx_buf[i];
+        SPI_DR(base) = tx_buf[i];
+#endif
 #if !RX_DMA
         while (!(SPI_SR(base) & SPI_SR_RXNE))
             continue;
         rx_buf[i] = SPI_DR(base);
 #endif
     }
-    // See Section 28.3.8, Disabling the SPI.
-    while (!(SPI_SR(base) & SPI_SR_RXNE))
+    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+#if TX_DMA
+    while (!(DMA_HISR(tx_dma) & DMA_HISR_TCIF6))
         continue;
+    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+#endif
+    // See Section 28.3.8, Disabling the SPI.
     while (!(SPI_SR(base) & SPI_SR_TXE))
         continue;
+    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
     while (SPI_SR(base) & SPI_SR_BSY)
         continue;
+    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+#if TX_DMA
+    DMA_SCR(tx_dma, tx_stream) &= ~DMA_SxCR_EN;
+    while (DMA_SCR(tx_dma, tx_stream) & DMA_SxCR_EN)
+        continue;
+#endif
 #if RX_DMA
     DMA_SCR(rx_dma, rx_stream) &= ~DMA_SxCR_EN;
     while (DMA_SCR(rx_dma, rx_stream) & DMA_SxCR_EN)
