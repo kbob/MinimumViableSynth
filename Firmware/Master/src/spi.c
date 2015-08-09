@@ -49,17 +49,20 @@
 // Each active DMA requires a controller/stream/channel triple.
 // Each controller/stream can only have a single channel active at a time.
 //
-// SPI 1 RX: 2/0/3, 2/2/3
-// SPI 1 TX: 2/3/3, 2/5/3
+//   SPI 1 RX: 2/0/3, 2/2/3
+//   SPI 1 TX: 2/3/3, 2/5/3
 //
-// SPI 3 RX: 1/0/0, 1/2/0
-// SPI 3 TX: 1/5/0, 1/7/0
+//   SPI 3 RX: 1/0/0, 1/2/0
+//   SPI 3 TX: 1/5/0, 1/7/0
 //
-// SPI 4 RX: 2/0/4, 2/3/5
-// SPI 4 TX: 2/1/4, 2/4/5
+//   SPI 4 RX: 2/0/4, 2/3/5
+//   SPI 4 TX: 2/1/4, 2/4/5
 //
-// SPI 5 RX: 2/3/2, 2/5/7
-// SPI 5 TX: 2/4/2, 2/6/7
+//   SPI 5 RX: 2/3/2, 2/5/7
+//   SPI 5 TX: 2/4/2, 2/6/7
+//
+// There is only one way to activate all eight channels simultaneously
+// without conflicts.  See the spi_config definitions.
 
 #define RX_DMA 1
 #define TX_DMA 1
@@ -142,10 +145,6 @@ static void spi_setup_pin(const gpio_pin *pin, int pupd)
                     GPIO_MODE_AF,
                     pupd,
                     pin->gp_pin);
-    printf("gpio_set_af(%#lx, %#x, %#x)\n",
-           pin->gp_port,
-           pin->gp_af,
-           pin->gp_pin);
 
     gpio_set_af(pin->gp_port,
                 pin->gp_af,
@@ -160,33 +159,19 @@ static void spi_setup_config(const spi_config *config)
     spi_setup_pin(&config->sc_mosi, GPIO_PUPD_NONE);
 
     // Init SPI
-    printf("%s:%d: %s: spi_init_master(%#lx, %#x, %#x, %#x, %#x, %#x)\n",
-           __FILE__, __LINE__, __func__,
-           config->sc_reg_base,
-           SPI_CR1_BAUDRATE_FPCLK_DIV_256,
-           SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
-           SPI_CR1_CPHA_CLK_TRANSITION_2,
-           SPI_CR1_DFF_8BIT,
-           SPI_CR1_MSBFIRST);
-#if RX_DMA
-    spi_enable_rx_dma(config->sc_reg_base);
-#endif
-#if TX_DMA
-    spi_enable_tx_dma(config->sc_reg_base);
-#endif
     spi_init_master(config->sc_reg_base,
                     SPI_CR1_BAUDRATE_FPCLK_DIV_256,
                     SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
                     SPI_CR1_CPHA_CLK_TRANSITION_2,
                     SPI_CR1_DFF_8BIT,
                     SPI_CR1_MSBFIRST);
-    printf("%s:%d: %s: SPI_CR1 = %#lx\n",
-           __FILE__, __LINE__, __func__,
-           SPI_CR1(config->sc_reg_base));
+#if RX_DMA
+    spi_enable_rx_dma(config->sc_reg_base);
+#endif
+#if TX_DMA
+    spi_enable_tx_dma(config->sc_reg_base);
+#endif
     spi_enable_ss_output(config->sc_reg_base);
-    printf("%s:%d: %s: SPI_CR1 = %#lx\n",
-           __FILE__, __LINE__, __func__,
-           SPI_CR1(config->sc_reg_base));
 }
 
 void spi_setup()
@@ -285,7 +270,7 @@ void spi_start_transfer(int            spi,
     dma_channel_select(rx_dma, rx_stream, rx_chsel);
 
     //  6. Set SxCR.PFCTRL.
-    // dma_set_peripheral_flow_control(rx_dma, rx_stream);
+    dma_set_dma_flow_control(rx_dma, rx_stream);
 
     //  7. Set the stream priority.
     dma_set_priority(rx_dma, rx_stream, DMA_SxCR_PL_LOW);
@@ -314,9 +299,6 @@ void spi_start_transfer(int            spi,
     dma_disable_transfer_complete_interrupt(rx_dma, rx_stream);
     dma_disable_direct_mode_error_interrupt(rx_dma, rx_stream);
     dma_disable_fifo_error_interrupt(rx_dma, rx_stream);
-    printf("%s:%d: %s: DMA_S%dCR = %#lx\n",
-           __FILE__, __LINE__, __func__,
-           rx_stream, DMA_SCR(rx_dma, rx_stream));
 
     // 10. Set SxCR_EN.
     dma_enable_stream(rx_dma, rx_stream);
@@ -341,7 +323,7 @@ void spi_start_transfer(int            spi,
     dma_channel_select(tx_dma, tx_stream, tx_chsel);
 
     //  6. Set SxCR.PFCTRL.
-    // dma_set_peripheral_flow_control(tx_dma, tx_stream);
+    dma_set_dma_flow_control(tx_dma, tx_stream);
 
     //  7. Set the stream priority.
     dma_set_priority(tx_dma, tx_stream, DMA_SxCR_PL_LOW);
@@ -370,42 +352,55 @@ void spi_start_transfer(int            spi,
     dma_disable_transfer_complete_interrupt(tx_dma, tx_stream);
     dma_disable_direct_mode_error_interrupt(tx_dma, tx_stream);
     dma_disable_fifo_error_interrupt(tx_dma, tx_stream);
-    printf("%s:%d: %s: DMA_S%dCR = %#lx\n",
-           __FILE__, __LINE__, __func__,
-           tx_stream, DMA_SCR(tx_dma, tx_stream));
 
     // 10. Set SxCR_EN.
     dma_enable_stream(tx_dma, tx_stream);
-    // printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
 #endif
     spi_enable(config->sc_reg_base);
-    // printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+
+#if !TX_DMA || !RX_DMA
     for (size_t i = 0; i < count; i++) {
-        // printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
-#if !TX_DMA
+  #if !TX_DMA
         while (!(SPI_SR(base) & SPI_SR_TXE))
             continue;
         SPI_DR(base) = tx_buf[i];
-#endif
-#if !RX_DMA
+  #endif
+  #if !RX_DMA
         while (!(SPI_SR(base) & SPI_SR_RXNE))
             continue;
         rx_buf[i] = SPI_DR(base);
-#endif
+  #endif
     }
-    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
-#if TX_DMA
-    while (!(DMA_HISR(tx_dma) & DMA_HISR_TCIF6))
-        continue;
-    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+#endif /* !TX_DMA || !RX_DMA */
+}
+
+void spi_finish_transfer(int spi)
+{
+    assert(spi <= 6);
+    const spi_config *config = config_map[spi];
+    assert(config);
+    uint32_t base = config->sc_reg_base;
+#if RX_DMA
+    uint32_t rx_dma = config->sc_rx_dma.dc_dma;
+    uint8_t rx_stream = config->sc_rx_dma.dc_stream;
 #endif
-    // See Section 28.3.8, Disabling the SPI.
+#if TX_DMA
+    uint32_t tx_dma = config->sc_tx_dma.dc_dma;
+    uint8_t tx_stream = config->sc_tx_dma.dc_stream;
+#endif
+
+    // Wait for I/O to drain.  See sections 28.3.8, Disabling the SPI,
+    // and 28.3.9, SPI communication using DMA.
+#if TX_DMA
+    while (!dma_get_interrupt_flag(tx_dma, tx_stream, DMA_TCIF))
+        continue;
+#endif
     while (!(SPI_SR(base) & SPI_SR_TXE))
         continue;
-    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
     while (SPI_SR(base) & SPI_SR_BSY)
         continue;
-    printf("%s:%d: %s\n", __FILE__, __LINE__, __func__);
+
+    // Disable DMA first, then SPI.
 #if TX_DMA
     DMA_SCR(tx_dma, tx_stream) &= ~DMA_SxCR_EN;
     while (DMA_SCR(tx_dma, tx_stream) & DMA_SxCR_EN)
@@ -417,9 +412,4 @@ void spi_start_transfer(int            spi,
         continue;
 #endif
     spi_disable(base);
-}
-
-void spi_finish_transfer(int spi)
-{
-    // Nothing to do
 }
