@@ -157,7 +157,7 @@ size_t do_transfer(uint8_t *receive_buffer, size_t receive_count,
     return ri;
 }
 
-uint16_t fletcher16(uint8_t *buf, size_t count)
+uint16_t fletcher16(const uint8_t *buf, size_t count)
 {
     uint16_t sum0 = 0, sum1 = 0;
     for (size_t i = 0; i < count; i++) {
@@ -175,7 +175,7 @@ namespace {                     // declare these functions in an
                                 // unnamed namespace to thwart the
                                 // stupid Arduino source mangler.
 
-    bool message_valid(message_buf buf)
+    bool message_valid(const message_buf buf)
     {
         if (buf[0] != STX)
             return false;
