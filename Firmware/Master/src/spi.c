@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include <libopencm3/stm32/dma.h>
-// #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
 
@@ -68,13 +67,6 @@
 
 #define RX_DMA 1
 #define TX_DMA 1
-#define GPIO_ABS 1
-
-// typedef struct gpio_pin {
-//     uint32_t gp_port;
-//     uint16_t gp_pin;
-//     uint8_t  gp_af;
-// } gpio_pin;
 
 typedef struct DMA_channel {
     uint32_t dc_dma;
@@ -142,37 +134,12 @@ static const gpio_pin group_ss_pins[] = {
 };
 static size_t group_count = sizeof group_ss_pins / sizeof group_ss_pins[0];
 
-#if !GPIO_ABS
-static void spi_setup_pin(const gpio_pin *pin, int pupd)
-{
-    gpio_mode_setup(pin->gp_port,
-                    GPIO_MODE_AF,
-                    pupd,
-                    pin->gp_pin);
-
-    gpio_set_output_options(pin->gp_port,
-                            GPIO_OTYPE_PP,
-                            GPIO_OSPEED_2MHZ,
-                            pin->gp_pin);
-
-    gpio_set_af(pin->gp_port,
-                pin->gp_af,
-                pin->gp_pin);
-}
-#endif
-
 static void spi_setup_config(const spi_config *config)
 {
     // GPIO 
-#if GPIO_ABS
     gpio_init_pin(&config->sc_sck);
     gpio_init_pin(&config->sc_miso);
     gpio_init_pin(&config->sc_mosi);
-#else
-    spi_setup_pin(&config->sc_sck, GPIO_PUPD_PULLDOWN);
-    spi_setup_pin(&config->sc_miso, GPIO_PUPD_PULLUP);
-    spi_setup_pin(&config->sc_mosi, GPIO_PUPD_NONE);
-#endif
 
     // Init SPI
     spi_init_master(config->sc_reg_base,
@@ -198,14 +165,6 @@ void spi_setup()
     // rcc_periph_clock_enable(RCC_SPI4);
     rcc_periph_clock_enable(RCC_SPI5);
 
-#if !GPIO_ABS
-    rcc_periph_clock_enable(RCC_GPIOA);
-    rcc_periph_clock_enable(RCC_GPIOB);
-    rcc_periph_clock_enable(RCC_GPIOC);
-    rcc_periph_clock_enable(RCC_GPIOE);
-    rcc_periph_clock_enable(RCC_GPIOF);
-#endif
-
 #if RX_DMA || TX_DMA
     // rcc_periph_clock_enable(RCC_DMA1);
     rcc_periph_clock_enable(RCC_DMA2);
@@ -219,14 +178,7 @@ void spi_setup()
     // Configure nSS pins
     for (size_t i = 0; i < group_count; i++) {
         const gpio_pin *gp = &group_ss_pins[i];
-#if GPIO_ABS
         gpio_init_pin(gp);
-#else
-        gpio_mode_setup(gp->gp_port,
-                        GPIO_MODE_OUTPUT,
-                        GPIO_PUPD_NONE,
-                        gp->gp_pin);
-#endif
         gpio_set(gp->gp_port, gp->gp_pin);
     }
 
