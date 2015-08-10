@@ -6,9 +6,11 @@
 #include <stdlib.h>
 
 #include <libopencm3/stm32/dma.h>
-#include <libopencm3/stm32/gpio.h>
+// #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
+
+#include "gpio.h"
 
 // We use SPI buses 1, 3, 4, and 5.
 // SPI bus 5 is also used for the LCD panel and the MEMS device.
@@ -66,12 +68,13 @@
 
 #define RX_DMA 1
 #define TX_DMA 1
+#define GPIO_ABS 1
 
-typedef struct gpio_pin {
-    uint32_t gp_port;
-    uint16_t gp_pin;
-    uint8_t  gp_af;
-} gpio_pin;
+// typedef struct gpio_pin {
+//     uint32_t gp_port;
+//     uint16_t gp_pin;
+//     uint8_t  gp_af;
+// } gpio_pin;
 
 typedef struct DMA_channel {
     uint32_t dc_dma;
@@ -80,46 +83,46 @@ typedef struct DMA_channel {
 } DMA_channel;
 
 typedef struct spi_config {
-    uint32_t sc_reg_base;
-    gpio_pin sc_sck;
-    gpio_pin sc_miso;
-    gpio_pin sc_mosi;
+    uint32_t    sc_reg_base;
+    gpio_pin    sc_sck;
+    gpio_pin    sc_miso;
+    gpio_pin    sc_mosi;
     DMA_channel sc_rx_dma;
     DMA_channel sc_tx_dma;
 } spi_config;
 
 static const spi_config spi1_config = {
     .sc_reg_base = SPI1_BASE,
-    .sc_sck      = { GPIOA, GPIO5, GPIO_AF5 },
-    .sc_miso     = { GPIOB, GPIO4, GPIO_AF5 },
-    .sc_mosi     = { GPIOA, GPIO7, GPIO_AF5 },
+    .sc_sck      = { GPIOA, GPIO5, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLDOWN },
+    .sc_miso     = { GPIOB, GPIO4, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLUP   },
+    .sc_mosi     = { GPIOA, GPIO7, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_NONE     },
     .sc_rx_dma   = { DMA2,  DMA_STREAM2, 3 },
     .sc_tx_dma   = { DMA2,  DMA_STREAM3, 3 },
 };
 
 static const spi_config spi3_config = {
     .sc_reg_base = SPI3_BASE,
-    .sc_sck      = { GPIOB, GPIO3, GPIO_AF6 },
-    .sc_miso     = { GPIOC, GPIO11, GPIO_AF6 },
-    .sc_mosi     = { GPIOC, GPIO12, GPIO_AF6 },
+    .sc_sck     = { GPIOB, GPIO3,  GPIO_MODE_AF, GPIO_AF6, GPIO_PUPD_PULLDOWN },
+    .sc_miso    = { GPIOC, GPIO11, GPIO_MODE_AF, GPIO_AF6, GPIO_PUPD_PULLUP   },
+    .sc_mosi    = { GPIOC, GPIO12, GPIO_MODE_AF, GPIO_AF6, GPIO_PUPD_NONE     },
     .sc_rx_dma   = { DMA1,  DMA_STREAM0, 0 },
     .sc_tx_dma   = { DMA1,  DMA_STREAM5, 0 },
 };
 
 static const spi_config spi4_config = {
     .sc_reg_base = SPI4_BASE,
-    .sc_sck      = { GPIOE, GPIO2, GPIO_AF5 },
-    .sc_miso     = { GPIOE, GPIO5, GPIO_AF5 },
-    .sc_mosi     = { GPIOE, GPIO6, GPIO_AF5 },
+    .sc_sck      = { GPIOE, GPIO2, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLDOWN },
+    .sc_miso     = { GPIOE, GPIO5, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLUP   },
+    .sc_mosi     = { GPIOE, GPIO6, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_NONE     },
     .sc_rx_dma   = { DMA2,  DMA_STREAM0, 4 },
     .sc_tx_dma   = { DMA2,  DMA_STREAM1, 4 },
 };
 
 static const spi_config spi5_config = {
     .sc_reg_base = SPI5_BASE,
-    .sc_sck      = { GPIOF, GPIO7, GPIO_AF5 },
-    .sc_miso     = { GPIOF, GPIO8, GPIO_AF5 },
-    .sc_mosi     = { GPIOF, GPIO9, GPIO_AF5 },
+    .sc_sck      = { GPIOF, GPIO7, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLDOWN },
+    .sc_miso     = { GPIOF, GPIO8, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLUP   },
+    .sc_mosi     = { GPIOF, GPIO9, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_NONE     },
     .sc_rx_dma   = { DMA2,  DMA_STREAM5, 7 },
     .sc_tx_dma   = { DMA2,  DMA_STREAM6, 7 },
 };
@@ -135,10 +138,11 @@ static const spi_config *config_map[7] = {
 };
 
 static const gpio_pin group_ss_pins[] = {
-    { GPIOB, GPIO7, GPIO_AF0 },
+    { GPIOB, GPIO7, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
 };
 static size_t group_count = sizeof group_ss_pins / sizeof group_ss_pins[0];
 
+#if !GPIO_ABS
 static void spi_setup_pin(const gpio_pin *pin, int pupd)
 {
     gpio_mode_setup(pin->gp_port,
@@ -146,17 +150,29 @@ static void spi_setup_pin(const gpio_pin *pin, int pupd)
                     pupd,
                     pin->gp_pin);
 
+    gpio_set_output_options(pin->gp_port,
+                            GPIO_OTYPE_PP,
+                            GPIO_OSPEED_2MHZ,
+                            pin->gp_pin);
+
     gpio_set_af(pin->gp_port,
                 pin->gp_af,
                 pin->gp_pin);
 }
+#endif
 
 static void spi_setup_config(const spi_config *config)
 {
     // GPIO 
+#if GPIO_ABS
+    gpio_init_pin(&config->sc_sck);
+    gpio_init_pin(&config->sc_miso);
+    gpio_init_pin(&config->sc_mosi);
+#else
     spi_setup_pin(&config->sc_sck, GPIO_PUPD_PULLDOWN);
     spi_setup_pin(&config->sc_miso, GPIO_PUPD_PULLUP);
     spi_setup_pin(&config->sc_mosi, GPIO_PUPD_NONE);
+#endif
 
     // Init SPI
     spi_init_master(config->sc_reg_base,
@@ -182,11 +198,13 @@ void spi_setup()
     // rcc_periph_clock_enable(RCC_SPI4);
     rcc_periph_clock_enable(RCC_SPI5);
 
+#if !GPIO_ABS
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_GPIOC);
     rcc_periph_clock_enable(RCC_GPIOE);
     rcc_periph_clock_enable(RCC_GPIOF);
+#endif
 
 #if RX_DMA || TX_DMA
     // rcc_periph_clock_enable(RCC_DMA1);
@@ -201,14 +219,18 @@ void spi_setup()
     // Configure nSS pins
     for (size_t i = 0; i < group_count; i++) {
         const gpio_pin *gp = &group_ss_pins[i];
+#if GPIO_ABS
+        gpio_init_pin(gp);
+#else
         gpio_mode_setup(gp->gp_port,
                         GPIO_MODE_OUTPUT,
                         GPIO_PUPD_NONE,
                         gp->gp_pin);
+#endif
         gpio_set(gp->gp_port, gp->gp_pin);
     }
 
-    // Hold pins PC1 and PC2 high.
+    // Hold pins PC1 and PC2 high to disable SPI on LCD and MEMS device.
     gpio_mode_setup(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO1 | GPIO2);
     gpio_set(GPIOC, GPIO1);
     gpio_set(GPIOC, GPIO2);

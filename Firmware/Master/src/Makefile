@@ -1,6 +1,6 @@
 # pass LIBOPENCM3 := the root of your libopencm3 tree.
 
-    OFILES := main.o button.o console.o spi.o usb-midi.o
+    OFILES := main.o button.o console.o gpio.o spi.o usb-midi.o
 
 # OFILES := usbmidi.o console.o
 
