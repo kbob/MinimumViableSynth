@@ -1,15 +1,19 @@
 #include "button.h"
 
-#include <stdio.h>
-
-#include <libopencm3/stm32/gpio.h>
-
+#include "gpio.h"
 #include "usb-midi.h"
+
+static const gpio_pin button_gpio = {
+    .gp_port = GPIOA,
+    .gp_pin  = GPIO0,
+    .gp_mode = GPIO_MODE_INPUT,
+    .gp_pupd = GPIO_PUPD_NONE,
+};
 
 void button_setup(void)
 {
     /* Button pin */
-    gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
+    gpio_init_pin(&button_gpio);
 }
 
 void button_poll(void)
@@ -23,7 +27,6 @@ void button_poll(void)
      */
     uint32_t old_button_state = button_state;
     button_state = (button_state << 1) | (GPIOA_IDR & 1);
-    // printf("button_state = %08lx\n", button_state);
     if ((0 == button_state) != (0 == old_button_state))
         usb_midi_send_note((bool)button_state);
 }

@@ -17,7 +17,8 @@
 #include <libopencm3/usb/audio.h>
 #include <libopencm3/usb/midi.h>
 #include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
+
+#include "gpio.h"
 
 /*
  * Table B-1: MIDI Adapter Device Descriptor
@@ -292,6 +293,30 @@ static const uint8_t sysex_identity[] = {
 	0x00,	/* Padding */
 };
 
+static const gpio_pin usb_id_pin = {
+    .gp_port = GPIOB,
+    .gp_pin  = GPIO12,
+    .gp_mode = GPIO_MODE_AF,
+    .gp_af   = GPIO_AF12,
+    .gp_pupd = GPIO_PUPD_NONE,
+};
+
+static const gpio_pin usb_dm_pin = {
+    .gp_port = GPIOB,
+    .gp_pin  = GPIO14,
+    .gp_mode = GPIO_MODE_AF,
+    .gp_af   = GPIO_AF12,
+    .gp_pupd = GPIO_PUPD_NONE,
+};
+
+static const gpio_pin usb_dp_pin = {
+    .gp_port = GPIOB,
+    .gp_pin  = GPIO15,
+    .gp_mode = GPIO_MODE_AF,
+    .gp_af   = GPIO_AF12,
+    .gp_pupd = GPIO_PUPD_NONE,
+};
+
 static void usbmidi_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
 	(void)ep;
@@ -323,14 +348,12 @@ static void usb_midi_set_config(usbd_device *usbd_dev, uint16_t wValue)
 void usb_midi_setup(void)
 {
     // Clock
-    rcc_periph_clock_enable(RCC_GPIOA);
-    rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_OTGHS);
 
     // GPIO
-    gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO13 | GPIO14 | GPIO15);
-    gpio_set_af(GPIOB, GPIO_AF12, GPIO13 | GPIO14 | GPIO15);
+    gpio_init_pin(&usb_id_pin);
+    gpio_init_pin(&usb_dm_pin);
+    gpio_init_pin(&usb_dp_pin);
 
     // USB
     usbd_dev = usbd_init(&otghs_usb_driver, &dev, &config,

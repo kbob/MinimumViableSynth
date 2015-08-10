@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h>              // XXX
 
 #include <libopencm3/stm32/rcc.h>
 

@@ -9,15 +9,15 @@
 #include "spi.h"
 #include "usb-midi.h"
 
-const uint8_t STX = '\02';
-const uint8_t ETX = '\03';
-const uint8_t SYN = '\26';
+static const uint8_t STX = '\02';
+static const uint8_t ETX = '\03';
+static const uint8_t SYN = '\26';
 
 static volatile uint32_t system_millis;
 
-void clock_setup()
+static void clock_setup()
 {
-#if 0
+#if 0                           // XXX slow CPU to slow SPI.
     rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_168MHZ]);
 #elif 1
     rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);

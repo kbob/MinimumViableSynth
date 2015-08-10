@@ -3,22 +3,38 @@
 #include <stdio.h>
 //#include <stdlib.h>
 
-#include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>
+
+#include "gpio.h"
 
 #define CONSOLE_UART USART1
 #define CONSOLE_BAUD 115200
 
+static const gpio_pin usart1_tx_pin = {
+    .gp_port = GPIOA,
+    .gp_pin  = GPIO9,
+    .gp_mode = GPIO_MODE_AF,
+    .gp_af   = GPIO_AF7,
+    .gp_pupd = GPIO_PUPD_NONE,
+};
+
+static const gpio_pin usart1_rx_pin = {
+    .gp_port = GPIOA,
+    .gp_pin  = GPIO10,
+    .gp_mode = GPIO_MODE_AF,
+    .gp_af   = GPIO_AF7,
+    .gp_pupd = GPIO_PUPD_NONE,
+};
+
 void console_setup(void)
 {
     // Clock
-    rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_USART1);
 
     // GPIO
-    gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9 | GPIO10);
-    gpio_set_af(GPIOA, GPIO_AF7, GPIO9 | GPIO10);
+    gpio_init_pin(&usart1_tx_pin);
+    gpio_init_pin(&usart1_rx_pin);
 
     // USART
     usart_set_baudrate(CONSOLE_UART, CONSOLE_BAUD);
