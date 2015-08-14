@@ -9,6 +9,7 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
 
+#include "dma-channel.h"
 #include "gpio.h"
 
 // We use SPI buses 1, 3, 4, and 5.
@@ -157,7 +158,7 @@ static void spi_setup_config(const spi_config *config)
     spi_enable_ss_output(config->sc_reg_base);
 }
 
-void spi_setup()
+void spi_setup(void)
 {
     // Clocks.
     // rcc_periph_clock_enable(RCC_SPI1);

@@ -15,7 +15,7 @@ static const uint8_t SYN = '\26';
 
 static volatile uint32_t system_millis;
 
-static void clock_setup()
+static void clock_setup(void)
 {
 #if 0                           // XXX slow CPU to slow SPI.
     rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_168MHZ]);
@@ -46,7 +46,7 @@ void sys_tick_handler(void)
 
 static void print_buf(const char *label, const uint8_t *buf, size_t n)
 {
-    printf("%s", label);
+    printf("%s %u:", label, n);
     for (size_t i = 0; i < n; i++) {
         uint8_t c = buf[i];
         if (c == STX)
@@ -56,7 +56,8 @@ static void print_buf(const char *label, const uint8_t *buf, size_t n)
         else if (c == SYN)
             printf(" SYN");
         else if (' ' <= c && c < '\377')
-            printf(" '%c'", c);
+            // printf(" '%c'", c);
+            printf(" %c", c);
         else
             printf(" \\%03o", c);
     }
@@ -86,7 +87,7 @@ static void do_spi(void)
     }
     uint32_t t1 = system_millis;
     
-    print_buf("sent", out, COUNT);
+    print_buf("sent    ", out, COUNT);
     print_buf("received", in, COUNT);
     printf("%ld ms\n", t1 - t0);
 }

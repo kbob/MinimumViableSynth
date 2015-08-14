@@ -64,7 +64,7 @@ static ssize_t console_write(void *cookie, const char *buf, size_t size)
     return size;
 }
 
-void console_stdio_setup()
+void console_stdio_setup(void)
 {
     cookie_io_functions_t console_input_fns = {
         .read  = NULL,

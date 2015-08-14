@@ -1993,6 +1993,10 @@ def create_panel(output_file):
         panel_size = (FULL_PANEL_WIDTH, FULL_PANEL_HEIGHT)
     boxes = layout_panel(panel, panel_size)
     print('grid width %g' % (g_grid_width))
+    for b in boxes:
+        w = b.widget
+        if isinstance(w, SourceModule):
+            print(float(b.y), str(w))
     render(boxes, output_file, panel_size)
 
 def main(argv):
