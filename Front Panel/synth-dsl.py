@@ -805,7 +805,12 @@ def stroke_engraver(c):
         yield egv
         if do_engrave:
             # color = ENGRAVE_COLOR if cutting_guide else FG
-            color = FG if do_art else ENGRAVE_COLOR
+            color = ENGRAVE_COLOR
+            c.canvas.setFillColorRGB(*color)
+            c.canvas.setStrokeColorRGB(*color)
+            c.canvas.drawPath(egv, stroke=1, fill=0)
+        if do_art:
+            color = FG
             c.canvas.setFillColorRGB(*color)
             c.canvas.setStrokeColorRGB(*color)
             c.canvas.drawPath(egv, stroke=1, fill=0)
