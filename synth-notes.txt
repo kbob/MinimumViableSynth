@@ -1,3 +1,68 @@
+2015-08-14
+MIDI CC Mappings
+
+We will shortly have raw data from a bunch of controls.  We need to
+turn that data into MIDI messages.
+
+The config has:
+    controller's SYSEX address
+    several module configs.
+
+A module_config has:
+    SPI address
+    MIDI SYSEX address
+    color
+    optional choice control
+    0-5 knob controls
+    optional assign control
+    predicate that determines whether it's active
+
+A choice control config has:
+    a MIDI CC number
+    number of options
+
+A knob control config has:
+    a MIDI CC number
+    optional LSB CC number
+    RGB status LED number
+    flag indicating button presence
+    optional button press handler
+    function that maps MIDI CC values to user values
+
+An assign control config has:
+    a MIDI CC number
+    a list of destinations and a MIDI CC value for each
+    
+That should be enough to describe the modules' static configuration.
+
+
+The controller's state has:
+    current preset name, number
+    several modules' states
+
+A module's state has:
+    reference to a module_config
+    flag indicating module is active
+    current status LED color/pattern
+
+A choice control's state has:
+    reference to choice_config
+    current value
+
+A knob control's state has:
+    reference to knob_config
+    exported value
+    actual value
+    flag indicating that actual value should be exported
+
+An assign control's state has:
+    reference to assign_config
+    current value
+
+That seems like enough to start implementing. 
+
+
+----------------------------------
 2015-06-05
 Master-Slave protocol
 
