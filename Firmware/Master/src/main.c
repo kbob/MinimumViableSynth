@@ -7,6 +7,7 @@
 #include "button.h"
 #include "console.h"
 #include "spi.h"
+#include "state.h"
 #include "usb-midi.h"
 
 static const uint8_t STX = '\02';
@@ -101,7 +102,11 @@ int main()
     button_setup();
     spi_setup();
 
+
     printf("Hello, World!\n");
+    printf("SYSEX address = %d\n", sc.sc_SYSEX_address);
+    printf("sizeof synth_config = %u\n", sizeof (synth_config));
+    printf("sizeof synth_config = %u\n", sizeof (synth_state));
 
     uint32_t next_time = system_millis + 1000;
 

@@ -1,8 +1,10 @@
 # pass LIBOPENCM3 := the root of your libopencm3 tree.
 
-    OFILES := main.o button.o console.o gpio.o spi.o usb-midi.o
-
-# OFILES := usbmidi.o console.o
+########################################################################
+   SOURCES := main.c button.c config.c console.c gpio.c spi.c state.c   \
+              usb-midi.c
+    CFILES := $(filter %.c, $(SOURCES))
+    OFILES := $(CFILES:%.c=%.o)
 
  L3_INCDIR := $(LIBOPENCM3)/include
  L3_LIBDIR := $(LIBOPENCM3)/lib
@@ -13,8 +15,8 @@
   FP_FLAGS := -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ARCH_FLAGS := -mthumb -mcpu=cortex-m4 $(FP_FLAGS)
 
-  CPPFLAGS := -MD -Wall -Wundef -I$(L3_INCDIR) $(DEFS)
-    CFLAGS := -std=gnu99 -Os -g -Werror -Wundef \
+  CPPFLAGS := -MD -I$(L3_INCDIR) $(DEFS)
+    CFLAGS := -std=gnu99 -Os -g -Wall -Wundef -Werror \
               -fno-common -ffunction-sections -fdata-sections \
               $(CPPFLAGS) $(ARCH_FLAGS)
    LDFLAGS := -g --static -nostartfiles \
@@ -34,4 +36,6 @@ master.elf: $(OFILES)
 clean:
 	rm -f *.d *.o *.elf *.map
 
-# arm-none-eabi-gcc --static -nostartfiles -L../../../../../libopencm3//lib -T../stm32f429i-discovery.ld -Wl,-Map=lcd-dma.map -Wl,--gc-sections -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 sdram.o clock.o console.o lcd-spi.o lcd-dma.o -lm -lopencm3_stm32f4 -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -o lcd-dma.elf
+ifeq '$(filter clean$ help,$(or $(MAKECMDGOALS),help))' ''
+  -include $(CFILES:%.c=%.d)
+endif
