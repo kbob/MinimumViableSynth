@@ -30,9 +30,8 @@ typedef struct knob_config {
     uint8_t       kc_LED;       // status LED number
     bool          kc_has_button; // true if knob has button
     knob_button_handler
-                 *kc_button_pressed; // handler for button press events
+                 *kc_button_handler; // handler for button press events
     knob_mapper  *kc_map_func;  // map MIDI CC values to user values
-    
 } knob_config;
 
 typedef struct assign_dest {
@@ -42,9 +41,10 @@ typedef struct assign_dest {
 } assign_dest;
 
 typedef struct assign_config {
+    const char   *ac_name;
     uint8_t       ac_CC;        // MIDI CC number
     size_t        ac_dest_count;
-    assign_dest const *ac_dest; // possible destinations
+    assign_dest const *ac_dests; // possible destinations
 } assign_config;
 
 typedef struct module_config {
@@ -52,6 +52,7 @@ typedef struct module_config {
     uint8_t       mc_SPI_group;
     uint8_t       mc_SPI_bus;
     uint8_t       mc_SYSEX_addr;
+    uint8_t       mc_LED;
     uint8_t       mc_color[3];
     bool          mc_has_choice;
     bool          mc_has_assign;
@@ -63,10 +64,12 @@ typedef struct module_config {
 } module_config;
 
 typedef struct synth_config {
-    uint8_t       sc_SYSEX_address;
+    uint8_t       sc_SYSEX_addr;
     module_config sc_modules[MODULE_COUNT];
 } synth_config;
 
 extern const synth_config sc;
+
+extern void verify_config(void);
 
 #endif /* !CONFIG_included */

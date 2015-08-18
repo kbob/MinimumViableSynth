@@ -104,9 +104,15 @@ int main()
 
 
     printf("Hello, World!\n");
-    printf("SYSEX address = %d\n", sc.sc_SYSEX_address);
+    printf("SYSEX address = %d\n", sc.sc_SYSEX_addr);
     printf("sizeof synth_config = %u\n", sizeof (synth_config));
     printf("sizeof synth_config = %u\n", sizeof (synth_state));
+
+#ifndef NDEBUG
+    verify_config();
+    printf("OK\n");
+#endif
+
 
     uint32_t next_time = system_millis + 1000;
 
@@ -115,12 +121,13 @@ int main()
         button_poll();
         if ((int32_t)(next_time - system_millis) >= 0)
             continue;
-        printf("tick\n");
+        // printf("tick\n");
         next_time += 1000;
 
-        do_spi();
+        if (0)
+            do_spi();
 
-        printf("\n");
+        // printf("\n");
     }
     return 0;
 }

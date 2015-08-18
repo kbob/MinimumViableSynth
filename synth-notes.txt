@@ -1,3 +1,91 @@
+2015-08-16
+Color indications
+
+Define an "active" module as one that affects the sound output.  E.g.,
+an oscillator is active iff its amount is nonzero, the filter cutoff
+is not subsonic, and the amplitude envelope has nonzero master volume
+and either attack, decay, or sustain is nonzero.
+
+Define a "working" knob as one whose value changes are generating MIDI
+messages.  The opposite of "working" is "idle".  When a preset is
+changed, all knobs whose current values don't match the preset's value
+become idle.  When a knob is rotated to the preset value, it becomes
+working.
+
+Define the "current" module as the most recently touched module.
+Similarly, the "current" knob is the most recently touched control,
+unless a non-knob control has been touched last.  (XXX figure out what
+to do when two modules are being touched at the same time.)
+
+A "modifier" is a module with an assign button.  A modifier has
+a current destination and a set of valid destinations.  To assign
+a modifier to a destination, click the assign button, then click
+the new destination.
+
+Clicking Assign activates assignment.  When assignment is active,
+
+  - clicking Assign again leaves assignment.
+
+  - clicking a different Assign button immediately deactivates
+    assignment (bypassing animation) and activates assignment on the
+    other module.
+
+  - clicking the current destination deassigns the modifier and leaves
+    assignment mode.
+
+  - clicking a valid, noncurrent destination assigns the modifier to
+    the new destination and leaves assignment mode.
+
+  - clicking an invalid destination has no effect.
+
+  - doing nothing for 2 seconds leaves assignment mode.
+
+When assignment mode is left, there is a brief animation.  The
+unselected destinations go black immediately.  All knobs return to
+their non-assignment-mode colors The Assign button and the current
+destination throb red once, then the Assign button goes black and
+the current destination returns to its non-assignment-mode color.
+
+The light for a module should be:
+
+  - module color with throbbing if the module is active and current.
+
+  - module color, solid (maybe dimmed) if the module is active
+    but not current.
+
+  - module color, dimmed and throbbing, if the module is current
+    but not active.
+
+  - off, if the module is neither active nor current.
+
+The light for a knob should be:
+
+  - blinking red with high duty cycle if a modifier assignment is
+    active and the knob is the modifier's current destination
+
+  - blinking red with low duty cycle if a modifier assignment is
+    active, the knob is a valid destination, and it is not the
+    modifier's current destination.
+
+  - throbbing red once during post-assignment animation.
+
+  - off if a modifier assignment is active and the knob is not a
+    valid destination.
+
+  - off if the module is currently inactive
+
+  - dimmed module color if the knob is idle and not current.
+
+  - dimmed complement of module color if the knob is working and not current.
+
+  - throbbing module color if the knob is idle and current.
+
+  - throbbing complement of module color if the knob is working and current.
+
+But for now, I can just set all modules to module color and all knobs
+to complement of module color.
+
+----------------------------------
 2015-08-14
 MIDI CC Mappings
 
