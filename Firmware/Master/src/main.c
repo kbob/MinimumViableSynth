@@ -1,3 +1,8 @@
+// XXX write SPI transmit packet generator.  Traverse state and config
+// to fill it in.
+
+
+
 #include <stdio.h>
 #include <string.h>
 
@@ -7,12 +12,9 @@
 #include "button.h"
 #include "console.h"
 #include "spi.h"
+#include "spi-proto.h"
 #include "state.h"
 #include "usb-midi.h"
-
-static const uint8_t STX = '\02';
-static const uint8_t ETX = '\03';
-static const uint8_t SYN = '\26';
 
 static volatile uint32_t system_millis;
 
