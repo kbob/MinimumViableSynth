@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <UniWS.h>
 
+// See synth-notes.txt for full information.
     // Teensy     Attributes        Use
     //  Pin        (subset)
     //   0                          choice button
