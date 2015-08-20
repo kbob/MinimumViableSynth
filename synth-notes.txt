@@ -1,3 +1,23 @@
+2015-08-19
+The Controllers Module
+
+The idea is that any MIDI controller can be mapped to a synth knob.
+There are many MIDI controllers.
+
+  * CCs go from 0 to 119.
+
+  * RPNs and NRPNs.
+
+  * General MIDI has some SYSEX messages, e.g., Master Volume GM.
+    I know of 8 GM SYSEX messages.
+
+  * Where is Pitch Bend?
+
+Maybe I should declare that no more than N controllers can be active
+at once.  Then the synth state only has to process N things.  4 would
+be the obvious number...
+
+----------------------------------
 2015-08-16
 Color indications
 
