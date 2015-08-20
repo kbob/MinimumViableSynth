@@ -40,7 +40,12 @@ typedef struct synth_state {
     // const synth_config *ss_config;
     char        *ss_preset_name;
     int          ss_preset_number;
+    uint8_t      ss_MIDI_channel;
     module_state ss_modules[MODULE_COUNT];
 } synth_state;
+
+extern synth_state ss;
+
+extern void init_synth_state(void);
 
 #endif /* !STATE_included */
