@@ -1,3 +1,30 @@
+2015-08-26
+Wiring
+
+I'm going to create a daughterboard that plugs in to the back side of
+the STM32F429IDISCOVERY.  It will have 12 or 16 connectors for slave
+modules, and it will have a 44 pin connector for the video screen.
+
+For the slave modules, I'm thinking about either Molex SL connectors
+or RJ45.
+
+RJ45 connectors are bigger, but Ethernet cables are cheap, plentiful,
+and shielded with twisted pairs.  I only have to crimp-connect one end.
+
+Molex SL connectors are small.  They have positive locking.  They work
+very well in my printer.  Crimping 11 * 6 * 2 = 132 connectors will
+make me an experienced crimper. (-:
+
+It would be nice to use Molex SL on the slave boards, but...
+  (a) They don't appear to be available in 3x2, and the boards are
+      are already fabbed with 3x2 holes.
+  (b) There is no room.
+So I will stick with 6 pin headers there.
+
+I should probably put some capacitance on the slave boards.
+
+
+----------------------------------
 2015-08-19
 The Controllers Module
 
