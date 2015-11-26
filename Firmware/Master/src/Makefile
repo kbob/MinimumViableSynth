@@ -1,8 +1,8 @@
 # pass LIBOPENCM3 := the root of your libopencm3 tree.
 
 ########################################################################
-   SOURCES := main.c button.c config.c console.c gpio.c spi.c state.c   \
-              usb-midi.c
+   SOURCES := main.c anim.c button.c config.c console.c gpio.c spi.c	\
+              spi-proto.c state.c usb-midi.c
     CFILES := $(filter %.c, $(SOURCES))
     OFILES := $(CFILES:%.c=%.o)
 

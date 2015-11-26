@@ -56,7 +56,7 @@ const uint8_t STX = '\02';
 const uint8_t ETX = '\03';
 const uint8_t SYN = '\26';
 
-const size_t MSG_MAX = 30;
+const size_t MSG_MAX = 32;
 const int DEBOUNCE_MSEC = 5;
 const size_t MAX_PIXELS = 6;
 const size_t MAX_ANALOGS = 5;
@@ -178,29 +178,42 @@ namespace {                     // declare these functions in an
 
     bool message_valid(const message_buf buf)
     {
-        if (buf[0] != STX)
+        if (buf[0] != STX) {
+            Serial.printf("buf[0] = \\%03o != STX\n", buf[0]);
             return false;
+        }
 
         uint8_t cfg0 = buf[1];
         uint8_t cfg1 = buf[2];
         uint8_t pixel_count = cfg1 & 0x07;
         uint8_t analog_count = (cfg1 >> 3) & 0x07;
-        if (pixel_count > MAX_PIXELS || analog_count > MAX_ANALOGS)
+        if (pixel_count > MAX_PIXELS || analog_count > MAX_ANALOGS) {
+            Serial.printf("pixel_count = %d, analog_count = %d\n",
+                          pixel_count, analog_count);
             return false;
+        }
         size_t len = 6;             // minimal message: STX cfg cfg chk chk ETX
         for (uint8_t bit = 1; bit; bit <<= 1)
             if (cfg0 & bit)
                 len++;              // one byte per PWM LED
         len += 3 * (cfg1 & 0x7);   // three bytes per pixel
-        if (len > MSG_MAX)
+        if (len > MSG_MAX) {
+            Serial.printf("len = %d\n", len);
             return false;
+        }
 
-        if (buf[len - 1] != ETX)
+        if (buf[len - 1] != ETX) {
+            Serial.printf("buf[%d - 1] = \\%03o != ETX\n", len, buf[len - 1]);
             return false;
+        }
         uint16_t chk = (uint16_t)buf[len - 3] << 8 | buf[len - 2];
-        if (chk != fletcher16(buf + 1, len - 3))
+        if (chk != fletcher16(buf + 1, len - 4)) {
+            Serial.printf("chk = %#x != %#x\n",
+                          chk, fletcher16(buf + 1, len - 3));
             return false;
+        }
 
+        Serial.printf("valid message received\n");
         return true;
     }
 
@@ -228,24 +241,24 @@ uint8_t update_analog(uint8_t index, uint8_t **pptr)
     return 0;
 }
 
-// static void print_buf(const char *label, const uint8_t *buf, size_t count)
-// {
-//     Serial.printf("%s", label);
-//     for (size_t i = 0; i < count; i++) {
-//         uint8_t c = buf[i];
-//         if (c == STX)
-//             Serial.printf(" STX");
-//         else if (c == ETX)
-//             Serial.printf(" ETX");
-//         else if (c == SYN)
-//             Serial.printf(" SYN");
-//         else if (c >= ' ' && c < '\377')
-//             Serial.printf(" '%c'", c);
-//         else
-//             Serial.printf(" '\\%03o'", c);
-//     }
-//     Serial.printf("\n");
-// }
+static void print_buf(const char *label, const uint8_t *buf, size_t count)
+{
+    Serial.printf("%s", label);
+    for (size_t i = 0; i < count; i++) {
+        uint8_t c = buf[i];
+        if (c == STX)
+            Serial.printf(" STX");
+        else if (c == ETX)
+            Serial.printf(" ETX");
+        else if (c == SYN)
+            Serial.printf(" SYN");
+        else if (c >= ' ' && c < '\177')
+            Serial.printf(" %c", c);
+        else
+            Serial.printf(" \\%03o", c);
+    }
+    Serial.printf("\n");
+}
 
 void setup()
 {
@@ -272,6 +285,7 @@ void setup()
 void loop()
 {
     do_transfer(recv_buf, MSG_MAX, send_buf, MSG_MAX);
+    print_buf("received: ", recv_buf, MSG_MAX);
     if (!message_valid(recv_buf)) {
         Serial.printf("invalid message received\n");
         memset(send_buf, SYN, sizeof send_buf);
@@ -289,7 +303,7 @@ void loop()
     update_LED(&c4_led, cfg0 & (1 << 3) ? *rx_ptr++ : 0);
     update_LED(&c5_led, cfg0 & (1 << 4) ? *rx_ptr++ : 0);
     update_LED(&c6_led, cfg0 & (1 << 5) ? *rx_ptr++ : 0);
-    update_LED(&a_led,  cfg0 * (1 << 7) ? *rx_ptr++ : 0);
+    update_LED(&a_led,  cfg0 & (1 << 7) ? *rx_ptr++ : 0);
 
     // Update the pixels.
     int pixel_count = cfg1 & 0x07;

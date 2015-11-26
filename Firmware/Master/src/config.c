@@ -5,8 +5,8 @@
 #include <string.h>
 
 // Module Colors
-#define AMBER  { 0xFF, 0x99, 0x33 }
-#define BLUE   { 0x4D, 0x4D, 0xFF }
+#define AMBER  { 0xFF, 0x44, 0x00 }
+#define BLUE   { 0x00, 0x00, 0xFF }
 #define GREEN  { 0x00, 0xFF, 0x00 }
 #define RED    { 0xFF, 0x33, 0x33 }
 #define YELLOW { 0xFF, 0xFF, 0x00 }
@@ -125,7 +125,7 @@ const synth_config sc = {
             .mc_assign = {
                 .ac_name = "Assign",
                 .ac_CC = 104,
-                .ac_dest_count = sizeof LFO1_dests / sizeof LFO1_dests[0],
+                .ac_dest_count = (&LFO1_dests)[1] - LFO1_dests,
                 .ac_dests = LFO1_dests,
             },
             .mc_is_active = NULL,
@@ -172,7 +172,7 @@ const synth_config sc = {
             .mc_assign = {
                 .ac_name = "Assign",
                 .ac_CC = 106,
-                .ac_dest_count = sizeof LFO2_dests / sizeof LFO2_dests[0],
+                .ac_dest_count = (&LFO2_dests)[1] - LFO2_dests,
                 .ac_dests = LFO2_dests,
             },
             .mc_is_active = NULL,
@@ -199,7 +199,7 @@ const synth_config sc = {
                 [K_CTLRS_AMT] = {
                     .kc_name = "Amount",
                     .kc_flags = KCF_NONE,
-                    .kc_CC_msb = 15,
+                    .kc_CC_msb = 0, // XXX assign a CC.
                     .kc_CC_lsb = 0,
                     .kc_LED = 1,
                     .kc_has_button = true,
@@ -210,7 +210,7 @@ const synth_config sc = {
             .mc_assign = {
                 .ac_name = "Assign",
                 .ac_CC = 102,
-                .ac_dest_count = sizeof CTLR_dests / sizeof CTLR_dests[0],
+                .ac_dest_count = (&CTLR_dests)[1] - CTLR_dests,
                 .ac_dests = CTLR_dests,
             },
             .mc_is_active = NULL,
@@ -287,7 +287,7 @@ const synth_config sc = {
                 [K_OSC2_WID] = {
                     .kc_name = "Width",
                     .kc_flags = KCF_NONE,
-                    .kc_CC_msb = 23,
+                    .kc_CC_msb = 24,
                     .kc_CC_lsb = 0,
                     .kc_LED = 1,
                     .kc_has_button = true,
@@ -495,7 +495,7 @@ const synth_config sc = {
             .mc_assign = {
                 .ac_name = "Assign",
                 .ac_CC = 112,
-                .ac_dest_count = sizeof ENV1_dests / sizeof ENV1_dests[0],
+                .ac_dest_count = (&ENV1_dests)[1] - ENV1_dests,
                 .ac_dests = ENV1_dests,
             },
             .mc_is_active = NULL,
@@ -693,11 +693,10 @@ static void end_LED_group(LED_mask *mask)
 static void verify_assign_config(const assign_config *acp)
 {
     for (size_t i = 0; i < acp->ac_dest_count; i++) {
-        
         assert(acp->ac_dests[i].ad_CC_val == i);
     }
 
-    for (size_t i = 1; i < acp->ac_dest_count; i++) {
+    for (size_t i = 2; i < acp->ac_dest_count; i++) {
         const assign_dest *d0p = &acp->ac_dests[i - 1];
         const assign_dest *d1p = &acp->ac_dests[i];
         uint8_t m0 = d0p->ad_module, m1 = d1p->ad_module;
@@ -727,6 +726,7 @@ static void verify_module_config(const module_config *mcp)
     } else
         assert(!mcp->mc_assign.ac_name);
 
+#if 0
     for (size_t i = 0; i < mcp->mc_knob_count; i++) {
         // XXX wart
         if (mcp->mc_SYSEX_addr != M_CTLRS + 1 && i != K_CTLRS_AMT - 1) {
@@ -737,6 +737,18 @@ static void verify_module_config(const module_config *mcp)
                 use_CC(kcp->kc_CC_lsb, mcp->mc_name, kcp->kc_name);
         }
     }
+#else
+    for (size_t i = 0; i < mcp->mc_knob_count; i++) {
+        const knob_config *kcp = &mcp->mc_knobs[i];
+        if (!kcp->kc_name) {
+            assert(mcp->mc_flags & MCF_CTLRS);
+            continue;
+        }
+        use_CC(kcp->kc_CC_msb, mcp->mc_name, kcp->kc_name);
+        if (kcp->kc_CC_lsb)
+            use_CC(kcp->kc_CC_lsb, mcp->mc_name, kcp->kc_name);
+    }
+#endif
     for (size_t i = mcp->mc_knob_count; i < MAX_KNOBS; i++)
         assert(!mcp->mc_knobs[i].kc_name);
 

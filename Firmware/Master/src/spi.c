@@ -120,20 +120,20 @@ static const spi_config spi5_config = {
     .sc_tx_dma   = { DMA2,  DMA_STREAM6, 7 },
 };
 
-static const spi_config *config_map[7] = {
+static const spi_config *config_map[SPI_BUS_RANGE] = {
     NULL,
     &spi1_config,
     NULL,
     &spi3_config,
     &spi4_config,
     &spi5_config,
-    NULL
+    NULL,
 };
 
 static const gpio_pin group_ss_pins[] = {
     { GPIOB, GPIO7, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
 };
-static size_t group_count = sizeof group_ss_pins / sizeof group_ss_pins[0];
+static size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
 
 static void spi_setup_config(const spi_config *config)
 {
@@ -161,7 +161,7 @@ static void spi_setup_config(const spi_config *config)
 void spi_setup(void)
 {
     // Clocks.
-    // rcc_periph_clock_enable(RCC_SPI1);
+    rcc_periph_clock_enable(RCC_SPI1);
     // rcc_periph_clock_enable(RCC_SPI3);
     // rcc_periph_clock_enable(RCC_SPI4);
     rcc_periph_clock_enable(RCC_SPI5);
@@ -171,7 +171,7 @@ void spi_setup(void)
     rcc_periph_clock_enable(RCC_DMA2);
 #endif
     
-    // spi_setup_config(&spi1_config);
+    spi_setup_config(&spi1_config);
     // spi_setup_config(&spi3_config);
     // spi_setup_config(&spi4_config);
     spi_setup_config(&spi5_config);
@@ -210,7 +210,7 @@ void spi_start_transfer(int            spi,
                         uint8_t       *rx_buf,
                         size_t         count)
 {
-    assert(spi <= 6);
+    assert(spi < SPI_BUS_RANGE);
     const spi_config *config = config_map[spi];
     assert(config);
     uint32_t base = config->sc_reg_base;

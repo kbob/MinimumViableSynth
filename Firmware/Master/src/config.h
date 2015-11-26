@@ -5,7 +5,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define MAX_CHOICES       6
 #define MAX_KNOBS         6
+#define MAX_ASSIGNS       1
+#define MAX_PIXELS       (1 + MAX_KNOBS)
 #define MODULE_COUNT     11
 
 // Module and Knob Indices
@@ -85,7 +88,7 @@ typedef enum __attribute__((packed)) module_config_flags {
 
 typedef enum __attribute__((packed)) knob_config_flags {
     KCF_NONE = 0,
-    MCF_PITCH = 1,
+    KCF_PITCH = 1,
 } knob_config_flags;
 
 typedef struct choice_config {

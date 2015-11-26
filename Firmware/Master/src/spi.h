@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define SPI_GROUP_COUNT 3
+#define SPI_BUS_RANGE   7       // bus numbers are [1 .. RANGE)
+#define SPI_BUS_COUNT   4       // four buses actually in use
+
 extern void spi_setup(void);
 
 extern void spi_select_group(int group);

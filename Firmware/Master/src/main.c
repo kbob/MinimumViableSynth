@@ -66,6 +66,8 @@ static void print_buf(const char *label, const uint8_t *buf, size_t n)
     }
     printf("\n");
 }
+
+#if 0
 static void do_spi(void)
 {
     static char seq = '0';
@@ -94,6 +96,44 @@ static void do_spi(void)
     print_buf("received", in, COUNT);
     printf("%ld ms\n", t1 - t0);
 }
+#else
+static void do_spi(void)
+{
+    int grp;
+
+    static spi_buf in[MODULE_COUNT];
+    memset(in, 0, sizeof in);
+
+    for (size_t i = 0; (grp = active_spi_groups(i)) != NO_GROUP; i++) {
+
+        int bus;
+        static spi_buf out[SPI_BUS_COUNT];
+
+        spi_select_group(grp);
+
+        // Start comm with on all buses in group
+        for (size_t j = 0; (bus = active_spi_buses(grp, j)) != NO_BUS; j++) {
+            size_t mod = spi_to_module(grp, bus);
+            // printf("group = %d, bus = %d, module = %d\n", grp, bus, mod);
+            // printf("module = \"%s\"\n", sc.sc_modules[mod].mc_name);
+            memset(in[mod], 0, sizeof in);
+int msec = 0;
+            size_t bytes_out = assemble_outgoing_packet(out[j], msec, mod);
+            spi_start_transfer(bus, out[j], in[mod], bytes_out);
+            print_buf("Send", out[j], bytes_out);
+        }
+
+        // Conclude comm with all buses
+        for (size_t j = 0; (bus = active_spi_buses(grp, j)) != NO_BUS; j++) {
+            spi_finish_transfer(bus);
+            size_t mod = spi_to_module(grp, bus);
+            print_buf("Receive", in[mod], sizeof in[mod]);
+        }
+        spi_deselect_group(grp);
+    }
+    printf("\n");
+}
+#endif
 
 int main()
 {
@@ -104,17 +144,28 @@ int main()
     button_setup();
     spi_setup();
 
-
     printf("Hello, World!\n");
     printf("SYSEX address = %d\n", sc.sc_SYSEX_addr);
     printf("sizeof synth_config = %u\n", sizeof (synth_config));
     printf("sizeof synth_config = %u\n", sizeof (synth_state));
 
+#if 0
+    uint32_t tm1 = system_millis;
+    while (system_millis - tm1 < 100)
+        continue;
+    uint32_t  t0 = system_millis;
+    for (int i = 0; i < 1000000; i++) {
+        spi_buf test;
+        assemble_outgoing_packet(test, system_millis, M_LFO1);
+    }
+    uint32_t t1 = system_millis;
+    printf("%ld msec\n", t1 - t0);
+#endif
+
 #ifndef NDEBUG
     verify_config();
     printf("OK\n");
 #endif
-
 
     uint32_t next_time = system_millis + 1000;
 
@@ -126,8 +177,7 @@ int main()
         // printf("tick\n");
         next_time += 1000;
 
-        if (0)
-            do_spi();
+        do_spi();
 
         // printf("\n");
     }
