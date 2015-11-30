@@ -1,8 +1,9 @@
 #include <Bounce.h>
+#include <DMAChannel.h>
 #include <SPI.h>
 #include <UniWS.h>
 
-#define USE_SERIAL 0
+#define USE_SERIAL 1
 
 // See synth-notes.txt for full information.
     // Teensy     Attributes        Use
@@ -53,6 +54,7 @@ const int DEST_BUTTON_3_pin =  1;
 const int DEST_BUTTON_4_pin =  2;
 const int ASSIGN_BUTTON_pin =  8;
 const int ASSIGN_LED_pin    = 23;
+const int SPI_CS_pin        = 10;
 
 const uint8_t STX = '\02';
 const uint8_t ETX = '\03';
@@ -93,6 +95,8 @@ LED_state c6_led = { CHOICE_LED_6_pin, 0 };
 LED_state a_led  = { ASSIGN_LED_pin,   0 };
 UniWS LED_strand(MAX_PIXELS);
 int analog_values[MAX_ANALOGS];
+DMAChannel SPI_rx_dma;
+DMAChannel SPI_tx_dma;
 
 Bounce *const buttons[] = {
     &c_button,
@@ -124,8 +128,8 @@ static void begin_serial()
     }
 }
 
-#define SERIAL_PRINTF(fmt, ...) \
-    (serial_is_up && Serial.printf((fmt), __VA_ARGS__))
+#define SERIAL_PRINTF(...) \
+    (serial_is_up && Serial.printf(__VA_ARGS__))
 
 #else
 
@@ -135,7 +139,7 @@ static void begin_serial() {}
 
 #endif
 
-void begin_slave()
+static void begin_slave()
 {
     // Route clock.
     SIM_SCGC4 |= SIM_SCGC4_SPI0;
@@ -147,49 +151,55 @@ void begin_slave()
     CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // SCK0  = 13 (PTC5)
 }
 
-size_t do_transfer(uint8_t *receive_buffer, size_t receive_count,
-                   uint8_t *send_buffer,    size_t send_count)
+static size_t do_transfer(uint8_t       *receive_buffer, size_t receive_count,
+                          uint8_t const *send_buffer,    size_t send_count)
 {
     // Disable SPI to reset to idle state.
     SPI0_C1 = 0;
 
     // Initialize SPI
-    SPI0_C1 = SPI_C1_SPE | SPI_C1_CPHA;
-    SPI0_C2 = 0;
+    SPI0_C1 = SPI_C1_CPHA;
+    SPI0_C2 = SPI_C2_RXDMAE | SPI_C2_TXDMAE;
     SPI0_ML = ETX;
-    size_t ri = 0, si = 0;
-    uint32_t t0 = micros();
-    while (ri < receive_count || si < send_count) {
-        uint32_t t1 = micros();
-        if (si > 2 && t1 - t0 > 100) {
-            // timeout
-            break;
-        }
-        uint8_t s = SPI0_S;
-        if (s & SPI_S_SPTEF) {
-            // transmit buffer empty
-            uint8_t c = SYN;
-            if (si < send_count)
-                c = send_buffer[si++];
-            if (si == 3)
-                __disable_irq();
-            SPI0_DL = c;
-            t0 = t1;
-        }
-        if (s & SPI_S_SPRF) {
-            // receive buffer full
-            uint8_t c = SPI0_DL;
-            if (ri < receive_count)
-                receive_buffer[ri++] = c;
-            t0 = t1;
-        }
-    }
-    if (si >= 3)
-        __enable_irq();
+
+    SPI_rx_dma.clearComplete();
+    SPI_rx_dma.disableOnCompletion();
+    SPI_rx_dma.source(SPI0_DL);
+    SPI_rx_dma.destinationBuffer(receive_buffer, receive_count);
+    SPI_rx_dma.triggerAtHardwareEvent(DMAMUX_SOURCE_SPI0_RX);
+    SPI_rx_dma.enable();
+
+    SPI_tx_dma.clearComplete();
+    SPI_tx_dma.disableOnCompletion();
+    SPI_tx_dma.sourceBuffer(send_buffer, send_count);
+    SPI_tx_dma.destination(SPI0_DL);
+    SPI_tx_dma.triggerAtHardwareEvent(DMAMUX_SOURCE_SPI0_TX);
+    SPI_tx_dma.enable();
+
+    // Wait for falling edge on SPI CS pin.
+    while (digitalRead(SPI_CS_pin) != HIGH)
+        continue;
+    while (digitalRead(SPI_CS_pin) == HIGH)
+        continue;
+
+    // Enable SPI.
+    SPI0_C1 |= SPI_C1_SPE;
+
+    // Wait for rising edge on SPI CS pin.
+    while (digitalRead(SPI_CS_pin) != HIGH)
+        continue;
+
+    // Disable SPI.
+    SPI0_C1 = 0;
+
+    // Disable DMA.
+    SPI_rx_dma.disable();
+    SPI_tx_dma.disable();
+    size_t ri = (uint8_t *)SPI_rx_dma.destinationAddress() - receive_buffer;
     return ri;
 }
 
-uint16_t fletcher16(const uint8_t *buf, size_t count)
+static uint16_t fletcher16(const uint8_t *buf, size_t count)
 {
     uint16_t sum0 = 0, sum1 = 0;
     for (size_t i = 0; i < count; i++) {
@@ -207,10 +217,15 @@ namespace {                     // declare these functions in an
                                 // unnamed namespace to thwart the
                                 // stupid Arduino source mangler.
 
-    bool message_valid(const message_buf buf)
+    static bool message_valid(const message_buf buf, size_t count)
     {
+        if (count < 6) {
+            SERIAL_PRINTF("count too short: %u < 6\n", count);
+            return false;
+        }
+
         if (buf[0] != STX) {
-            SERIAL_PRINTF("buf[0] = \\%03o != STX\n", buf[0]);
+            SERIAL_PRINTF("short message: %u < 6\n", count);
             return false;
         }
 
@@ -223,13 +238,18 @@ namespace {                     // declare these functions in an
                           pixel_count, analog_count);
             return false;
         }
-        size_t len = 6;             // minimal message: STX cfg cfg chk chk ETX
+        size_t len = 6;    // minimal message: STX cfg cfg chk chk ETX
         for (uint8_t bit = 1; bit; bit <<= 1)
             if (cfg0 & bit)
-                len++;              // one byte per PWM LED
-        len += 3 * (cfg1 & 0x7);   // three bytes per pixel
+                len++;           // one byte per PWM LED
+        len += 3 * (cfg1 & 0x7); // three bytes per pixel
         if (len > MSG_MAX) {
             SERIAL_PRINTF("len = %d\n", len);
+            return false;
+        }
+
+        if (count < len) {
+            SERIAL_PRINTF("short message: %u < %u\n", count, len);
             return false;
         }
 
@@ -237,18 +257,20 @@ namespace {                     // declare these functions in an
             SERIAL_PRINTF("buf[%d - 1] = \\%03o != ETX\n", len, buf[len - 1]);
             return false;
         }
-        uint16_t chk = (uint16_t)buf[len - 3] << 8 | buf[len - 2];
-        if (chk != fletcher16(buf + 1, len - 4)) {
-            SERIAL_PRINTF("chk = %#x != %#x\n",
-                          chk, fletcher16(buf + 1, len - 3));
+        uint16_t rx_chk = (uint16_t)buf[len - 3] << 8 | buf[len - 2];
+        uint16_t cc_chk = fletcher16(buf + 1, len - 4);
+        if (rx_chk != cc_chk) {
+            SERIAL_PRINTF("chk: got %#x, not %#x\n", rx_chk, cc_chk);
+            SERIAL_PRINTF("    len = %u\n", len);
+            for (int i = 0; i < len; i++)
+                SERIAL_PRINTF("    %3d: %d\n", i, buf[i]);
             return false;
         }
 
-        // SERIAL_PRINTF("valid message received\n");
         return true;
     }
 
-    void update_LED(LED_state *lp, uint8_t new_value)
+    static void update_LED(LED_state *lp, uint8_t new_value)
     {
         if (lp->value != new_value) {
             analogWrite(lp->pin, new_value);
@@ -257,7 +279,7 @@ namespace {                     // declare these functions in an
     }
 };
 
-uint8_t update_analog(uint8_t index, uint8_t **pptr)
+static uint8_t update_analog(uint8_t index, uint8_t **pptr)
 {
     int new_value = analogRead(analog_pins[index]);
     int old_value = analog_values[index];
@@ -312,9 +334,9 @@ void setup()
 
 void loop()
 {
-    do_transfer(recv_buf, MSG_MAX, send_buf, MSG_MAX);
+    size_t receive_count = do_transfer(recv_buf, MSG_MAX, send_buf, MSG_MAX);
     // print_buf("received: ", recv_buf, MSG_MAX);
-    if (!message_valid(recv_buf)) {
+    if (!message_valid(recv_buf, receive_count)) {
         // SERIAL_PRINTF("invalid message received\n");
         memset(send_buf, SYN, sizeof send_buf);
         return;
