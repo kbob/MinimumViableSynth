@@ -129,10 +129,10 @@ static uint16_t fletcher16(const uint8_t *p, size_t count)
     uint16_t sum2 = 0;
     for (size_t i = 0; i < count; i++) {
         sum += p[i];
-        if (sum > 255)
+        if (sum >= 255)
             sum -= 255;
         sum2 += sum;
-        if (sum2 > 255)
+        if (sum2 >= 255)
             sum2 -= 255;
     }
     return sum2 << 8 | sum;
