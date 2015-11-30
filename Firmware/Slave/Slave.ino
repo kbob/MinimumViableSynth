@@ -2,6 +2,8 @@
 #include <SPI.h>
 #include <UniWS.h>
 
+#define USE_SERIAL 0
+
 // See synth-notes.txt for full information.
     // Teensy     Attributes        Use
     //  Pin        (subset)
@@ -104,6 +106,35 @@ const size_t button_count = sizeof buttons / sizeof buttons[0];
 
 message_buf recv_buf, send_buf;
 
+#if USE_SERIAL
+
+static bool serial_is_up;
+
+static void begin_serial()
+{
+    int i;
+    const int limit = 5000000;
+
+    Serial.begin(9600);
+    for (i = 0; i < limit && !Serial; i++)
+        continue;
+    if (i < limit) {
+        Serial.printf("Hello from Slave: %d\n", i);
+        serial_is_up = true;
+    }
+}
+
+#define SERIAL_PRINTF(fmt, ...) \
+    (serial_is_up && Serial.printf((fmt), __VA_ARGS__))
+
+#else
+
+static void begin_serial() {}
+
+#define SERIAL_PRINTF(fmt, ...) (0)
+
+#endif
+
 void begin_slave()
 {
     // Route clock.
@@ -179,7 +210,7 @@ namespace {                     // declare these functions in an
     bool message_valid(const message_buf buf)
     {
         if (buf[0] != STX) {
-            Serial.printf("buf[0] = \\%03o != STX\n", buf[0]);
+            SERIAL_PRINTF("buf[0] = \\%03o != STX\n", buf[0]);
             return false;
         }
 
@@ -188,7 +219,7 @@ namespace {                     // declare these functions in an
         uint8_t pixel_count = cfg1 & 0x07;
         uint8_t analog_count = (cfg1 >> 3) & 0x07;
         if (pixel_count > MAX_PIXELS || analog_count > MAX_ANALOGS) {
-            Serial.printf("pixel_count = %d, analog_count = %d\n",
+            SERIAL_PRINTF("pixel_count = %d, analog_count = %d\n",
                           pixel_count, analog_count);
             return false;
         }
@@ -198,22 +229,22 @@ namespace {                     // declare these functions in an
                 len++;              // one byte per PWM LED
         len += 3 * (cfg1 & 0x7);   // three bytes per pixel
         if (len > MSG_MAX) {
-            Serial.printf("len = %d\n", len);
+            SERIAL_PRINTF("len = %d\n", len);
             return false;
         }
 
         if (buf[len - 1] != ETX) {
-            Serial.printf("buf[%d - 1] = \\%03o != ETX\n", len, buf[len - 1]);
+            SERIAL_PRINTF("buf[%d - 1] = \\%03o != ETX\n", len, buf[len - 1]);
             return false;
         }
         uint16_t chk = (uint16_t)buf[len - 3] << 8 | buf[len - 2];
         if (chk != fletcher16(buf + 1, len - 4)) {
-            Serial.printf("chk = %#x != %#x\n",
+            SERIAL_PRINTF("chk = %#x != %#x\n",
                           chk, fletcher16(buf + 1, len - 3));
             return false;
         }
 
-        Serial.printf("valid message received\n");
+        // SERIAL_PRINTF("valid message received\n");
         return true;
     }
 
@@ -241,31 +272,28 @@ uint8_t update_analog(uint8_t index, uint8_t **pptr)
     return 0;
 }
 
-static void print_buf(const char *label, const uint8_t *buf, size_t count)
-{
-    Serial.printf("%s", label);
-    for (size_t i = 0; i < count; i++) {
-        uint8_t c = buf[i];
-        if (c == STX)
-            Serial.printf(" STX");
-        else if (c == ETX)
-            Serial.printf(" ETX");
-        else if (c == SYN)
-            Serial.printf(" SYN");
-        else if (c >= ' ' && c < '\177')
-            Serial.printf(" %c", c);
-        else
-            Serial.printf(" \\%03o", c);
-    }
-    Serial.printf("\n");
-}
+// static void print_buf(const char *label, const uint8_t *buf, size_t count)
+// {
+//     SERIAL_PRINTF("%s", label);
+//     for (size_t i = 0; i < count; i++) {
+//         uint8_t c = buf[i];
+//         if (c == STX)
+//             SERIAL_PRINTF(" STX");
+//         else if (c == ETX)
+//             SERIAL_PRINTF(" ETX");
+//         else if (c == SYN)
+//             SERIAL_PRINTF(" SYN");
+//         else if (c >= ' ' && c < '\177')
+//             SERIAL_PRINTF(" %c", c);
+//         else
+//             SERIAL_PRINTF(" \\%03o", c);
+//     }
+//     SERIAL_PRINTF("\n");
+// }
 
 void setup()
 {
-    Serial.begin(9600);
-    while (!Serial)
-        continue;
-    Serial.printf("Hello from Slave\n");
+    begin_serial();
 
     pinMode(CHOICE_BUTTON_pin, INPUT_PULLUP);
     pinMode(DEST_BUTTON_1_pin, INPUT_PULLUP);
@@ -285,9 +313,9 @@ void setup()
 void loop()
 {
     do_transfer(recv_buf, MSG_MAX, send_buf, MSG_MAX);
-    print_buf("received: ", recv_buf, MSG_MAX);
+    // print_buf("received: ", recv_buf, MSG_MAX);
     if (!message_valid(recv_buf)) {
-        Serial.printf("invalid message received\n");
+        // SERIAL_PRINTF("invalid message received\n");
         memset(send_buf, SYN, sizeof send_buf);
         return;
     }
@@ -313,6 +341,7 @@ void loop()
             uint8_t r = *rx_ptr++;
             uint8_t g = *rx_ptr++;
             uint8_t b = *rx_ptr++;
+            // SERIAL_PRINTF("  LED %d = %x %x %x\n", i, r, g, b);
             LED_strand.setPixel(i, r, g, b);
         }
         LED_strand.show();
