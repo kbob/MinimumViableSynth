@@ -15,7 +15,7 @@ static volatile uint32_t system_millis;
 
 static void clock_setup(void)
 {
-#if 1                           // XXX slow CPU to slow SPI.
+#if 0
     // CPU = 168 MHz, min SPI =~ 300 KHz
     rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_168MHZ]);
 #elif 0
@@ -158,7 +158,7 @@ int main()
         if ((int32_t)(next_time - system_millis) >= 0)
             continue;
         // printf("tick\n");
-        next_time += 20;
+        next_time += 1;
 
         do_spi();
 

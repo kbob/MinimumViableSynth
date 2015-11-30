@@ -41,12 +41,12 @@
 
 // There are three or four SPI groups.
 // Each group uses all four SPI buses and is enabled by a single slave
-// select line.  The nSS lines are controlled by software
+// select line.  The nSS lines are controlled by software.
 //
 //    Group A: PB7
-//    Group B:  ?
-//    Group C:  ?
-//    Group D:  ?
+//    Group B: PA9
+//    Group C: PA10
+//    Group D: PC8
 
 // Each active DMA requires a controller/stream/channel triple.
 // Each controller/stream can only have a single channel active at a time.
@@ -144,7 +144,7 @@ static void spi_setup_config(const spi_config *config)
 
     // Init SPI
     spi_init_master(config->sc_reg_base,
-                    SPI_CR1_BAUDRATE_FPCLK_DIV_256,
+                    SPI_CR1_BAUDRATE_FPCLK_DIV_32,
                     SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
                     SPI_CR1_CPHA_CLK_TRANSITION_2,
                     SPI_CR1_DFF_8BIT,
