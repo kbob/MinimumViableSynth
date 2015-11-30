@@ -131,7 +131,10 @@ static const spi_config *config_map[SPI_BUS_RANGE] = {
 };
 
 static const gpio_pin group_ss_pins[] = {
-    { GPIOB, GPIO7, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
+    { GPIOB, GPIO7,  GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
+    { GPIOA, GPIO9,  GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
+    { GPIOA, GPIO10, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
+    { GPIOC, GPIO8,  GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
 };
 static size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
 
