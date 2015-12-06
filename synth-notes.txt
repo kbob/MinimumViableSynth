@@ -1,3 +1,343 @@
+2015-12-04
+Event-driven SPI driver
+
+Let's think of an API.
+
+    typedef void SPI_slave_state_handler(const slave_state *, void *user_data);
+
+    void SPI_events_setup(void);
+    void SPI_register_slave_state_handler(SPI_slave_state_handler);
+    void SPI_handle_systick(void);
+    void SPI_report_and_clear_stats(void);
+
+Let's think of an implementation.
+
+    typedef enum SPI_state {
+        SS_IDLE,
+        SS_START,
+        SS_GROUP_DONE,
+    } SPI_state;
+
+    typedef struct SPI_stats {
+        uint32_t ok_count[MOD_COUNT];
+        uint32_t fail_count[MOD_COUNT];
+    } SPI_stats;
+
+    static volatile SPI_state state;
+    static volatile int current_grp_idx;
+    static spi_buf outgoing_packets[MOD_COUNT];
+    static spi_buf incoming_packets[MOD_COUNT];
+    static slave_state slave_states[MOD_COUNT];
+
+  The systick handler would look like this.
+
+    void SPI_handle_systick(void)
+    {
+        if (state == IDLE) {
+            state = START;
+            nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+        }
+    }
+
+  The DMA ISRs would look like this.
+
+    void DMAx_streamy_isr(void)
+    {
+        state.active_bus_mask &= ~(1 << something);
+        if (state.active_bus_mask == 0) {
+            state = GROUP_DONE;
+            nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+        }            
+    }
+
+  The soft interrupt does all the work.
+
+    void exti0_isr(void)
+    {
+        switch (state) {
+
+        case START:
+            current_grp_idx = -1;
+            /* FALLTHRU */
+
+        case GROUP_DONE:
+            int prev_grp_idx = current_grp_idx;
+            current_grp_idx++;
+            int current_grp = active_spi_groups(current_grp_idx);
+            if (current_grp == NO_GROUP) {
+                state = POSTPROCESSING;
+                postprocess_SPI();
+                state = IDLE;
+            } else {
+                state = ACTIVE;
+                start_SPI_group(current_grp);
+            }
+            if (prev_grp_idx != -1) {
+                int prev_grp = active_spi-groups(prev_grp_idx);
+                process_SPI_group(prev_grp);
+            }
+            break;
+
+        case ACTIVE:
+        case IDLE:
+        case POSTPROCESSING:
+            assert(!"Unexpected SPI state");
+            break;
+        }
+    }
+
+    static void start_SPI_group(int grp)
+    {
+        int bus;
+        for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
+            size_t mod_idx = spi_to_module(grp, bus);
+            const module_config *mod = &sc.sc_modules[mod_index];
+            uint32_t msec = system_millis;
+            size_t bytes_out =
+                assemble_outgoing_packet(outgoing_packets[mod_idx],
+                                         msec, mod);
+            spi_start_transfer(bus,
+                               outgoing_packets[mod],
+                               incoming_packets[mod],
+                               bytes_out);
+        }
+    }
+
+    static void process_SPI_group(int grp)
+    {
+        int bus;
+        for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
+            size_t mod_idx = spi_to_module(grp, bus);
+            const module_config *mod = &sc.sc_modules[mod_index];
+            bool ok = parse_incoming_packet(incoming_packets[mod_index],
+                                            sizeof incoming_packets[mod_index],
+                                            mod_index,
+                                            &slave_state[mod_index]);
+ 
+            if (ok)
+                SPI_stats.ok_count[mod_idx]++;
+            else
+                SPI_stats.fail_count[mod_idx]++;
+        }
+    }
+
+    static void postprocess_SPI(void)
+    {
+        for all modules,
+            if choice button,
+                do_choice_button();
+            if assign button,
+                do_assign_button();
+            for all knob buttons,
+                if knob button,
+                    do_knob_button();
+            for all knobs
+                if knob changed,
+                    do_knob();
+    }
+
+----------------------------------
+2015-12-04
+USB-MIDI driver
+
+Let's think of an API.
+
+  void USB_MIDI_setup(void);
+
+  // return 0 on success or an error code
+  int USB_MIDI_enqueue(uint8_t *pkt, size_t size);
+  
+  // This may receive more than one packet at a time.
+  typedef void USB_MIDI_handler(uint8_t *pkt, size_t size, void *user_data);
+
+  // returns the previous handler or NULL if none.
+  USB_MIDI_HANDLER *USB_MIDI_register_handler(USB_MIDI_HANDLER *cb);
+
+And then there could be some "porcelain" layers above that.  First,
+drop the USB_ prefix.  At some point in the future, this could route
+to USB or serial MIDI or both.
+
+  void MIDI_setup(void);
+
+  // return 0 on success or an error code
+  int MIDI_enqueue(uint8_t *pkt, size_t size);
+  
+  typedef void MIDI_handler(uint8_t *pkt, size_t size, void *user_data);
+
+  // returns the previous handler or NULL if none.
+  MIDI_HANDLER *MIDI_register_handler(MIDI_HANDLER *cb);
+
+Then specialize the send function on the various messages types.
+
+  MIDI_send_note_off         (uint8_t channel, uint8_t note, uint8_t velocity);
+  MIDI_send_note_on          (uint8_t channel, uint8_t note, uint8_t velocity);
+  MIDI_send_poly_pressure    (uint8_t channel, uint8_t note, uint8_t pressure);
+  MIDI_send_control_change   (uint8_t channel, uint8_t control, uint8_t value);
+  MIDI_send_program_change   (uint8_t channel, uint8_t patch);
+  MIDI_send_channel_pressure (uint8_t channel, uint8_t value);
+  MIDI_send_pitch_bend       (uint8_t channel, uint16_t value);
+
+  // Message must include leading 0xF0 byte
+  MIDI_send_raw_SYSEX        (uint8_t const *message, size_t size);
+  MIDI_send_MTC_quarter      (uint8_t type, uint8_t values);
+  MIDI_send_song_position    (uint16_t beat);
+  MIDI_send_song_select      (uint8_t song);
+  MIDI_send_tune_request     (void);
+  MIDI_send_timing_clock     (void);
+  MIDI_send_start            (void);
+  MIDI_send_continue         (void);
+  MIDI_send_stop             (void);
+  MIDI_send_active_sensing   (void);
+  MIDI_send_reset            (void);
+    
+And similarly for receive.
+
+  typedef void MIDI_note_off_handler         (uint8_t channel,
+                                              uint8_t note,
+                                              uint8_t velocity);
+
+  typedef void MIDI_note_on_handler          (uint8_t channel,
+                                              uint8_t note,
+                                              uint8_t velocity);
+
+  typedef void MIDI_poly_pressure_handler    (uint8_t channel,
+                                              uint8_t note,
+                                              uint8_t pressure);
+
+  typedef void MIDI_control_change_handler   (uint8_t channel,
+                                              uint8_t control,
+                                              uint8_t value);
+
+  typedef void MIDI_program_change_handler   (uint8_t channel,
+                                              uint8_t patch);
+
+  typedef void MIDI_channel_pressure_handler (uint8_t channel,
+                                              uint8_t value);
+
+  typedef void MIDI_pitch_bend_handler       (uint8_t channel,
+                                              uint16_t value);
+
+  typedef void MIDI_SYSEX_handler            (uint8_t const *message,
+                                              size_t size);
+
+  typedef void MIDI_MTC_quarter_handler      (uint8_t type, uint8_t values);
+
+  typedef void MIDI_song_position_handler    (uint16_t beat);
+
+  typedef void MIDI_song_select_handler      (uint8_t song);
+
+  typedef void MIDI_tune_request_handler     (void);
+
+  typedef void MIDI_timing_clock_handler     (void);
+
+  typedef void MIDI_start_handler            (void);
+
+  typedef void MIDI_continue_handler         (void);
+
+  typedef void MIDI_stop_handler             (void);
+
+  typedef void MIDI_active_sensing_handler   (void);
+
+  typedef void MIDI_reset_handler            (void);
+
+  #define REGISTER_HANDLER(type) \
+    MIDI_##type##_handler MIDI_register_##type##_handler(MIDI_##type##_handler);
+  REGISTER_HANDLER(note_off);
+  REGISTER_HANDLER(note_on);
+  REGISTER_HANDLER(poly_pressure);
+  REGISTER_HANDLER(control_change);
+  REGISTER_HANDLER(program_change);
+  REGISTER_HANDLER(channel_pressure);
+  REGISTER_HANDLER(pitch_bend);
+  REGISTER_HANDLER(SYSEX);
+  REGISTER_HANDLER(MTC_quarter);
+  REGISTER_HANDLER(song_position);
+  REGISTER_HANDLER(song_select);
+  REGISTER_HANDLER(tune_request);
+  REGISTER_HANDLER(timing_clock);
+  REGISTER_HANDLER(start);
+  REGISTER_HANDLER(continue);
+  REGISTER_HANDLER(stop);
+  REGISTER_HANDLER(active_sensing);
+  REGISTER_HANDLER(reset);
+
+And then specialize on all the channel control messages and RPNs and
+NRPNs.  Also specialize on all the Universal SYSEX messages.  But I'm
+going to stop typing here.
+
+----------------------------------
+2015-12-04
+Master Firmware
+
+The firmware on the master MCU (STM32) needs to have some tasks and
+some interrupts.
+
+There are lots of things happening.
+
+    Based on a timer, the master polls the slaves through SPI.
+    Some SPI responses cause MIDI-USB packets to be sent.
+    MIDI-USB packets are received asynchronously.
+    Some MIDI-USB packets causes MIDI-USB replies to be sent.
+    The screen is updated often.
+    The Chrom-Art accelerator has a queue of bit blts to do.
+
+I see a bunch of interrupts and service routines, and three main
+tasks.  From highest to lowest priority,
+
+    Service USB queues
+    Service SPI
+    Draw screen
+
+So the first two can be written as event handlers, and the screen I/O
+will be the background tasks.  Screen I/O will be a mix of CPU drawing
+and DMA2D drawing and compositing.  I don't want to work on the
+graphics until the SPI and USB-MIDI are working well.
+
+Lots of devices interrupt.  These are the ones I can think of.
+
+    systick                NVIC_SYSTICK_IRQ
+    SPI1 TX DMA complete   NVIC_DMA?_STREAM?_IRQ
+    SPI3 TX DMA complete   NVIC_DMA?_STREAM?_IRQ
+    SPI4 TX DMA complete   NVIC_DMA?_STREAM?_IRQ
+    SPI5 TX DMA complete   NVIC_DMA?_STREAM?_IRQ
+    serial                 NVIC_USART1_IRQ
+    USB                    NVIC_OTG_FS_IRQ
+    DMA2D                  NVIC_DMA2D_IRQ
+    LCD refresh            NVIC_LCD_TFT_IRQ
+                           NVIC_LCD_TFT_ERR_IRQ
+    software interrupt     NVIC_EXTI0_IRQ
+    software interrupt     NVIC_EXTI1_IRQ
+
+Software interrupts are easy.  There are 23 of them, and for any one,
+you just create an ISR function like this,
+
+    void exti0_isr(void) { ... }
+
+Initialize it like this.
+
+        nvic_set_priority(NVIC_EXTI0_IRQ, 0xFF);
+        nvic_enable_irq(NVIC_EXTI0_IRQ);
+
+Trigger it like this.
+
+        nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+
+Mutual exclusion is easy using mutices.
+
+    typedef uint32_t mutex_t;
+
+    void mutex_lock(mutex_t *m);
+    uint32_t mutex_trylock(mutex_t *m);
+    void mutex_unlock(mutex_t *m);
+
+
+So, step one.  Write a USB driver that enqueues outgoing packets,
+dispatches on incoming packets.  I think the queue entries can be
+statically allocated.  We can have one for each possible message source?
+
+This means we're going to start decoding MIDI.
+
+----------------------------------
 2015-08-26
 Wiring
 
