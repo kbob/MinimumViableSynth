@@ -147,7 +147,7 @@ static void spi_setup_config(const spi_config *config)
 
     // Init SPI
     spi_init_master(config->sc_reg_base,
-                    SPI_CR1_BAUDRATE_FPCLK_DIV_32,
+                    SPI_CR1_BAUDRATE_FPCLK_DIV_256,
                     SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
                     SPI_CR1_CPHA_CLK_TRANSITION_2,
                     SPI_CR1_DFF_8BIT,

@@ -1,6 +1,7 @@
 #include "spi-proto.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "anim.h"
@@ -36,7 +37,8 @@
 // active_modules is a hack to allow turning the synth on one module at a time.
 static size_t active_modules[] = {
     M_LFO1,
-    M_OSC1,
+    // M_OSC1,
+    // M_OSC2,
 };
 static size_t active_module_count = (&active_modules)[1] - active_modules;
 
@@ -220,4 +222,85 @@ size_t assemble_outgoing_packet(spi_buf packet,
     assert(p - packet <= MAX_SPI_PACKET_SIZE);
 
     return p - packet;
+}
+
+static bool check_buttons(uint8_t button_mask, size_t module_index)
+{
+    const module_config *mod = &sc.sc_modules[module_index];
+    if ((button_mask & SBB_CHOICE) && !mod->mc_has_choice)
+        return false;
+    if ((button_mask & SBB_ASSIGN) && !mod->mc_has_assign)
+        return false;
+    for (size_t i = mod->mc_knob_count; i < MAX_KNOBS; i++)
+        if ((button_mask & 1 << (i + 2)))
+            return false;
+    return true;
+}
+
+static bool check_analog(uint8_t analog_mask, size_t module_index)
+{
+    const module_config *mod = &sc.sc_modules[module_index];
+    for (int i = 0; i < 8; i++)
+        if (analog_mask & (1 << i) &&
+            (i >= mod->mc_knob_count || !mod->mc_knobs[i].kc_has_button))
+            return false;
+    return true;
+}
+
+bool parse_incoming_packet(spi_buf const packet,
+                           size_t        count,
+                           size_t        module_index,
+                           slave_state  *state_out)
+{
+    const module_config *mod = &sc.sc_modules[module_index];
+
+
+    memset(state_out, 0, sizeof *state_out);
+    if (count < 6) {
+        printf("%s: count = %u < 6, fail\n", mod->mc_name, count);
+        return false;
+    }
+    if (packet[0] != STX) {
+        printf("%s: packet[0] = %#o != STX\n", mod->mc_name, packet[0]);
+        return false;
+    }
+    size_t len = 6;             // 6 bytes: STX bmask amask chk chk ETX
+    uint8_t bmask = packet[1];
+    uint8_t amask = packet[2];
+    for (uint8_t i = 1; i; i <<= 1)
+        if (amask & i)
+            len++;
+    if (count < len) {
+        printf("%s: received %u bytes, expected %u bytes\n",
+               mod->mc_name, count, len);
+        return false;
+    }
+    uint16_t rx_chk = (uint16_t)packet[len - 3] << 8 | packet[len - 2];
+    uint16_t cc_chk = fletcher16(packet + 1, len - 4);
+    if (rx_chk != cc_chk) {
+        printf("%s: chk: got %#x, not %#x\n", mod->mc_name, rx_chk, cc_chk);
+        return false;
+    }
+    if (packet[len - 1] != ETX) {
+        printf("%s: packet[%u] = %#o, expected ETX\n",
+               mod->mc_name, len - 1, packet[len - 1]);
+        return false;
+    }
+    if (!check_buttons(bmask, module_index)) {
+        printf("%s: bmask %#x invalid\n", mod->mc_name, bmask);
+        return false;
+    }
+    if (!check_analog(amask, module_index)) {
+        printf("%s: amask %#x invalid\n", mod->mc_name, amask);
+        return false;
+    }
+
+    state_out->ss_is_valid = true;
+    state_out->ss_buttons = bmask;
+    state_out->ss_analog_mask = amask;
+    const uint8_t *p = packet + 3;
+    for (int i = 0; i < MAX_KNOBS; i++)
+        if (amask & (1 << i))
+            state_out->ss_analog_values[i] = *p++;
+    return true;
 }

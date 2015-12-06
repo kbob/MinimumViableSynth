@@ -11,7 +11,12 @@
 #include "state.h"
 #include "usb-midi.h"
 
+#define SPI_POLL_INTERVAL_MSEC 100
+
 static volatile uint32_t system_millis;
+
+static spi_buf outgoing_packets[MODULE_COUNT];
+static spi_buf incoming_packets[MODULE_COUNT];
 
 static void clock_setup(void)
 {
@@ -42,8 +47,10 @@ static void clock_setup(void)
 /* Called when systick fires */
 void sys_tick_handler(void)
 {
-        system_millis++;
+    system_millis++;
 }
+
+#if 0
 
 // static void print_buf(const char *label, const uint8_t *buf, size_t n)
 // {
@@ -65,7 +72,6 @@ void sys_tick_handler(void)
 //     printf("\n");
 // }
 
-#if 0
 static void do_spi(void)
 {
     static char seq = '0';
@@ -94,41 +100,77 @@ static void do_spi(void)
     print_buf("received", in, COUNT);
     printf("%ld ms\n", t1 - t0);
 }
+
 #else
+
 static void do_spi(void)
 {
     int grp;
 
-    static spi_buf in[MODULE_COUNT];
-    memset(in, 0, sizeof in);
+    memset(incoming_packets, 0, sizeof incoming_packets);
 
-    for (size_t i = 0; (grp = active_spi_groups(i)) != NO_GROUP; i++) {
+    for (int i = 0; (grp = active_spi_groups(i)) != NO_GROUP; i++) {
 
         int bus;
-        static spi_buf out[SPI_BUS_COUNT];
 
         spi_select_group(grp);
 
-        // Start comm with on all buses in group
+        // Start comm on all buses in group
         for (size_t j = 0; (bus = active_spi_buses(grp, j)) != NO_BUS; j++) {
             size_t mod = spi_to_module(grp, bus);
-            memset(in[mod], 0, sizeof in);
-            int msec = system_millis;
-            size_t bytes_out = assemble_outgoing_packet(out[j], msec, mod);
-            spi_start_transfer(bus, out[j], in[mod], bytes_out);
-            // print_buf("Send", out[j], bytes_out);
+            if (mod >= MODULE_COUNT) {
+                printf("grp %d bus %d => mod %d\n", grp, bus, mod);
+                continue;
+            }
+            uint32_t msec = system_millis;
+            size_t bytes_out =
+                assemble_outgoing_packet(outgoing_packets[mod], msec, mod);
+            spi_start_transfer(bus,
+                               outgoing_packets[mod],
+                               incoming_packets[mod],
+                               bytes_out);
+            // print_buf("Send", outgoing_packets[mod], bytes_out);
         }
 
         // Conclude comm with all buses
         for (size_t j = 0; (bus = active_spi_buses(grp, j)) != NO_BUS; j++) {
             spi_finish_transfer(bus);
-            // size_t mod = spi_to_module(grp, bus);
-            // print_buf("Receive", in[mod], sizeof in[mod]);
         }
         spi_deselect_group(grp);
+        
+        // Parse all the received packets
+        for (size_t j = 0; (bus = active_spi_buses(grp, j)) != NO_BUS; j++) {
+            size_t mod_index = spi_to_module(grp, bus);
+            const module_config *mod = &sc.sc_modules[mod_index];
+            slave_state state;
+            bool ok = parse_incoming_packet(incoming_packets[mod_index],
+                                            sizeof incoming_packets[mod_index],
+                                            mod_index,
+                                            &state);
+            if (ok) {
+                if (!state.ss_is_valid) {
+                    printf("%s: not valid\n", mod->mc_name);
+                } else {
+                    if (state.ss_buttons)
+                        printf("%s: buttons = %#x\n",
+                               mod->mc_name, state.ss_buttons);
+                    if (state.ss_analog_mask)
+                        for (int j = 0; j < MAX_KNOBS; j++)
+                            if (state.ss_analog_mask & (1 << j))
+                                printf("%s: analog[%d] = %u\n",
+                                       mod->mc_name,
+                                       j, state.ss_analog_values[j]);
+                }
+            } else {
+                for (size_t j = 0; j < sizeof (spi_buf); j++)
+                    printf("%#4o ", incoming_packets[mod_index][j]);
+                printf("\n");
+                printf("incoming packet failed\n\n");
+            }
+        }
     }
-    // printf("\n");
 }
+
 #endif
 
 int main()
@@ -141,28 +183,26 @@ int main()
     spi_setup();
 
     printf("Hello, World!\n");
-    // printf("SYSEX address = %d\n", sc.sc_SYSEX_addr);
-    // printf("sizeof synth_config = %u\n", sizeof (synth_config));
-    // printf("sizeof synth_config = %u\n", sizeof (synth_state));
+    printf("SYSEX address = %d\n", sc.sc_SYSEX_addr);
+    printf("sizeof synth_config = %u\n", sizeof (synth_config));
+    printf("sizeof synth_config = %u\n", sizeof (synth_state));
 
 #ifndef NDEBUG
     verify_config();
     printf("OK\n");
 #endif
 
-    uint32_t next_time = system_millis + 20;
+    uint32_t next_time = system_millis + 1;
 
     while (1) {
         usb_midi_poll();
         button_poll();
+
         if ((int32_t)(next_time - system_millis) >= 0)
             continue;
-        // printf("tick\n");
-        next_time += 1;
+        next_time += SPI_POLL_INTERVAL_MSEC;
 
         do_spi();
-
-        // printf("\n");
     }
     return 0;
 }

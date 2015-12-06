@@ -123,8 +123,8 @@ static void begin_serial()
     for (i = 0; i < limit && !Serial; i++)
         continue;
     if (i < limit) {
-        Serial.printf("Hello from Slave: %d\n", i);
         serial_is_up = true;
+        Serial.printf("Hello from Slave: %d\n", i);
     }
 }
 
@@ -225,7 +225,7 @@ namespace {                     // declare these functions in an
         }
 
         if (buf[0] != STX) {
-            SERIAL_PRINTF("short message: %u < 6\n", count);
+            SERIAL_PRINTF("first byte is %#o, not STX\n", buf[0]);
             return false;
         }
 
@@ -389,7 +389,7 @@ void loop()
     send_buf[0] = STX;
     send_buf[1] = switch_mask;
     send_buf[2] = analog_mask;
-    uint16_t chk = fletcher16(send_buf + 1, (tx_ptr - send_buf) - 1);
+    uint16_t chk = fletcher16(send_buf + 1, tx_ptr - send_buf - 1);
     *tx_ptr++ = chk >> 8;
     *tx_ptr++ = chk & 0xFF;
     *tx_ptr++ = ETX;
