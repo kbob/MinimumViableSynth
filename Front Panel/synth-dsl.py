@@ -86,6 +86,8 @@ LED_blue = (0.3, 0.3, 1.0)
 LED_amber = (1, 0.6, 0.2)
 LED_red = (1, 0.2, 0.2)
 LED_green = (0, 1, 0)
+ENV_COLOR = (1, 0, 1)
+AMP_COLOR = (1, 1, 1)
 
 ASSIGN_RADIUS = 8.5 / 2
 
@@ -427,6 +429,7 @@ def LFO(label, *args, **kwargs):
     return SourceModule(label,
                         (Choice('Waveform', lf_waveforms, color=LED_blue),
                          DestKnob('Speed')),
+                        color=LED_blue,
                         **kwargs)
 
 def Envelope(label, *controls, assign=True, **kwargs):
@@ -435,9 +438,10 @@ def Envelope(label, *controls, assign=True, **kwargs):
                  Knob('Sustain', align=Layout.right),
                  Knob('Release', align=Layout.right))
     if assign:
-        return SourceModule(label, controls, side=Layout.right, **kwargs)
+        return SourceModule(label, controls,
+                            side=Layout.right, color=ENV_COLOR, **kwargs)
     else:
-        return Module(label, controls, **kwargs)
+        return Module(label, controls, color=ENV_COLOR, **kwargs)
 
 ## Front Panel Definition
 
@@ -461,7 +465,8 @@ ctls = SourceModule('Controllers',
                                           'Aftertouch',
                                            'Other'], color=LED_blue),
                      Blank()),
-                    side=Layout.left)
+                    side=Layout.left,
+                    color=LED_blue)
 
 title = Title('Minimum Viable Synth')
 
@@ -472,21 +477,25 @@ osc1 = Module('Oscillator 1',
                DestKnob('Width'),
                DestKnob('Pitch'),
                # Knob('Fine Pitch'),
-               AmountKnob(align=Layout.right)))
+               AmountKnob(align=Layout.right)),
+              color=LED_amber)
 osc2 = Module('Oscillator 2',
               (Choice('Waveform', af_waveforms, color=LED_amber),
                DestKnob('Width'),
                DestKnob('Pitch'),
-               AmountKnob(align=Layout.left)))
+               AmountKnob(align=Layout.left)),
+              color=LED_amber)
 noise = Module('Noise',
                (Choice('Spectrum', ['White', 'Pink', 'Red'], color=LED_amber),
-                AmountKnob()))
+                AmountKnob()),
+               color=LED_amber)
 mixer = Module('Mix',
                (Choice('Operator',
                        ['Mix', 'Ring Mod', 'Hard Sync'],
                        color=LED_green),
                 Blank()),
-               align=Layout.center)
+               align=Layout.center,
+               color=LED_green)
 filter = Module('Filter',
                 (Choice('Type',
                         ['Low Pass', 'High Pass', 'Off'],
@@ -495,12 +504,14 @@ filter = Module('Filter',
                  DestKnob('Resonance', align=Layout.stretch),
                  DestKnob('Drive', align=Layout.right),
                  DestKnob('Key Track', align=Layout.right)),
-                early=True)
+                early=True,
+                color=LED_red)
 # amp = Module('Amp',
 #              (AmountKnob('Master Volume', align=Layout.stretch),),
 #              align=Layout.center, x_pad=5)
 amp = Module('Amp',
              (AmountKnob('Master Volume', align=Layout.stretch),),
+             color=AMP_COLOR,
              x_pad=5)
 
 col0 = PanelColumn([lfo1, lfo2, ctls])
@@ -767,7 +778,6 @@ def state(c):
 
 
 def graphics(c):
-    # if not cutting_guide:
     if do_art:
         with state(c):
             yield c.canvas
@@ -786,14 +796,19 @@ def cutter(c):
 
 
 @contextmanager
-def engraver(c):
+def engraver(c, color=None):
     egv = c.canvas.beginPath()
     yield egv
     if do_art or do_vector or do_engrave:
         with state(c):
-            c.canvas.setFillColorRGB(*(FG if do_art else ENGRAVE_COLOR))
+            fill_color = ENGRAVE_COLOR
+            vec_color = VEC_COLOR
+            if do_art:
+                fill_color = color or FG
+                vec_color = color or FG
+            c.canvas.setFillColorRGB(*fill_color)
             c.canvas.setLineWidth(cut_width)
-            c.canvas.setStrokeColorRGB(*(FG if do_art else VEC_COLOR))
+            c.canvas.setStrokeColorRGB(*vec_color)
             c.canvas.drawPath(egv,
                               stroke=do_art or (do_vector and outline_all),
                               fill=do_art or do_engrave)
@@ -875,10 +890,12 @@ def text_engraver(c, x=0, y=0, fill=0, inverse=False):
     if do_art or do_engrave or do_vector:
         with state(c):
             fill_color = FG if do_art else ENGRAVE_COLOR
+            stroke_color = FG if do_art else VEC_COLOR
             if inverse:
                 fill_color = BG if do_art else INV_ENG_COLOR
-            c.canvas.setFillColorRGB(*(fill_color))
-            c.canvas.setStrokeColorRGB(*(FG if do_art else VEC_COLOR))
+                stroke_color = BG if do_art else VEC_COLOR
+            c.canvas.setFillColorRGB(*fill_color)
+            c.canvas.setStrokeColorRGB(*stroke_color)
             c.canvas.setLineWidth(cut_width)
             c.canvas.drawText(t)
             # t.setTextRenderMode(0)
@@ -1295,7 +1312,7 @@ def render_module(c, box):
         assign_cx0 = left_box.x - box.x - left_box.w / 2 + ASSIGN_RADIUS
         assign_cy = left_box.y - box.y + left_box.h / 2
 
-    with state(c), engraver(c) as egv:
+    with state(c), engraver(c, color=getattr(mod, 'color', None)) as egv:
         c.translate(box.x*mm, box.y*mm)
         outer_dims = dims(x0=outer_x0,
                           y0=margin[1],
