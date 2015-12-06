@@ -1,10 +1,13 @@
 #include "spi.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <libopencm3/cm3/cortex.h>
+#include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/dma.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
@@ -66,8 +69,9 @@
 // There is only one way to activate all eight channels simultaneously
 // without conflicts.  See the spi_config definitions.
 
-#define RX_DMA 1
-#define TX_DMA 1
+#define RX_DMA   1
+#define TX_DMA   1
+#define DMA_INTR 1
 
 typedef struct DMA_channel {
     uint32_t dc_dma;
@@ -136,7 +140,60 @@ static const gpio_pin group_ss_pins[] = {
     { GPIOA, GPIO10, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
     { GPIOC, GPIO8,  GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
 };
-static size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
+static const size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
+
+#if DMA_INTR
+
+static volatile uint8_t active_bus_mask;
+static spi_completion_handler *completion_handler;
+
+static inline void mark_bus_inactive(uint8_t bus)
+{
+    active_bus_mask &= ~(1 << bus);
+    if (active_bus_mask == 0 && completion_handler)
+        (*completion_handler)();
+}
+
+static inline void mark_bus_active(uint8_t bus)
+{
+    bool interrupts_are_masked = cm_is_masked_interrupts();
+    cm_disable_interrupts();
+
+    active_bus_mask |= 1 << bus;
+
+    if (!interrupts_are_masked)
+        cm_enable_interrupts();
+}
+
+void dma2_stream2_isr(void)
+{
+    dma_clear_interrupt_flags(DMA2, DMA_STREAM2, DMA_TCIF);
+    uint8_t bus = 1;
+    mark_bus_inactive(bus);
+}
+
+void dma1_stream0_isr(void)
+{
+    dma_clear_interrupt_flags(DMA1, DMA_STREAM0, DMA_TCIF);
+    uint8_t bus = 3;
+    mark_bus_inactive(bus);
+}
+
+void dma2_stream0_isr(void)
+{
+    dma_clear_interrupt_flags(DMA2, DMA_STREAM0, DMA_TCIF);
+    uint8_t bus = 4;
+    mark_bus_inactive(bus);
+}
+
+void dma2_stream5_isr(void)
+{
+    dma_clear_interrupt_flags(DMA2, DMA_STREAM5, DMA_TCIF);
+    uint8_t bus = 5;
+    mark_bus_inactive(bus);
+}
+
+#endif
 
 static void spi_setup_config(const spi_config *config)
 {
@@ -165,18 +222,25 @@ void spi_setup(void)
 {
     // Clocks.
     rcc_periph_clock_enable(RCC_SPI1);
-    // rcc_periph_clock_enable(RCC_SPI3);
-    // rcc_periph_clock_enable(RCC_SPI4);
+    rcc_periph_clock_enable(RCC_SPI3);
+    rcc_periph_clock_enable(RCC_SPI4);
     rcc_periph_clock_enable(RCC_SPI5);
 
 #if RX_DMA || TX_DMA
-    // rcc_periph_clock_enable(RCC_DMA1);
+    rcc_periph_clock_enable(RCC_DMA1);
     rcc_periph_clock_enable(RCC_DMA2);
+
+  #if DMA_INTR
+    nvic_enable_irq(NVIC_DMA2_STREAM2_IRQ);
+    nvic_enable_irq(NVIC_DMA1_STREAM0_IRQ);
+    nvic_enable_irq(NVIC_DMA2_STREAM0_IRQ);
+    nvic_enable_irq(NVIC_DMA2_STREAM5_IRQ);
+  #endif
 #endif
     
     spi_setup_config(&spi1_config);
-    // spi_setup_config(&spi3_config);
-    // spi_setup_config(&spi4_config);
+    spi_setup_config(&spi3_config);
+    spi_setup_config(&spi4_config);
     spi_setup_config(&spi5_config);
 
     // Configure nSS pins
@@ -186,10 +250,18 @@ void spi_setup(void)
         gpio_set(gp->gp_port, gp->gp_pin);
     }
 
-    // Hold pins PC1 and PC2 high to disable SPI on LCD and MEMS device.
+    // Hold pins PC1 and PC2 permanently high to disable SPI on LCD
+    // and MEMS device.
     gpio_mode_setup(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO1 | GPIO2);
     gpio_set(GPIOC, GPIO1);
     gpio_set(GPIOC, GPIO2);
+}
+
+void spi_register_completion_handler(spi_completion_handler *handler)
+{
+#if DMA_INTR
+    completion_handler = handler;
+#endif
 }
 
 void spi_select_group(int group)
@@ -221,6 +293,9 @@ void spi_start_transfer(int            spi,
     uint32_t rx_dma = config->sc_rx_dma.dc_dma;
     uint8_t rx_stream = config->sc_rx_dma.dc_stream;
     uint32_t rx_channel = config->sc_rx_dma.dc_channel;
+  #if DMA_INTR
+    mark_bus_active(spi);
+  #endif
 #endif
 #if TX_DMA
     uint32_t tx_dma = config->sc_tx_dma.dc_dma;
@@ -274,7 +349,11 @@ void spi_start_transfer(int            spi,
     dma_disable_double_buffer_mode(rx_dma, rx_stream);
     dma_disable_transfer_error_interrupt(rx_dma, rx_stream);
     dma_disable_half_transfer_interrupt(rx_dma, rx_stream);
+#if DMA_INTR
+    dma_enable_transfer_complete_interrupt(rx_dma, rx_stream);
+#else
     dma_disable_transfer_complete_interrupt(rx_dma, rx_stream);
+#endif
     dma_disable_direct_mode_error_interrupt(rx_dma, rx_stream);
     dma_disable_fifo_error_interrupt(rx_dma, rx_stream);
 

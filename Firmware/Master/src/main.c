@@ -9,11 +9,10 @@
 #include "spi.h"
 #include "spi-proto.h"
 #include "state.h"
+#include "systick.h"
 #include "usb-midi.h"
 
 #define SPI_POLL_INTERVAL_MSEC 100
-
-static volatile uint32_t system_millis;
 
 static spi_buf outgoing_packets[MODULE_COUNT];
 static spi_buf incoming_packets[MODULE_COUNT];
@@ -34,20 +33,6 @@ static void clock_setup(void)
     cs.apb2_frequency = 168000000 / 4;
     rcc_clock_setup_hse_3v3(&cs);
 #endif
-
-    /* clock rate / 168000 to get 1mS interrupt rate */
-    systick_set_reload(168000);
-    systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
-    systick_counter_enable();
-
-    /* this done last */
-    systick_interrupt_enable();
-}
-
-/* Called when systick fires */
-void sys_tick_handler(void)
-{
-    system_millis++;
 }
 
 #if 0
@@ -103,6 +88,13 @@ static void do_spi(void)
 
 #else
 
+static volatile uint32_t completion_count;
+
+static void SPI_completion_handler()
+{
+    completion_count++;
+}
+
 static void do_spi(void)
 {
     int grp;
@@ -137,6 +129,7 @@ static void do_spi(void)
             spi_finish_transfer(bus);
         }
         spi_deselect_group(grp);
+        printf("completion_count = %lu\n", completion_count);
         
         // Parse all the received packets
         for (size_t j = 0; (bus = active_spi_buses(grp, j)) != NO_BUS; j++) {
@@ -176,16 +169,15 @@ static void do_spi(void)
 int main()
 {
     clock_setup();
+    systick_setup(168000000);
     console_setup();
     console_stdio_setup();
     usb_midi_setup();
     button_setup();
     spi_setup();
+    spi_register_completion_handler(SPI_completion_handler);
 
     printf("Hello, World!\n");
-    printf("SYSEX address = %d\n", sc.sc_SYSEX_addr);
-    printf("sizeof synth_config = %u\n", sizeof (synth_config));
-    printf("sizeof synth_config = %u\n", sizeof (synth_state));
 
 #ifndef NDEBUG
     verify_config();

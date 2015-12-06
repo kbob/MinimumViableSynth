@@ -41,7 +41,7 @@ Let's think of an implementation.
 
   The DMA ISRs would look like this.
 
-    void DMAx_streamy_isr(void)
+    void dmaX_streamY_isr(void)
     {
         state.active_bus_mask &= ~(1 << something);
         if (state.active_bus_mask == 0) {
