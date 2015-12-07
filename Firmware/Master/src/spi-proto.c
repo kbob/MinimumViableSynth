@@ -4,43 +4,53 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <libopencm3/cm3/cortex.h>
+#include <libopencm3/cm3/nvic.h>
+
 #include "anim.h"
 #include "config.h"
 #include "spi.h"
 #include "state.h"
+#include "systick.h"
 
-// MOSI message format
-//
-//   STX : 1 byte
-//   config 0 : 1 byte
-//     bit 0:      c1 = nonzero if choice one lit
-//     bit 1:      c2 = nonzero if choice two lit
-//     bit 2:      c3 = nonzero if choice three lit
-//     bit 3:      c4 = nonzero if choice four lit
-//     bit 4:      c5 = nonzero if choice five lit
-//     bit 5:      c6 = nonzero if choice six lit
-//     bit 6:       (not used)
-//     bit 7:      ap = nonzero if assign LED lit
-//   config 1: 1 byte
-//     bits 0-2:   np = number of pixels
-//     bits 3-5:   na = number of analog inputs
-//     bits 6-7:   unused
-//   choice LED pwm: 1 byte per lit choice
-//   assign LED pwm: 1 byte
-//   pixels: 3 * np bytes
-//     1st: title
-//     2nd - np'th: knobs
-//     red, green, blue order
-//   checksum : 2 bytes
-//   ETX : 1 byte
+#define MAX_SPI_PACKET_SIZE 32
+
+static const uint8_t STX      = '\02';
+static const uint8_t ETX      = '\03';
+static const uint8_t SYN      = '\26';
 
 // active_modules is a hack to allow turning the synth on one module at a time.
-static size_t active_modules[] = {
+static const size_t active_modules[] = {
     M_LFO1,
     // M_OSC1,
     // M_OSC2,
 };
-static size_t active_module_count = (&active_modules)[1] - active_modules;
+static const size_t active_module_count = (&active_modules)[1] - active_modules;
+
+typedef uint8_t spi_buf[MAX_SPI_PACKET_SIZE];
+
+typedef enum SPI_state {
+    SS_IDLE,
+    SS_START,
+    SS_ACTIVE,
+    SS_GROUP_DONE,
+    SS_POSTPROCESSING,
+} SPI_state;
+
+typedef struct SPI_stats {
+    uint32_t ok_count[MODULE_COUNT];
+    uint32_t fail_count[MODULE_COUNT];
+    uint32_t skip_count;
+} SPI_stats;
+
+static volatile SPI_state state;
+static volatile int current_grp_idx;
+static spi_buf outgoing_packets[MODULE_COUNT];
+static spi_buf incoming_packets[MODULE_COUNT];
+static slave_state slave_states[MODULE_COUNT];
+static SPI_stats stats;
+static SPI_slave_state_handler *slave_state_handler;
+static void *handler_data;
 
 static void module_to_spi(size_t   module_index,
                           uint8_t *spi_group_out,
@@ -140,22 +150,34 @@ static uint16_t fletcher16(const uint8_t *p, size_t count)
     return sum2 << 8 | sum;
 }
 
-// Need:
-//   choice value, number of choices
-//   assign value, whether assign exists
-//   pixel count
-//   pixel values
-//     module: ms_LED()
-//     knobs:  ks_LED()
-//   knob count
-//   choice PWM value
-//   assign PWM value
+// MOSI message format
 //
-// Define some convenience routines to calculate the LED values.
+//   STX : 1 byte
+//   config 0 : 1 byte
+//     bit 0:      c1 = nonzero if choice one lit
+//     bit 1:      c2 = nonzero if choice two lit
+//     bit 2:      c3 = nonzero if choice three lit
+//     bit 3:      c4 = nonzero if choice four lit
+//     bit 4:      c5 = nonzero if choice five lit
+//     bit 5:      c6 = nonzero if choice six lit
+//     bit 6:       (not used)
+//     bit 7:      ap = nonzero if assign LED lit
+//   config 1: 1 byte
+//     bits 0-2:   np = number of pixels
+//     bits 3-5:   na = number of analog inputs
+//     bits 6-7:   unused
+//   choice LED pwm: 1 byte per lit choice
+//   assign LED pwm: 1 byte
+//   pixels: 3 * np bytes
+//     1st: title
+//     2nd - np'th: knobs
+//     red, green, blue order
+//   checksum : 2 bytes
+//   ETX : 1 byte
 
-size_t assemble_outgoing_packet(spi_buf packet,
-                                uint32_t msec,
-                                size_t module_index)
+static size_t assemble_outgoing_packet(spi_buf packet,
+                                       uint32_t msec,
+                                       size_t module_index)
 {
     const module_config *mcp = &sc.sc_modules[module_index];
     const module_state *msp = &ss.ss_modules[module_index];
@@ -247,15 +269,33 @@ static bool check_analog(uint8_t analog_mask, size_t module_index)
     return true;
 }
 
-bool parse_incoming_packet(spi_buf const packet,
-                           size_t        count,
-                           size_t        module_index,
-                           slave_state  *state_out)
+// MISO message format
+//
+//   STX : 1 byte
+//   switches: 1 byte
+//     bit 0: c0 clicked
+//     bit 1: assign clicked
+//     bit 2: destination button 1 clicked
+//     bit 3: destination button 2 clicked
+//     bit 4: destination button 3 clicked
+//     bit 5: destination button 4 clicked
+//   analog: 1 byte
+//     bit 0: analog 1 changed
+//     bit 1: analog 2 changed
+//     bit 2: analog 3 changed
+//     bit 3: analog 4 changed
+//     bit 4: analog 5 changed
+//   analog values:  1 byte per changed value
+//   checksum : 2 bytes
+//   ETX : 1 byte
+
+static bool parse_incoming_packet(spi_buf const packet,
+                                  size_t        count,
+                                  size_t        module_index,
+                                  slave_state  *state_out)
 {
     const module_config *mod = &sc.sc_modules[module_index];
 
-
-    memset(state_out, 0, sizeof *state_out);
     if (count < 6) {
         printf("%s: count = %u < 6, fail\n", mod->mc_name, count);
         return false;
@@ -304,3 +344,151 @@ bool parse_incoming_packet(spi_buf const packet,
             state_out->ss_analog_values[i] = *p++;
     return true;
 }
+
+static void start_SPI_group(int grp)
+{
+    spi_select_group(grp);
+    int bus;
+    for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
+        size_t mod_idx = spi_to_module(grp, bus);
+        // const module_config *mod = &sc.sc_modules[mod_idx];
+        uint32_t msec = system_millis;
+        size_t bytes_out =
+            assemble_outgoing_packet(outgoing_packets[mod_idx], msec, mod_idx);
+        spi_start_transfer(bus,
+                           outgoing_packets[mod_idx],
+                           incoming_packets[mod_idx],
+                           bytes_out);
+    }
+}
+
+static void process_SPI_group(int grp)
+{
+    int bus;
+    for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++)
+        spi_finish_transfer(bus);
+    spi_deselect_group(grp);
+    for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
+        size_t mod_idx = spi_to_module(grp, bus);
+        bool ok = parse_incoming_packet(incoming_packets[mod_idx],
+                                        sizeof incoming_packets[mod_idx],
+                                        mod_idx,
+                                        &slave_states[mod_idx]);
+        if (ok)
+            stats.ok_count[mod_idx]++;
+        else
+            stats.fail_count[mod_idx]++;
+    }
+}
+
+static void postprocess_SPI(void)
+{
+    if (slave_state_handler) {
+        for (size_t i = 0; i < MODULE_COUNT; i++) {
+            const slave_state *ss = &slave_states[i];
+            if (ss->ss_is_valid)
+                (*slave_state_handler)(i, &slave_states[i], handler_data);
+        }
+    }
+}
+
+volatile uint32_t ext0;
+
+void exti0_isr(void)
+{
+    ext0++;
+    // printf("%s:%d: state = %d\n", __func__, __LINE__, (int)state);
+    switch (state) {
+
+    case SS_START:
+        memset(outgoing_packets, 0, sizeof outgoing_packets);
+        memset(incoming_packets, 0, sizeof incoming_packets);
+        memset(slave_states, 0, sizeof slave_states);
+        current_grp_idx = -1;
+        /* FALLTHRU */
+
+    case SS_GROUP_DONE:;
+        int prev_grp_idx = current_grp_idx;
+        current_grp_idx++;
+        int current_grp = active_spi_groups(current_grp_idx);
+        // printf("pgi = %d, cgi = %d, cg = %d\n",
+        //        prev_grp_idx, current_grp_idx, current_grp);
+        if (current_grp == NO_GROUP) {
+            state = SS_POSTPROCESSING;
+            postprocess_SPI();
+            state = SS_IDLE;
+        } else {
+            state = SS_ACTIVE;
+            start_SPI_group(current_grp);
+        }
+        if (prev_grp_idx != -1) {
+            int prev_grp = active_spi_groups(prev_grp_idx);
+            process_SPI_group(prev_grp);
+        }
+        break;
+
+    case SS_ACTIVE:
+    case SS_IDLE:
+    case SS_POSTPROCESSING:
+        // printf("state = %d\n", (int)state);
+        assert(!"Unexpected SPI state");
+        break;
+    }
+}
+
+static void handle_systick(uint32_t millis)
+{
+    if (state == SS_IDLE) {
+        state = SS_START;
+        nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+    } else {
+        stats.skip_count++;
+    }
+}
+
+static void handle_SPI_completion(void)
+{
+    state = SS_GROUP_DONE;
+    nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+}
+
+void SPI_proto_setup(void)
+{
+    spi_register_completion_handler(handle_SPI_completion);
+    state = SS_IDLE;
+    nvic_set_priority(NVIC_EXTI0_IRQ, 0xFF);
+    nvic_enable_irq(NVIC_EXTI0_IRQ);
+    register_systick_handler(handle_systick);
+}
+
+void SPI_proto_register_slave_state_handler(SPI_slave_state_handler *handler,
+                                            void *user_data)
+{
+    slave_state_handler = handler;
+    handler_data = user_data;
+}
+
+void SPI_report_and_clear_stats(void)
+{
+    bool interrupts_are_masked = cm_is_masked_interrupts();
+    cm_disable_interrupts();
+
+    SPI_stats tmp = stats;
+    memset(&stats, 0, sizeof stats);
+
+    if (!interrupts_are_masked)
+        cm_enable_interrupts();
+
+    printf("   OK  fail module\n");
+    for (size_t i = 0; i < MODULE_COUNT; i++) {
+        uint32_t ok = tmp.ok_count[i];
+        uint32_t fail = tmp.fail_count[i];
+        if (!ok && !fail)
+            continue;
+        const char *mod_name = sc.sc_modules[i].mc_name;
+        printf("%5lu %5lu %s\n", ok, fail, mod_name);
+    }
+    printf("skipped %lu\n", tmp.skip_count);
+    printf("\n");
+}
+

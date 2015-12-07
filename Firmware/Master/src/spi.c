@@ -165,8 +165,12 @@ static inline void mark_bus_active(uint8_t bus)
         cm_enable_interrupts();
 }
 
+volatile uint32_t d2s2, d1s0, d2s0, d2s5;
+
 void dma2_stream2_isr(void)
 {
+    // printf("d2s2\n");
+    d2s2++;
     dma_clear_interrupt_flags(DMA2, DMA_STREAM2, DMA_TCIF);
     uint8_t bus = 1;
     mark_bus_inactive(bus);
@@ -174,6 +178,7 @@ void dma2_stream2_isr(void)
 
 void dma1_stream0_isr(void)
 {
+    d1s0++;
     dma_clear_interrupt_flags(DMA1, DMA_STREAM0, DMA_TCIF);
     uint8_t bus = 3;
     mark_bus_inactive(bus);
@@ -181,6 +186,7 @@ void dma1_stream0_isr(void)
 
 void dma2_stream0_isr(void)
 {
+    d2s0++;
     dma_clear_interrupt_flags(DMA2, DMA_STREAM0, DMA_TCIF);
     uint8_t bus = 4;
     mark_bus_inactive(bus);
@@ -188,6 +194,7 @@ void dma2_stream0_isr(void)
 
 void dma2_stream5_isr(void)
 {
+    d2s5++;
     dma_clear_interrupt_flags(DMA2, DMA_STREAM5, DMA_TCIF);
     uint8_t bus = 5;
     mark_bus_inactive(bus);

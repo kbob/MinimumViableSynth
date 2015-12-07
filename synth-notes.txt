@@ -1,3 +1,53 @@
+2015-12-05
+
+There is another piece needed.
+
+There is a module that handles HID events from the SPI-proto driver.
+Call it Giraffe for now.
+
+    Giraffe_SPI_handler(slave_status const *ss)
+    {
+        if choice button,
+            increment choice according to rules;
+            send MIDI CC message;
+        if assign button,
+            decide what it means;
+            ...
+        for each knob button,
+            decide what it means;
+            ...
+        for each knob,
+            ...
+    }
+
+This is where double clicks and more complex sequences are processed.
+
+Either Giraffe or another module, Gazelle, handles incoming USB
+requests.
+
+    Gazelle_MIDI_SYSEX_handler(...)
+    {
+        if message is set_preset,
+            ...;
+        if message is get_preset,
+            ...;
+        // or something.  I don't really understand what SYSEX
+        // messages are needed yet.
+    
+    }
+
+Names for Giraffe?  Maybe it's the HID module or Gestures module?
+In a traditional widget framework, it would be buried inside some
+widget's implementation.  What does IOS call the thing that turns
+raw touchscreen data into gestures?  (answer: Gesture Recognizers)
+
+Gazelle is the high level MIDI responder.  MIDI foo.  MIDI manager.
+MIDI executive (-:.  Or something.
+
+When the touchscreen is implemented, I'll need a real gesture
+recognizer.
+
+----------------------------------
 2015-12-04
 Event-driven SPI driver
 
@@ -124,16 +174,7 @@ Let's think of an implementation.
     static void postprocess_SPI(void)
     {
         for all modules,
-            if choice button,
-                do_choice_button();
-            if assign button,
-                do_assign_button();
-            for all knob buttons,
-                if knob button,
-                    do_knob_button();
-            for all knobs
-                if knob changed,
-                    do_knob();
+            (*slave_state_handler)(&slave_states[i]);
     }
 
 ----------------------------------

@@ -2,7 +2,8 @@
 
 #include <assert.h>
 
-void MIDI_setup(void);
+void MIDI_setup(void)
+{}
 
 // copies message to internal queue.
 // returns 0 on success or an error code
@@ -42,7 +43,6 @@ void MIDI_send_raw_SYSEX(uint8_t const *message, size_t size)
     assert(message[0] == 0xF0);
     assert(message[size - 1] == 0xF7);
 }
-
 
 void MIDI_send_MTC_quarter(uint8_t type, uint8_t values);
 

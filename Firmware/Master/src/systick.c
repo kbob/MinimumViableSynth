@@ -21,8 +21,6 @@ void systick_setup(uint32_t cpu_freq)
     systick_set_reload(cpu_freq / 1000);
     systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
     systick_counter_enable();
-
-    // Do this last.
     systick_interrupt_enable();
 }
 
