@@ -8,6 +8,7 @@
 #include "midi.h"
 #include "spi.h"
 #include "spi-proto.h"
+#include "spi-responder.h"
 #include "state.h"
 #include "systick.h"
 #include "usb-midi.h"
@@ -43,6 +44,7 @@ int main()
     button_setup();
     spi_setup();
     SPI_proto_setup();
+    SPI_responder_setup();
 
     printf("Minimum Viable Firmware\n");
 

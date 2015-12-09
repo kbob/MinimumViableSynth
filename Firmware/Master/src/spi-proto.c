@@ -51,7 +51,7 @@ typedef struct SPI_stats {
     uint32_t skip_count;
 } SPI_stats;
 
-static volatile SPI_state state;
+static volatile SPI_state sp_state;
 static volatile int current_grp_idx;
 static spi_buf outgoing_packets[MODULE_COUNT];
 static spi_buf incoming_packets[MODULE_COUNT];
@@ -202,7 +202,8 @@ static size_t assemble_outgoing_packet(spi_buf packet,
 
     // Collect the info.
     if (mcp->mc_has_choice) {
-        cfg0 |= 1 << msp->ms_choice.cs_value;
+        uint8_t first = 6 - mcp->mc_choice.cc_count;
+        cfg0 |= 1 << (first + msp->ms_choice.cs_value);
         pwm[pwm_count++] = anim_choice_brightness(msec, module_index);
     }
 
@@ -400,9 +401,10 @@ static void postprocess_SPI(void)
     }
 }
 
+// This is the main event handler for the SPI proto task.
 void exti0_isr(void)
 {
-    switch (state) {
+    switch (sp_state) {
 
     case SS_START:
         memset(outgoing_packets, 0, sizeof outgoing_packets);
@@ -412,20 +414,23 @@ void exti0_isr(void)
         /* FALLTHRU */
 
     case SS_GROUP_DONE:;
+        // N.B., we start the next SPI group running before
+        // we parse the reply messages from the current group.
         int prev_grp_idx = current_grp_idx;
         current_grp_idx++;
         int current_grp = active_spi_groups(current_grp_idx);
-        if (current_grp == NO_GROUP) {
-            state = SS_POSTPROCESSING;
-            postprocess_SPI();
-            state = SS_IDLE;
-        } else {
-            state = SS_ACTIVE;
+        if (current_grp != NO_GROUP) {
+            sp_state = SS_ACTIVE;
             start_SPI_group(current_grp);
         }
         if (prev_grp_idx != -1) {
             int prev_grp = active_spi_groups(prev_grp_idx);
             process_SPI_group(prev_grp);
+        }
+        if (current_grp == NO_GROUP) {
+            sp_state = SS_POSTPROCESSING;
+            postprocess_SPI();
+            sp_state = SS_IDLE;
         }
         break;
 
@@ -439,8 +444,8 @@ void exti0_isr(void)
 
 static void handle_systick(uint32_t millis)
 {
-    if (state == SS_IDLE) {
-        state = SS_START;
+    if (sp_state == SS_IDLE) {
+        sp_state = SS_START;
         nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
     } else {
         stats.skip_count++;
@@ -449,14 +454,15 @@ static void handle_systick(uint32_t millis)
 
 static void handle_SPI_completion(void)
 {
-    state = SS_GROUP_DONE;
+    assert(sp_state == SS_ACTIVE);
+    sp_state = SS_GROUP_DONE;
     nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
 }
 
 void SPI_proto_setup(void)
 {
     spi_register_completion_handler(handle_SPI_completion);
-    state = SS_IDLE;
+    sp_state = SS_IDLE;
     nvic_set_priority(NVIC_EXTI0_IRQ, 0xFF);
     nvic_enable_irq(NVIC_EXTI0_IRQ);
     register_systick_handler(handle_systick);

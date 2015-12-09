@@ -6,6 +6,8 @@
 
 // MIDI - plumbing
 
+static const uint8_t MIDI_default_channel = 0;
+
 typedef void MIDI_handler(uint8_t *pkt, size_t size, void *user_data);
 
 extern void MIDI_setup(void);

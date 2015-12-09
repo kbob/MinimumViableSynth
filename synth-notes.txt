@@ -34,6 +34,7 @@ requests.
         // or something.  I don't really understand what SYSEX
         // messages are needed yet.
     
+        // We probably want to handle Program Change messages too.
     }
 
 Names for Giraffe?  Maybe it's the HID module or Gestures module?

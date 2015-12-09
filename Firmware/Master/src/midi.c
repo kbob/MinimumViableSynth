@@ -1,6 +1,9 @@
 #include "midi.h"
 
 #include <assert.h>
+#include <stdio.h>              // XXX
+
+#define ASSERT_VALID_CHANNEL(channel) (assert((uint8_t)(channel) < 16))
 
 // MIDI - plumbing
 
@@ -35,7 +38,12 @@ void MIDI_send_poly_pressure(uint8_t channel, uint8_t note, uint8_t pressure)
 {}
 
 void MIDI_send_control_change(uint8_t channel, uint8_t control, uint8_t value)
-{}
+{
+    ASSERT_VALID_CHANNEL(channel);
+    assert(control < 128);
+    assert(value < 128);
+    printf("CC %d %d\n", control, value);
+}
 
 void MIDI_send_program_change(uint8_t channel, uint8_t patch)
 {}
