@@ -1,7 +1,6 @@
 #include "console.h"
 
 #include <stdio.h>
-//#include <stdlib.h>
 
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>

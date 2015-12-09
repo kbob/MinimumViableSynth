@@ -726,21 +726,10 @@ static void verify_module_config(const module_config *mcp)
     } else
         assert(!mcp->mc_assign.ac_name);
 
-#if 0
-    for (size_t i = 0; i < mcp->mc_knob_count; i++) {
-        // XXX wart
-        if (mcp->mc_SYSEX_addr != M_CTLRS + 1 && i != K_CTLRS_AMT - 1) {
-            const knob_config *kcp = &mcp->mc_knobs[i];
-            assert(kcp->kc_name);
-            use_CC(kcp->kc_CC_msb, mcp->mc_name, kcp->kc_name);
-            if (kcp->kc_CC_lsb)
-                use_CC(kcp->kc_CC_lsb, mcp->mc_name, kcp->kc_name);
-        }
-    }
-#else
     for (size_t i = 0; i < mcp->mc_knob_count; i++) {
         const knob_config *kcp = &mcp->mc_knobs[i];
         if (!kcp->kc_name) {
+            // The Controllers module has a missing knob.
             assert(mcp->mc_flags & MCF_CTLRS);
             continue;
         }
@@ -748,7 +737,7 @@ static void verify_module_config(const module_config *mcp)
         if (kcp->kc_CC_lsb)
             use_CC(kcp->kc_CC_lsb, mcp->mc_name, kcp->kc_name);
     }
-#endif
+
     for (size_t i = mcp->mc_knob_count; i < MAX_KNOBS; i++)
         assert(!mcp->mc_knobs[i].kc_name);
 

@@ -2,6 +2,8 @@
 
 #include <assert.h>
 
+// MIDI - plumbing
+
 void MIDI_setup(void)
 {}
 
@@ -23,19 +25,26 @@ MIDI_handler *MIDI_register_handler(MIDI_handler *cb)
 
 // MIDI_send functions for all message types
 
-void MIDI_send_note_off(uint8_t channel, uint8_t note, uint8_t velocity);
+void MIDI_send_note_off(uint8_t channel, uint8_t note, uint8_t velocity)
+{}
 
-void MIDI_send_note_on(uint8_t channel, uint8_t note, uint8_t velocity);
+void MIDI_send_note_on(uint8_t channel, uint8_t note, uint8_t velocity)
+{}
 
-void MIDI_send_poly_pressure(uint8_t channel, uint8_t note, uint8_t pressure);
+void MIDI_send_poly_pressure(uint8_t channel, uint8_t note, uint8_t pressure)
+{}
 
-void MIDI_send_control_change(uint8_t channel, uint8_t control, uint8_t value);
+void MIDI_send_control_change(uint8_t channel, uint8_t control, uint8_t value)
+{}
 
-void MIDI_send_program_change(uint8_t channel, uint8_t patch);
+void MIDI_send_program_change(uint8_t channel, uint8_t patch)
+{}
 
-void MIDI_send_channel_pressure(uint8_t channel, uint8_t value);
+void MIDI_send_channel_pressure(uint8_t channel, uint8_t value)
+{}
 
-void MIDI_send_pitch_bend(uint8_t channel, uint16_t value);
+void MIDI_send_pitch_bend(uint8_t channel, uint16_t value)
+{}
 
 void MIDI_send_raw_SYSEX(uint8_t const *message, size_t size)
 {
@@ -44,25 +53,35 @@ void MIDI_send_raw_SYSEX(uint8_t const *message, size_t size)
     assert(message[size - 1] == 0xF7);
 }
 
-void MIDI_send_MTC_quarter(uint8_t type, uint8_t values);
+void MIDI_send_MTC_quarter(uint8_t type, uint8_t values)
+{}
 
-void MIDI_send_song_position(uint16_t beat);
+void MIDI_send_song_position(uint16_t beat)
+{}
 
-void MIDI_send_song_select(uint8_t song);
+void MIDI_send_song_select(uint8_t song)
+{}
 
-void MIDI_send_tune_request(void);
+void MIDI_send_tune_request(void)
+{}
 
-void MIDI_send_timing_clock(void);
+void MIDI_send_timing_clock(void)
+{}
 
-void MIDI_send_start(void);
+void MIDI_send_start(void)
+{}
 
-void MIDI_send_continue(void);
+void MIDI_send_continue(void)
+{}
 
-void MIDI_send_stop(void);
+void MIDI_send_stop(void)
+{}
 
-void MIDI_send_active_sensing(void);
+void MIDI_send_active_sensing(void)
+{}
 
-void MIDI_send_reset(void);
+void MIDI_send_reset(void)
+{}
 
 
 // Handlers for incoming MIDI messages

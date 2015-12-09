@@ -15,15 +15,23 @@
 
 #define MAX_SPI_PACKET_SIZE 32
 
-static const uint8_t STX      = '\02';
-static const uint8_t ETX      = '\03';
-static const uint8_t SYN      = '\26';
+static const uint8_t STX = '\02';
+static const uint8_t ETX = '\03';
+static const uint8_t SYN = '\26';
 
 // active_modules is a hack to allow turning the synth on one module at a time.
 static const size_t active_modules[] = {
     M_LFO1,
-    // M_OSC1,
+    // M_LFO2,
+    // M_CTLRS,
+    M_OSC1,
     // M_OSC2,
+    // M_NOIS,
+    // M_MIX,
+    // M_FILT,
+    // M_ENV1,
+    // M_ENV2,
+    // M_ENV3,
 };
 static const size_t active_module_count = (&active_modules)[1] - active_modules;
 
@@ -64,7 +72,7 @@ static void module_to_spi(size_t   module_index,
         *spi_bus_out = mcp->mc_SPI_bus;
 }
 
-size_t spi_to_module(uint8_t spi_group, uint8_t spi_bus)
+size_t spi_to_module(int spi_group, int spi_bus)
 {
     static size_t spi2mod[SPI_GROUP_COUNT][SPI_BUS_RANGE];
     static bool initialized;
@@ -77,6 +85,8 @@ size_t spi_to_module(uint8_t spi_group, uint8_t spi_bus)
         }
         initialized = true;
     }
+    assert(0 <= spi_group && spi_group < SPI_GROUP_COUNT);
+    assert(0 <= spi_bus && spi_bus < SPI_BUS_RANGE);
     return spi2mod[spi_group][spi_bus];
 }
 
@@ -246,6 +256,26 @@ static size_t assemble_outgoing_packet(spi_buf packet,
     return p - packet;
 }
 
+// MISO message format
+//
+//   STX : 1 byte
+//   switches: 1 byte
+//     bit 0: c0 clicked
+//     bit 1: assign clicked
+//     bit 2: destination button 1 clicked
+//     bit 3: destination button 2 clicked
+//     bit 4: destination button 3 clicked
+//     bit 5: destination button 4 clicked
+//   analog: 1 byte
+//     bit 0: analog 1 changed
+//     bit 1: analog 2 changed
+//     bit 2: analog 3 changed
+//     bit 3: analog 4 changed
+//     bit 4: analog 5 changed
+//   analog values:  1 byte per changed value
+//   checksum : 2 bytes
+//   ETX : 1 byte
+
 static bool check_buttons(uint8_t button_mask, size_t module_index)
 {
     const module_config *mod = &sc.sc_modules[module_index];
@@ -269,39 +299,17 @@ static bool check_analog(uint8_t analog_mask, size_t module_index)
     return true;
 }
 
-// MISO message format
-//
-//   STX : 1 byte
-//   switches: 1 byte
-//     bit 0: c0 clicked
-//     bit 1: assign clicked
-//     bit 2: destination button 1 clicked
-//     bit 3: destination button 2 clicked
-//     bit 4: destination button 3 clicked
-//     bit 5: destination button 4 clicked
-//   analog: 1 byte
-//     bit 0: analog 1 changed
-//     bit 1: analog 2 changed
-//     bit 2: analog 3 changed
-//     bit 3: analog 4 changed
-//     bit 4: analog 5 changed
-//   analog values:  1 byte per changed value
-//   checksum : 2 bytes
-//   ETX : 1 byte
-
 static bool parse_incoming_packet(spi_buf const packet,
                                   size_t        count,
                                   size_t        module_index,
                                   slave_state  *state_out)
 {
-    const module_config *mod = &sc.sc_modules[module_index];
-
     if (count < 6) {
-        printf("%s: count = %u < 6, fail\n", mod->mc_name, count);
+        // printf("%s: count = %u < 6, fail\n", mod->mc_name, count);
         return false;
     }
     if (packet[0] != STX) {
-        printf("%s: packet[0] = %#o != STX\n", mod->mc_name, packet[0]);
+        // printf("%s: packet[0] = %#o != STX\n", mod->mc_name, packet[0]);
         return false;
     }
     size_t len = 6;             // 6 bytes: STX bmask amask chk chk ETX
@@ -311,30 +319,31 @@ static bool parse_incoming_packet(spi_buf const packet,
         if (amask & i)
             len++;
     if (count < len) {
-        printf("%s: received %u bytes, expected %u bytes\n",
-               mod->mc_name, count, len);
+        // printf("%s: received %u bytes, expected %u bytes\n",
+        //        mod->mc_name, count, len);
         return false;
     }
     uint16_t rx_chk = (uint16_t)packet[len - 3] << 8 | packet[len - 2];
     uint16_t cc_chk = fletcher16(packet + 1, len - 4);
     if (rx_chk != cc_chk) {
-        printf("%s: chk: got %#x, not %#x\n", mod->mc_name, rx_chk, cc_chk);
+        // printf("%s: chk: got %#x, not %#x\n", mod->mc_name, rx_chk, cc_chk);
         return false;
     }
     if (packet[len - 1] != ETX) {
-        printf("%s: packet[%u] = %#o, expected ETX\n",
-               mod->mc_name, len - 1, packet[len - 1]);
+        // printf("%s: packet[%u] = %#o, expected ETX\n",
+        //        mod->mc_name, len - 1, packet[len - 1]);
         return false;
     }
     if (!check_buttons(bmask, module_index)) {
-        printf("%s: bmask %#x invalid\n", mod->mc_name, bmask);
+        // printf("%s: bmask %#x invalid\n", mod->mc_name, bmask);
         return false;
     }
     if (!check_analog(amask, module_index)) {
-        printf("%s: amask %#x invalid\n", mod->mc_name, amask);
+        // printf("%s: amask %#x invalid\n", mod->mc_name, amask);
         return false;
     }
 
+    // Populate the slave_state.
     state_out->ss_is_valid = true;
     state_out->ss_buttons = bmask;
     state_out->ss_analog_mask = amask;
@@ -351,7 +360,6 @@ static void start_SPI_group(int grp)
     int bus;
     for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
         size_t mod_idx = spi_to_module(grp, bus);
-        // const module_config *mod = &sc.sc_modules[mod_idx];
         uint32_t msec = system_millis;
         size_t bytes_out =
             assemble_outgoing_packet(outgoing_packets[mod_idx], msec, mod_idx);
@@ -392,12 +400,8 @@ static void postprocess_SPI(void)
     }
 }
 
-volatile uint32_t ext0;
-
 void exti0_isr(void)
 {
-    ext0++;
-    // printf("%s:%d: state = %d\n", __func__, __LINE__, (int)state);
     switch (state) {
 
     case SS_START:
@@ -411,8 +415,6 @@ void exti0_isr(void)
         int prev_grp_idx = current_grp_idx;
         current_grp_idx++;
         int current_grp = active_spi_groups(current_grp_idx);
-        // printf("pgi = %d, cgi = %d, cg = %d\n",
-        //        prev_grp_idx, current_grp_idx, current_grp);
         if (current_grp == NO_GROUP) {
             state = SS_POSTPROCESSING;
             postprocess_SPI();
@@ -430,7 +432,6 @@ void exti0_isr(void)
     case SS_ACTIVE:
     case SS_IDLE:
     case SS_POSTPROCESSING:
-        // printf("state = %d\n", (int)state);
         assert(!"Unexpected SPI state");
         break;
     }
@@ -468,7 +469,7 @@ void SPI_proto_register_slave_state_handler(SPI_slave_state_handler *handler,
     handler_data = user_data;
 }
 
-void SPI_report_and_clear_stats(void)
+void SPI_proto_report_and_clear_stats(void)
 {
     bool interrupts_are_masked = cm_is_masked_interrupts();
     cm_disable_interrupts();
@@ -488,7 +489,7 @@ void SPI_report_and_clear_stats(void)
         const char *mod_name = sc.sc_modules[i].mc_name;
         printf("%5lu %5lu %s\n", ok, fail, mod_name);
     }
-    printf("skipped %lu\n", tmp.skip_count);
+    if (tmp.skip_count)
+        printf("skipped %lu\n", tmp.skip_count);
     printf("\n");
 }
-

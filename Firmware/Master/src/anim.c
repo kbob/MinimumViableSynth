@@ -1,8 +1,5 @@
 #include "anim.h"
 
-#include <inttypes.h>
-#include <stdio.h>              // XXX
-
 #include "config.h"
 
 packed_RGB anim_module_color(uint32_t msec, size_t module_index)
@@ -18,9 +15,6 @@ packed_RGB anim_module_color(uint32_t msec, size_t module_index)
     r *= m; r /= 2000;
     g *= m; g /= 2000;
     b *= m; b /= 2000;
-    // printf("%s(%" PRIu32 ", %u): returning %#x\n",
-    //        __func__, msec, module_index,
-    //        p[0] << 16 | p[1] << 8 | p[2] << 0);
     return r << 16 | g << 8 | b << 0;
 }
 

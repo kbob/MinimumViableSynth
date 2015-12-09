@@ -2,9 +2,6 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <libopencm3/cm3/cortex.h>
 #include <libopencm3/cm3/nvic.h>
@@ -12,7 +9,6 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
 
-#include "dma-channel.h"
 #include "gpio.h"
 
 // We use SPI buses 1, 3, 4, and 5.
@@ -68,10 +64,6 @@
 //
 // There is only one way to activate all eight channels simultaneously
 // without conflicts.  See the spi_config definitions.
-
-#define RX_DMA   1
-#define TX_DMA   1
-#define DMA_INTR 1
 
 typedef struct DMA_channel {
     uint32_t dc_dma;
@@ -142,8 +134,6 @@ static const gpio_pin group_ss_pins[] = {
 };
 static const size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
 
-#if DMA_INTR
-
 static volatile uint8_t active_bus_mask;
 static spi_completion_handler *completion_handler;
 
@@ -165,12 +155,8 @@ static inline void mark_bus_active(uint8_t bus)
         cm_enable_interrupts();
 }
 
-volatile uint32_t d2s2, d1s0, d2s0, d2s5;
-
 void dma2_stream2_isr(void)
 {
-    // printf("d2s2\n");
-    d2s2++;
     dma_clear_interrupt_flags(DMA2, DMA_STREAM2, DMA_TCIF);
     uint8_t bus = 1;
     mark_bus_inactive(bus);
@@ -178,7 +164,6 @@ void dma2_stream2_isr(void)
 
 void dma1_stream0_isr(void)
 {
-    d1s0++;
     dma_clear_interrupt_flags(DMA1, DMA_STREAM0, DMA_TCIF);
     uint8_t bus = 3;
     mark_bus_inactive(bus);
@@ -186,7 +171,6 @@ void dma1_stream0_isr(void)
 
 void dma2_stream0_isr(void)
 {
-    d2s0++;
     dma_clear_interrupt_flags(DMA2, DMA_STREAM0, DMA_TCIF);
     uint8_t bus = 4;
     mark_bus_inactive(bus);
@@ -194,13 +178,10 @@ void dma2_stream0_isr(void)
 
 void dma2_stream5_isr(void)
 {
-    d2s5++;
     dma_clear_interrupt_flags(DMA2, DMA_STREAM5, DMA_TCIF);
     uint8_t bus = 5;
     mark_bus_inactive(bus);
 }
-
-#endif
 
 static void spi_setup_config(const spi_config *config)
 {
@@ -216,12 +197,8 @@ static void spi_setup_config(const spi_config *config)
                     SPI_CR1_CPHA_CLK_TRANSITION_2,
                     SPI_CR1_DFF_8BIT,
                     SPI_CR1_MSBFIRST);
-#if RX_DMA
     spi_enable_rx_dma(config->sc_reg_base);
-#endif
-#if TX_DMA
     spi_enable_tx_dma(config->sc_reg_base);
-#endif
     spi_enable_ss_output(config->sc_reg_base);
 }
 
@@ -233,17 +210,13 @@ void spi_setup(void)
     rcc_periph_clock_enable(RCC_SPI4);
     rcc_periph_clock_enable(RCC_SPI5);
 
-#if RX_DMA || TX_DMA
     rcc_periph_clock_enable(RCC_DMA1);
     rcc_periph_clock_enable(RCC_DMA2);
 
-  #if DMA_INTR
     nvic_enable_irq(NVIC_DMA2_STREAM2_IRQ);
     nvic_enable_irq(NVIC_DMA1_STREAM0_IRQ);
     nvic_enable_irq(NVIC_DMA2_STREAM0_IRQ);
     nvic_enable_irq(NVIC_DMA2_STREAM5_IRQ);
-  #endif
-#endif
     
     spi_setup_config(&spi1_config);
     spi_setup_config(&spi3_config);
@@ -266,9 +239,7 @@ void spi_setup(void)
 
 void spi_register_completion_handler(spi_completion_handler *handler)
 {
-#if DMA_INTR
     completion_handler = handler;
-#endif
 }
 
 void spi_select_group(int group)
@@ -295,22 +266,16 @@ void spi_start_transfer(int            spi,
     assert(spi < SPI_BUS_RANGE);
     const spi_config *config = config_map[spi];
     assert(config);
-    uint32_t base = config->sc_reg_base;
-#if RX_DMA
-    uint32_t rx_dma = config->sc_rx_dma.dc_dma;
-    uint8_t rx_stream = config->sc_rx_dma.dc_stream;
+    uint32_t base       = config->sc_reg_base;
+    uint32_t rx_dma     = config->sc_rx_dma.dc_dma;
+    uint8_t  rx_stream  = config->sc_rx_dma.dc_stream;
     uint32_t rx_channel = config->sc_rx_dma.dc_channel;
-  #if DMA_INTR
-    mark_bus_active(spi);
-  #endif
-#endif
-#if TX_DMA
-    uint32_t tx_dma = config->sc_tx_dma.dc_dma;
-    uint8_t tx_stream = config->sc_tx_dma.dc_stream;
+    uint32_t tx_dma     = config->sc_tx_dma.dc_dma;
+    uint8_t  tx_stream  = config->sc_tx_dma.dc_stream;
     uint32_t tx_channel = config->sc_tx_dma.dc_channel;
-#endif
+
+    mark_bus_active(spi);
     
-#if RX_DMA
     //  1. Clear SxCR_EN.  Wait until SxCR_EN == 0.
     dma_stream_reset(rx_dma, rx_stream);
     while (DMA_SCR(rx_dma, rx_stream) & DMA_SxCR_EN)
@@ -356,18 +321,13 @@ void spi_start_transfer(int            spi,
     dma_disable_double_buffer_mode(rx_dma, rx_stream);
     dma_disable_transfer_error_interrupt(rx_dma, rx_stream);
     dma_disable_half_transfer_interrupt(rx_dma, rx_stream);
-#if DMA_INTR
     dma_enable_transfer_complete_interrupt(rx_dma, rx_stream);
-#else
-    dma_disable_transfer_complete_interrupt(rx_dma, rx_stream);
-#endif
     dma_disable_direct_mode_error_interrupt(rx_dma, rx_stream);
     dma_disable_fifo_error_interrupt(rx_dma, rx_stream);
 
     // 10. Set SxCR_EN.
     dma_enable_stream(rx_dma, rx_stream);
-#endif
-#if TX_DMA
+
     //  1. Clear SxCR_EN.  Wait until SxCR_EN == 0.
     dma_stream_reset(tx_dma, tx_stream);
     while (DMA_SCR(tx_dma, tx_stream) & DMA_SxCR_EN)
@@ -419,23 +379,8 @@ void spi_start_transfer(int            spi,
 
     // 10. Set SxCR_EN.
     dma_enable_stream(tx_dma, tx_stream);
-#endif
-    spi_enable(config->sc_reg_base);
 
-#if !TX_DMA || !RX_DMA
-    for (size_t i = 0; i < count; i++) {
-  #if !TX_DMA
-        while (!(SPI_SR(base) & SPI_SR_TXE))
-            continue;
-        SPI_DR(base) = tx_buf[i];
-  #endif
-  #if !RX_DMA
-        while (!(SPI_SR(base) & SPI_SR_RXNE))
-            continue;
-        rx_buf[i] = SPI_DR(base);
-  #endif
-    }
-#endif /* !TX_DMA || !RX_DMA */
+    spi_enable(config->sc_reg_base);
 }
 
 void spi_finish_transfer(int spi)
@@ -443,37 +388,30 @@ void spi_finish_transfer(int spi)
     assert(spi <= 6);
     const spi_config *config = config_map[spi];
     assert(config);
-    uint32_t base = config->sc_reg_base;
-#if RX_DMA
-    uint32_t rx_dma = config->sc_rx_dma.dc_dma;
-    uint8_t rx_stream = config->sc_rx_dma.dc_stream;
-#endif
-#if TX_DMA
-    uint32_t tx_dma = config->sc_tx_dma.dc_dma;
-    uint8_t tx_stream = config->sc_tx_dma.dc_stream;
-#endif
+    uint32_t base      = config->sc_reg_base;
+    uint32_t rx_dma    = config->sc_rx_dma.dc_dma;
+    uint8_t  rx_stream = config->sc_rx_dma.dc_stream;
+    uint32_t tx_dma    = config->sc_tx_dma.dc_dma;
+    uint8_t  tx_stream = config->sc_tx_dma.dc_stream;
 
     // Wait for I/O to drain.  See sections 28.3.8, Disabling the SPI,
     // and 28.3.9, SPI communication using DMA.
-#if TX_DMA
     while (!dma_get_interrupt_flag(tx_dma, tx_stream, DMA_TCIF))
         continue;
-#endif
+
     while (!(SPI_SR(base) & SPI_SR_TXE))
         continue;
     while (SPI_SR(base) & SPI_SR_BSY)
         continue;
 
     // Disable DMA first, then SPI.
-#if TX_DMA
     DMA_SCR(tx_dma, tx_stream) &= ~DMA_SxCR_EN;
     while (DMA_SCR(tx_dma, tx_stream) & DMA_SxCR_EN)
         continue;
-#endif
-#if RX_DMA
+
     DMA_SCR(rx_dma, rx_stream) &= ~DMA_SxCR_EN;
     while (DMA_SCR(rx_dma, rx_stream) & DMA_SxCR_EN)
         continue;
-#endif
+
     spi_disable(base);
 }

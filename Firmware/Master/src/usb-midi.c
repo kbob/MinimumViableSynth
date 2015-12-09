@@ -11,7 +11,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/audio.h>
@@ -262,12 +261,10 @@ static const char *usb_strings[] = {
 	"MIDI demo",
 };
 
-// static
-usbd_device *usbd_dev;
+static usbd_device *usbd_dev;
 
 /* Buffer to be used for control requests. */
-// static
-uint8_t usbd_control_buffer[128];
+static uint8_t usbd_control_buffer[128];
 
 /* SysEx identity message, preformatted with correct USB framing information */
 static const uint8_t sysex_identity[] = {
