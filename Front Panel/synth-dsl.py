@@ -86,7 +86,7 @@ LED_blue = (0.3, 0.3, 1.0)
 LED_amber = (1, 0.6, 0.2)
 LED_red = (1, 0.2, 0.2)
 LED_green = (0, 1, 0)
-ENV_COLOR = (1, 0, 1)
+ENV_COLOR = (0.2, 0.6, 1)
 AMP_COLOR = (1, 1, 1)
 
 ASSIGN_RADIUS = 8.5 / 2
