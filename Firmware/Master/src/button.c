@@ -1,7 +1,7 @@
 #include "button.h"
 
 #include "gpio.h"
-#include "usb-midi.h"
+#include "midi.h"
 
 static const gpio_pin button_gpio = {
     .gp_port = GPIOA,
@@ -27,7 +27,14 @@ void button_poll(void)
      */
     uint32_t old_button_state = button_state;
     button_state = (button_state << 1) | (GPIOA_IDR & 1);
-    if ((0 == button_state) != (0 == old_button_state))
-        usb_midi_send_note((bool)button_state);
+    if (!button_state != !old_button_state) {
+        static const uint8_t note_sequence[] = { 60, 64, 69, 62, 67 };
+        static size_t i;
+        if (button_state)
+            MIDI_send_note_on(MIDI_default_channel, note_sequence[i], 96);
+        else {
+            MIDI_send_note_off(MIDI_default_channel, note_sequence[i], 96);
+            i = (i + 1) % sizeof note_sequence;
+        }
+    }
 }
-

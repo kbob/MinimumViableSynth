@@ -36,10 +36,30 @@ MIDI_handler *MIDI_register_handler(MIDI_handler *cb)
 // MIDI_send functions for all message types
 
 void MIDI_send_note_off(uint8_t channel, uint8_t note, uint8_t velocity)
-{}
+{
+    ASSERT_VALID_CHANNEL(channel);
+    assert(note < 128);
+    assert(velocity < 128);
+    uint8_t msg[3] = {
+        NoteOff | channel,
+        note,
+        velocity
+    };
+    MIDI_send_message(msg, sizeof msg);
+}
 
 void MIDI_send_note_on(uint8_t channel, uint8_t note, uint8_t velocity)
-{}
+{
+    ASSERT_VALID_CHANNEL(channel);
+    assert(note < 128);
+    assert(velocity < 128);
+    uint8_t msg[3] = {
+        NoteOn | channel,
+        note,
+        velocity
+    };
+    MIDI_send_message(msg, sizeof msg);
+}
 
 void MIDI_send_poly_pressure(uint8_t channel, uint8_t note, uint8_t pressure)
 {}
@@ -49,7 +69,6 @@ void MIDI_send_control_change(uint8_t channel, uint8_t control, uint8_t value)
     ASSERT_VALID_CHANNEL(channel);
     assert(control < 128);
     assert(value < 128);
-    printf("CC %d %d\n", control, value);
     uint8_t msg[3] = {
         ControlChange | channel,
         control,
