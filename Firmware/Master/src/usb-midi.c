@@ -369,26 +369,6 @@ void usb_midi_poll(void)
     usbd_poll(usbd_dev);
 }
 
-void usb_midi_send_note(bool on_off)
-{
-    static char notes[] = { 60, 62, 64, 67, 69 };
-    static const size_t nc = sizeof notes;
-    static size_t index = 0;
-
-    char buf[4] = {
-        on_off ? 0x09 : 0x08,
-        on_off ? NoteOn : NoteOff,
-        notes[index],
-        96,
-    };
-    if (!on_off)
-        index = (index + 1) % nc;
-
-    while (usbd_ep_write_packet(usbd_dev, 0x81, buf, sizeof(buf)) == 0) {
-        continue;
-    }
-}
-
 void usb_midi_send_message(uint8_t const *msg, size_t size)
 {
     if (!size)
