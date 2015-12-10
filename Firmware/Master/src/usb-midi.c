@@ -10,6 +10,7 @@
  * Definition for MIDI Devices, release 1.0.
  */
 
+#include <assert.h>
 #include <stdio.h>
 
 #include <libopencm3/usb/usbd.h>
@@ -18,6 +19,7 @@
 #include <libopencm3/stm32/rcc.h>
 
 #include "gpio.h"
+#include "midi-defs.h"
 
 /*
  * Table B-1: MIDI Adapter Device Descriptor
@@ -314,6 +316,8 @@ static const gpio_pin usb_dp_pin = {
     .gp_pupd = GPIO_PUPD_NONE,
 };
 
+typedef uint8_t usb_midi_packet[4];
+
 static void usbmidi_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
 	(void)ep;
@@ -373,7 +377,7 @@ void usb_midi_send_note(bool on_off)
 
     char buf[4] = {
         on_off ? 0x09 : 0x08,
-        on_off ? 0x90 : 0x80,
+        on_off ? NoteOn : NoteOff,
         notes[index],
         96,
     };
@@ -383,4 +387,40 @@ void usb_midi_send_note(bool on_off)
     while (usbd_ep_write_packet(usbd_dev, 0x81, buf, sizeof(buf)) == 0) {
         continue;
     }
+}
+
+void usb_midi_send_message(uint8_t const *msg, size_t size)
+{
+    if (!size)
+        return;
+    uint8_t status = msg[0];
+    assert(status & 0x80);
+    uint8_t status_hi = status & 0xF0;
+    if (status_hi == SystemCommon) {
+        // This is a System Common message.
+        assert(!"Write me!");
+    } else {
+        // This is a Channel Voice message.
+        uint8_t cin = status_hi >> 4;
+        uint8_t cn = 0;         // cable number 0
+        usb_midi_packet pkt;
+        if (status_hi == ProgramChange || status_hi == ChannelPressure) {
+            // Two-byte message
+            assert(size == 2);
+            pkt[0] = cn << 4 | cin;
+            pkt[1] = status;
+            pkt[2] = msg[1];
+            pkt[3] = 0;
+        } else {
+            // Three-byte message
+            assert(size = 3);
+            pkt[0] = cn << 4 | cin;
+            pkt[1] = status;
+            pkt[2] = msg[1];
+            pkt[3] = msg[2];
+        }
+        while (usbd_ep_write_packet(usbd_dev, 0x81, pkt, sizeof pkt) == 0)
+            continue;
+    }
+    return;
 }

@@ -1,3 +1,22 @@
+2015-12-09
+MIDI-USB driver
+
+I've read a little about how MIDI is encapsulated in USB, and I've
+read a little of libopencm3's MIDI code.
+
+USB-MIDI chops a MIDI data stream into 4 byte packets.  Each packet
+has one byte of header and up to 3 bytes of MIDI.  The header has
+a four bit Cable Number (up to 16 MIDI cables on a single USB
+endpoint) and a four bit Code Index Number (CIN).  The CIN partially
+duplicates the MIDI status byte.  E.g., CIN 9 means the packet
+is a Note On message, which must start with a 0x9# byte.
+
+So my plan to assemble packets in the MIDI layer and just pass them
+through in the USB-MIDI layer is not so good.
+
+
+
+----------------------------------
 2015-12-05
 
 There is another piece needed.
@@ -187,7 +206,7 @@ Let's think of an API.
   void USB_MIDI_setup(void);
 
   // return 0 on success or an error code
-  int USB_MIDI_enqueue(uint8_t *pkt, size_t size);
+  int USB_MIDI_enqueue(uint8_t *msg, size_t size);
   
   // This may receive more than one packet at a time.
   typedef void USB_MIDI_handler(uint8_t *pkt, size_t size, void *user_data);

@@ -3,17 +3,24 @@
 #include <assert.h>
 #include <stdio.h>              // XXX
 
+#include "midi-defs.h"
+#include "usb-midi.h"
+
 #define ASSERT_VALID_CHANNEL(channel) (assert((uint8_t)(channel) < 16))
 
 // MIDI - plumbing
 
 void MIDI_setup(void)
-{}
+{
+}
 
 // copies message to internal queue.
 // returns 0 on success or an error code
-int MIDI_send_message(uint8_t *pkt, size_t size)
+int MIDI_send_message(uint8_t *msg, size_t size)
 {
+    // In the future, this might dispatch to both USB and serial MIDI
+    // interfaces.
+    usb_midi_send_message(msg, size);
     return 0;
 }
 
@@ -43,6 +50,12 @@ void MIDI_send_control_change(uint8_t channel, uint8_t control, uint8_t value)
     assert(control < 128);
     assert(value < 128);
     printf("CC %d %d\n", control, value);
+    uint8_t msg[3] = {
+        ControlChange | channel,
+        control,
+        value
+    };
+    MIDI_send_message(msg, sizeof msg);
 }
 
 void MIDI_send_program_change(uint8_t channel, uint8_t patch)

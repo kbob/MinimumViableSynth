@@ -8,13 +8,13 @@
 
 static const uint8_t MIDI_default_channel = 0;
 
-typedef void MIDI_handler(uint8_t *pkt, size_t size, void *user_data);
+typedef void MIDI_handler(uint8_t *msg, size_t size, void *user_data);
 
 extern void MIDI_setup(void);
 
-// copies message to internal queue.
+// Send one complete MIDI message.
 // returns 0 on success or an error code
-extern int MIDI_send_message(uint8_t *pkt, size_t size);
+extern int MIDI_send_message(uint8_t *msg, size_t size);
 
 // returns the previous handler or NULL if none.
 extern MIDI_handler *MIDI_register_handler(MIDI_handler *cb);
