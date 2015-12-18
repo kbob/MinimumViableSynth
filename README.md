@@ -2,7 +2,7 @@
 
 A virtual analog synthesizer with lots of knobs and buttons.
 
-![front panel image](image/Synth Panel.png?raw=true)
+![front panel image](image/Synth_Panel_color.png?raw=true)
 
 This is a polyphonic, monotimbral, virtual analog synth.  The audio
 engine runs as an Apple Audio Unit on a Macintosh.  The control panel,
@@ -10,6 +10,8 @@ shown here, will provide dedicated controls for most of the synth's
 functions.
 
 ## Status
+
+Check out synth-notes.txt for my thoughts as I worked things out.
 
 #### December 17, 2015:
 
