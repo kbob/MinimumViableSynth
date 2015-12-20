@@ -56,14 +56,15 @@ const int ASSIGN_BUTTON_pin =  8;
 const int ASSIGN_LED_pin    = 23;
 const int SPI_CS_pin        = 10;
 
-const uint8_t STX = '\02';
-const uint8_t ETX = '\03';
-const uint8_t SYN = '\26';
+const uint8_t  STX = '\02';
+const uint8_t  ETX = '\03';
+const uint8_t  SYN = '\26';
 
-const size_t MSG_MAX = 32;
-const int DEBOUNCE_MSEC = 5;
-const size_t MAX_PIXELS = 6;
-const size_t MAX_ANALOGS = 5;
+const size_t   MSG_MAX = 32;
+const size_t   MAX_PIXELS = 6;
+const size_t   MAX_ANALOGS = 5;
+const int      DEBOUNCE_MSEC = 5;
+const uint32_t SPI_TIMEOUT_MSEC = 1500;
 
 const int analog_pins[] = {
     ANALOG_1_pin,
@@ -72,6 +73,26 @@ const int analog_pins[] = {
     ANALOG_4_pin,
     ANALOG_5_pin,
 };
+static const size_t analog_count = (&analog_pins)[1] - analog_pins;
+
+static const uint8_t choice_LED_pins[] = {
+    CHOICE_LED_1_pin,
+    CHOICE_LED_2_pin,
+    CHOICE_LED_3_pin,
+    CHOICE_LED_4_pin,
+    CHOICE_LED_5_pin,
+    CHOICE_LED_6_pin,
+};
+static const size_t choice_LED_count = (&choice_LED_pins)[1] - choice_LED_pins;
+
+static const uint8_t dest_button_pins[] = {
+    DEST_BUTTON_1_pin,
+    DEST_BUTTON_2_pin,
+    DEST_BUTTON_3_pin,
+    DEST_BUTTON_4_pin,
+};
+static const size_t dest_button_count =
+    (&dest_button_pins)[1] - dest_button_pins;
 
 typedef uint8_t message_buf[MSG_MAX];
 
@@ -152,8 +173,11 @@ static void begin_slave()
 }
 
 static size_t do_transfer(uint8_t       *receive_buffer, size_t receive_count,
-                          uint8_t const *send_buffer,    size_t send_count)
+                          uint8_t const *send_buffer,    size_t send_count,
+                          uint32_t       timeout_msec)
 {
+    uint32_t timeout_abs_msec = millis() + timeout_msec;
+
     // Disable SPI to reset to idle state.
     SPI0_C1 = 0;
 
@@ -178,16 +202,19 @@ static size_t do_transfer(uint8_t       *receive_buffer, size_t receive_count,
 
     // Wait for falling edge on SPI CS pin.
     while (digitalRead(SPI_CS_pin) != HIGH)
-        continue;
+        if ((int32_t)(timeout_abs_msec - millis()) < 0)
+            return 0;
     while (digitalRead(SPI_CS_pin) == HIGH)
-        continue;
+        if ((int32_t)(timeout_abs_msec - millis()) < 0)
+            return 0;
 
     // Enable SPI.
     SPI0_C1 |= SPI_C1_SPE;
 
     // Wait for rising edge on SPI CS pin.
     while (digitalRead(SPI_CS_pin) != HIGH)
-        continue;
+        if ((int32_t)(timeout_abs_msec - millis()) < 0)
+            return 0;
 
     // Disable SPI.
     SPI0_C1 = 0;
@@ -313,6 +340,70 @@ static uint8_t update_analog(uint8_t index, uint8_t **pptr)
 //     SERIAL_PRINTF("\n");
 // }
 
+static uint8_t biramp(uint32_t i, uint32_t n)
+{
+    if (i >= n/2)
+        i = n - i - 1;
+    if (i >= n/2)
+        return 0;
+    return i * 255 / (n/2 - 1);
+}
+
+static void self_test_loop()
+{
+    static uint32_t t;
+    uint32_t now = millis();
+
+    if ((int32_t)(t - now) > 0)
+        return;
+    t += 10;                    // 100 Hz loop
+
+    // Choice buttons step 2 Hz.
+    uint8_t choice = now / 500 % choice_LED_count;
+    uint8_t choice_level = biramp(now % 500, 500);
+    bool cb_down = digitalRead(CHOICE_BUTTON_pin) == LOW;
+    for (size_t i = 0; i < choice_LED_count; i++)
+        if (cb_down)
+            analogWrite(choice_LED_pins[i], 10);
+        else
+            analogWrite(choice_LED_pins[i], (choice == i) * choice_level);
+
+    // Assign button blink 10 Hz.
+    uint8_t assign_level = biramp(now % 100, 100);
+    bool ab_down = digitalRead(ASSIGN_BUTTON_pin) == LOW;
+    if (ab_down)
+        analogWrite(ASSIGN_LED_pin, 10);
+    else
+        analogWrite(ASSIGN_LED_pin, assign_level);
+
+    // Strand cycles through R, G, B, 1/6 Hz.
+    uint32_t npix = LED_strand.numPixels();
+    uint32_t pt = now % 6000;
+    uint8_t  component = pt / 2000;
+    uint32_t  pixel = pt % 2000 / (2000 / npix);
+    uint8_t  level = biramp(pt % (2000 / npix), 2000 / npix);
+
+    for (uint32_t i = 0; i < npix; i++) {
+        bool db_down = ((i - 1) < dest_button_count &&
+                        digitalRead(dest_button_pins[i - 1]) == LOW);
+        uint16_t analog = ((i - 1) < analog_count
+                           ? analogRead(analog_pins[i - 1])
+                           : 0);
+        uint8_t pix_level = 0;
+        if (db_down)
+            pix_level = 63;
+        else if (pixel == i)
+            pix_level = level;
+        uint8_t primary_level = pix_level * (1023 - analog) / 1023;
+        uint8_t secondary_level = pix_level * analog / 1023;
+        uint8_t r = (component == 0) ? primary_level : secondary_level;
+        uint8_t g = (component == 1) ? primary_level : secondary_level;
+        uint8_t b = (component == 2) ? primary_level : secondary_level;
+        LED_strand.setPixel(i, r, g, b);
+    }
+    LED_strand.show();
+}
+
 void setup()
 {
     begin_serial();
@@ -334,13 +425,26 @@ void setup()
 
 void loop()
 {
-    size_t receive_count = do_transfer(recv_buf, MSG_MAX, send_buf, MSG_MAX);
+    static uint32_t alive_time;
+    uint32_t timeout_msec = SPI_TIMEOUT_MSEC;
+    if ((int32_t)(millis() - alive_time) > timeout_msec)
+        timeout_msec = 10;
+
+    size_t receive_count = do_transfer(recv_buf, MSG_MAX,
+                                       send_buf, MSG_MAX,
+                                       timeout_msec);
     // print_buf("received: ", recv_buf, MSG_MAX);
+    if (receive_count == 0) {
+        memset(send_buf, SYN, sizeof send_buf);
+        self_test_loop();
+        return;
+    }
     if (!message_valid(recv_buf, receive_count)) {
         // SERIAL_PRINTF("invalid message received\n");
         memset(send_buf, SYN, sizeof send_buf);
         return;
     }
+    alive_time = millis();
 
     uint8_t cfg0 = recv_buf[1];
     uint8_t cfg1 = recv_buf[2];
