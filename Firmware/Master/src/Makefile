@@ -1,4 +1,7 @@
 # pass LIBOPENCM3 := the root of your libopencm3 tree.
+ifeq '$(LIBOPENCM3)' ''
+   $(error Please pass LIBOPENCM3 = the root of your libopencm3 tree)
+endif
 
 ########################################################################
    SOURCES := main.c anim.c button.c config.c console.c gpio.c midi.c	\
