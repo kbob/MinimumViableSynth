@@ -411,6 +411,7 @@ void exti0_isr(void)
         memset(incoming_packets, 0, sizeof incoming_packets);
         memset(slave_states, 0, sizeof slave_states);
         current_grp_idx = -1;
+        anim_update(system_millis);
         /* FALLTHRU */
 
     case SS_GROUP_DONE:;
@@ -454,9 +455,10 @@ static void handle_systick(uint32_t millis)
 
 static void handle_SPI_completion(void)
 {
-    assert(sp_state == SS_ACTIVE);
-    sp_state = SS_GROUP_DONE;
-    nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+    if (sp_state == SS_ACTIVE) {
+        sp_state = SS_GROUP_DONE;
+        nvic_generate_software_interrupt(NVIC_EXTI0_IRQ);
+    }
 }
 
 void SPI_proto_setup(void)

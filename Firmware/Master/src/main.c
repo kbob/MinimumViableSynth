@@ -23,13 +23,13 @@ static void clock_setup(void)
 {
     if (CPU_FREQ == 168000000) {
         // CPU = 168 MHz, min SPI =~ 328 KHz
-        rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_168MHZ]);
+        rcc_clock_setup_hse_3v3(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_168MHZ]);
     } else if (CPU_FREQ == 120000000) {
         // CPU = 120 MHz, min SPI =~ 234 KHz
-        rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
+        rcc_clock_setup_hse_3v3(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_120MHZ]);
     } else if (CPU_FREQ == 48000000) {
         // CPU = 48 MHz, min SPI =~ 94 KHz
-        rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_48MHZ]);
+        rcc_clock_setup_hse_3v3(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_48MHZ]);
     }
 }
 

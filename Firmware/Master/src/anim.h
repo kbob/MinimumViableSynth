@@ -4,7 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef size_t packed_RGB;
+typedef uint32_t packed_RGB;
+
+extern void anim_update(uint32_t msec);
 
 extern packed_RGB anim_module_color(uint32_t msec, size_t module_index);
 

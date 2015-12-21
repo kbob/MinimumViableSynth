@@ -8,6 +8,8 @@
 #define MAX_CHOICES       6
 #define MAX_KNOBS         6
 #define MAX_ASSIGNS       1
+#define MAX_SOURCES       4
+#define MAX_DESTS        16
 #define MAX_PIXELS       (1 + MAX_KNOBS)
 #define MODULE_COUNT     11
 
@@ -67,6 +69,7 @@
 
 #define M_NONE    0xFF
 #define K_NONE    0xFF
+#define D_NONE    0xFF
 
 // Selected destination indices
 #define DEST_LFO1_OSC1_PIT 4
@@ -87,8 +90,9 @@ typedef enum __attribute__((packed)) module_config_flags {
 } module_config_flags;
 
 typedef enum __attribute__((packed)) knob_config_flags {
-    KCF_NONE = 0,
-    KCF_PITCH = 1,
+    KCF_NONE  = 0,
+    KCF_PITCH = 1 << 0,
+    KCF_FRQ   = 1 << 1,
 } knob_config_flags;
 
 typedef struct choice_config {
@@ -103,6 +107,7 @@ typedef struct knob_config {
     uint8_t       kc_CC_msb;    // MIDI CC number, MSB
     uint8_t       kc_CC_lsb;    // MIDI CC number, LSB (zero if none)
     uint8_t       kc_LED;       // status LED number
+    uint8_t       kc_color[3];
     bool          kc_has_button; // true if knob has button
     knob_button_handler
                  *kc_button_handler; // handler for button press events
@@ -147,5 +152,16 @@ typedef struct synth_config {
 extern const synth_config sc;
 
 extern void verify_config(void);
+
+// Convenience
+extern size_t dest_index_by_knob(size_t src_mod_idx,
+                                 size_t dst_mod_idx,
+                                 size_t dst_knob_idx);
+
+// const assign_dest *dest_by_index (size_t module_index, size_t index);
+// const assign_dest *dest_by_knob  (size_t src_mod_idx,
+//                                   size_t dst_mod_idx,
+//                                   size_t dst_knob_idx);
+
 
 #endif /* !CONFIG_included */

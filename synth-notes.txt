@@ -1,4 +1,45 @@
 2015-12-09
+
+Going back to 2015-08-16 Color Indications, I had some big ideas about
+animation.  To achieve that, I'm going to need at least one state
+machine.
+
+enum AssignmentState {
+  AS_INACTIVE,
+  AS_ACTIVE,
+  AS_CONFIRMING,               // when the confirming animation runs.
+};
+
+Also need some other state.
+
+size_t current_assignment_source; // module index or source index
+uint32_t assignment_start_time;   // milliseconds
+uint32_t assignment_confirm_time; // milliseconds
+
+
+I'm also going to need some predicates.
+
+   bool module_is_current(size_t module_index);
+   bool module_is_active(size_t module_index);
+   bool knob_is_working(size_t module_index, size_t knob_index);
+
+It would be good to make these fast...
+
+module_is_current() is easy -- always record the last modified module and
+compare.
+
+knob_is_working() is easy: kn_exported_value == ks_actual_value.
+
+module_is_active() is hard.  Each module depends on a different set of
+knobs.  Ideally, I'll have a list: Osc 1 depends on Osc1.Amount,
+Filter.Cutoff, Env3.MasterVolume, Env3.Attack, Env3.Decay, and
+Env3.Sustain.  (And maybe I missed a couple.)  Create an inverse map
+that maps every control onto the set of modules it can affect, and
+whenever that control is changed, reevaluate whether the module is
+active.
+
+----------------------------------
+2015-12-09
 MIDI-USB driver
 
 I've read a little about how MIDI is encapsulated in USB, and I've
@@ -14,7 +55,7 @@ is a Note On message, which must start with a 0x9# byte.
 So my plan to assemble packets in the MIDI layer and just pass them
 through in the USB-MIDI layer is not so good.
 
-
+EDIT: Oops, disregard.  It worked out fine.
 
 ----------------------------------
 2015-12-05
@@ -451,8 +492,9 @@ Color indications
 
 Define an "active" module as one that affects the sound output.  E.g.,
 an oscillator is active iff its amount is nonzero, the filter cutoff
-is not subsonic, and the amplitude envelope has nonzero master volume
-and either attack, decay, or sustain is nonzero.
+is not subsonic (or supersonic if high-pass), and the amplitude
+envelope has nonzero master volume and either attack, decay, or
+sustain is nonzero.
 
 Define a "working" knob as one whose value changes are generating MIDI
 messages.  The opposite of "working" is "idle".  When a preset is
@@ -463,7 +505,7 @@ working.
 Define the "current" module as the most recently touched module.
 Similarly, the "current" knob is the most recently touched control,
 unless a non-knob control has been touched last.  (XXX figure out what
-to do when two modules are being touched at the same time.)
+to do when two knobs are being touched at the same time.)
 
 A "modifier" is a module with an assign button.  A modifier has
 a current destination and a set of valid destinations.  To assign
@@ -486,11 +528,16 @@ Clicking Assign activates assignment.  When assignment is active,
 
   - clicking an invalid destination has no effect.
 
+  - turning a knob has no effect.  (The knob may become idle.)
+
+  - clicking a choice button deactivates assignment (bypassing
+    animation) and selects the new choice.
+
   - doing nothing for 2 seconds leaves assignment mode.
 
 When assignment mode is left, there is a brief animation.  The
 unselected destinations go black immediately.  All knobs return to
-their non-assignment-mode colors The Assign button and the current
+their non-assignment-mode colors. The Assign button and the current
 destination throb red once, then the Assign button goes black and
 the current destination returns to its non-assignment-mode color.
 

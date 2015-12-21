@@ -12,20 +12,20 @@
 #define YELLOW { 0xFF, 0xFF, 0x00 }
 
 static const assign_dest LFO1_dests[] = {
-    { .ad_module = M_NONE, .ad_control = K_NONE,     .ad_CC_val =  0 },
-    { .ad_module = M_LFO2, .ad_control = K_LFO2_SPD, .ad_CC_val =  1 },
-    { .ad_module = M_LFO2, .ad_control = K_LFO2_AMT, .ad_CC_val =  2 },
-    { .ad_module = M_OSC1, .ad_control = K_OSC1_WID, .ad_CC_val =  3 },
-    { .ad_module = M_OSC1, .ad_control = K_OSC1_PIT, .ad_CC_val =  4 },
-    { .ad_module = M_OSC1, .ad_control = K_OSC1_AMT, .ad_CC_val =  5 },
-    { .ad_module = M_OSC2, .ad_control = K_OSC2_WID, .ad_CC_val =  6 },
-    { .ad_module = M_OSC2, .ad_control = K_OSC2_PIT, .ad_CC_val =  7 },
-    { .ad_module = M_OSC2, .ad_control = K_OSC2_AMT, .ad_CC_val =  8 },
-    { .ad_module = M_NOIS, .ad_control = K_NOIS_AMT, .ad_CC_val =  9 },
-    { .ad_module = M_FILT, .ad_control = K_FILT_FRQ, .ad_CC_val = 10 },
-    { .ad_module = M_FILT, .ad_control = K_FILT_RES, .ad_CC_val = 11 },
-    { .ad_module = M_FILT, .ad_control = K_FILT_DRV, .ad_CC_val = 12 },
-    { .ad_module = M_ENV3, .ad_control = K_ENV3_VOL, .ad_CC_val = 13 },
+    { .ad_module = M_NONE, .ad_control = K_NONE,     .ad_CC_val = 12 },
+    { .ad_module = M_LFO2, .ad_control = K_LFO2_SPD, .ad_CC_val = 12 }, // XXX
+    { .ad_module = M_LFO2, .ad_control = K_LFO2_AMT, .ad_CC_val = 12 }, // XXX
+    { .ad_module = M_OSC1, .ad_control = K_OSC1_WID, .ad_CC_val =  1 },
+    { .ad_module = M_OSC1, .ad_control = K_OSC1_PIT, .ad_CC_val =  0 },
+    { .ad_module = M_OSC1, .ad_control = K_OSC1_AMT, .ad_CC_val =  2 },
+    { .ad_module = M_OSC2, .ad_control = K_OSC2_WID, .ad_CC_val =  4 },
+    { .ad_module = M_OSC2, .ad_control = K_OSC2_PIT, .ad_CC_val =  3 },
+    { .ad_module = M_OSC2, .ad_control = K_OSC2_AMT, .ad_CC_val =  5 },
+    { .ad_module = M_NOIS, .ad_control = K_NOIS_AMT, .ad_CC_val =  6 },
+    { .ad_module = M_FILT, .ad_control = K_FILT_FRQ, .ad_CC_val =  7 },
+    { .ad_module = M_FILT, .ad_control = K_FILT_RES, .ad_CC_val =  8 },
+    { .ad_module = M_FILT, .ad_control = K_FILT_DRV, .ad_CC_val =  9 },
+    { .ad_module = M_ENV3, .ad_control = K_ENV3_VOL, .ad_CC_val = 10 },
 };
 
 static const assign_dest LFO2_dests[] = {
@@ -107,6 +107,7 @@ const synth_config sc = {
                     .kc_CC_msb = 55,
                     .kc_CC_lsb = 0,
                     .kc_LED = 1,
+                    .kc_color = BLUE,
                     .kc_has_button = true,
                     .kc_button_handler = NULL,
                     .kc_map_func = NULL,
@@ -117,6 +118,7 @@ const synth_config sc = {
                     .kc_CC_msb = 14,
                     .kc_CC_lsb = 0,
                     .kc_LED = 2,
+                    .kc_color = BLUE,
                     .kc_has_button = true,
                     .kc_button_handler = NULL,
                     .kc_map_func = NULL,
@@ -239,6 +241,7 @@ const synth_config sc = {
                     .kc_CC_msb = 23,
                     .kc_CC_lsb = 0,
                     .kc_LED = 1,
+                    .kc_color = AMBER,
                     .kc_has_button = true,
                     .kc_button_handler = NULL,
                     .kc_map_func = NULL,
@@ -249,6 +252,7 @@ const synth_config sc = {
                     .kc_CC_msb = 0, // XXX assign a CC.
                     .kc_CC_lsb = 0, // XXX assign a CC.
                     .kc_LED = 2,
+                    .kc_color = AMBER,
                     .kc_has_button = true,
                     .kc_button_handler = NULL, // XXX create callback
                     .kc_map_func = NULL,
@@ -259,6 +263,7 @@ const synth_config sc = {
                     .kc_CC_msb = 20,
                     .kc_CC_lsb = 0,
                     .kc_LED = 3,
+                    .kc_color = AMBER,
                     .kc_has_button = true,
                     .kc_button_handler = NULL,
                     .kc_map_func = NULL,
@@ -387,7 +392,7 @@ const synth_config sc = {
             .mc_knobs = {
                [K_FILT_FRQ] = {
                     .kc_name = "Cutoff",
-                    .kc_flags = KCF_NONE,
+                    .kc_flags = KCF_FRQ,
                     .kc_CC_msb = 17,
                     .kc_CC_lsb = 49,
                     .kc_LED = 1,
@@ -635,6 +640,23 @@ const synth_config sc = {
     },
 };
 
+size_t dest_index_by_knob(size_t src_mod_idx,
+                          size_t dst_mod_idx,
+                          size_t dst_knob_idx)
+{
+    assert(src_mod_idx < MODULE_COUNT);
+    module_config const *mc = &sc.sc_modules[src_mod_idx];
+    assign_config const *ac = &mc->mc_assign;
+    assign_dest   const *dests = ac->ac_dests;
+    size_t               ndest = ac->ac_dest_count;
+    for (size_t i = 0; i < ndest; i++) {
+        assign_dest const *d = &dests[i];
+        if (d->ad_module == dst_mod_idx && d->ad_control == dst_knob_idx)
+            return i;
+    }
+    return D_NONE;
+}
+
 #ifndef NDEBUG
 
 static const char *CC_used[256][2];
@@ -692,9 +714,7 @@ static void end_LED_group(LED_mask *mask)
 
 static void verify_assign_config(const assign_config *acp)
 {
-    for (size_t i = 0; i < acp->ac_dest_count; i++) {
-        assert(acp->ac_dests[i].ad_CC_val == i);
-    }
+    assert(acp->ac_dest_count <= MAX_DESTS);
 
     for (size_t i = 2; i < acp->ac_dest_count; i++) {
         const assign_dest *d0p = &acp->ac_dests[i - 1];
@@ -725,6 +745,8 @@ static void verify_module_config(const module_config *mcp)
         verify_assign_config(acp);
     } else
         assert(!mcp->mc_assign.ac_name);
+
+    assert(mcp->mc_knob_count <= MAX_KNOBS);
 
     for (size_t i = 0; i < mcp->mc_knob_count; i++) {
         const knob_config *kcp = &mcp->mc_knobs[i];
