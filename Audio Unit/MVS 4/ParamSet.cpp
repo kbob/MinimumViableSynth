@@ -152,9 +152,11 @@ OSStatus EnumParamBase::set_value(float new_value)
 {
     // AU Lab gives us indexed params as 0/127, 1/127, etc.
     // We scale them up here.
+    // XXX There is no justification for this heuristic except
+    // that it works.
 
     size_t size = mValueStrings.size();
-    if (new_value < 1.0 && size > 1)
+    if (new_value != (int)new_value)
         new_value *= 127.0 / (size - 1);
     int intval = (int)(new_value + 0.5);
     if (intval < 0 || intval >= size) {

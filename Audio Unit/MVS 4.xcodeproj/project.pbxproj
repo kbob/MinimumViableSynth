@@ -726,7 +726,7 @@
 		92717B5E1A19A7DC00B87C38 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = kbobsoft.com;
 				TargetAttributes = {
 					92717B681A19A7DC00B87C38 = {
@@ -1047,6 +1047,7 @@
 				);
 				INFOPLIST_FILE = "MVS 4 - Logic-Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "MVS 4 — Logic";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
@@ -1066,6 +1067,7 @@
 				);
 				INFOPLIST_FILE = "MVS 4 - Logic-Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "MVS 4 — Logic";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
@@ -1091,6 +1093,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1161,6 +1164,7 @@
 				);
 				INFOPLIST_FILE = "MVS 4/Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "MVS 4";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
@@ -1180,6 +1184,7 @@
 				);
 				INFOPLIST_FILE = "MVS 4/Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "MVS 4";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
@@ -1222,6 +1227,7 @@
 				);
 				INFOPLIST_FILE = "MVS 4 - AU Lab-Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "MVS 4 - AU Lab";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
@@ -1242,6 +1248,7 @@
 				);
 				INFOPLIST_FILE = "MVS 4 - AU Lab-Info.plist";
 				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Audio/Plug-Ins/Components";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "MVS 4 - AU Lab";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = component;
@@ -1260,6 +1267,7 @@
 				);
 				INFOPLIST_FILE = "UI Mockup/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1272,6 +1280,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "UI Mockup/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -1291,6 +1300,7 @@
 				);
 				INFOPLIST_FILE = "UI MockupTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UI Mockup.app/Contents/MacOS/UI Mockup";
 			};
@@ -1307,6 +1317,7 @@
 				);
 				INFOPLIST_FILE = "UI MockupTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kbobsoft.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UI Mockup.app/Contents/MacOS/UI Mockup";
 			};
