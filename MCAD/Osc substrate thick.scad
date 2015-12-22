@@ -63,7 +63,7 @@ header_h = 2 * 2.54;
 
 // End Eagle constants
 
-teensy_rx = teensy_cx + teensy_w / 2; // Teensy right side x coord.
+teensy_rx = teensy_cx + teensy_w / 2 + clr; // Teensy right side x coord.
 
 // Z heights
 base_z = 1 + 7 + 2;

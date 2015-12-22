@@ -54,7 +54,7 @@ header_h = 2 * 2.54;
 // End Eagle constants
 
 spine_screw_y = spine_y - hole_d / 2;
-teensy_rx = teensy_cx + teensy_w / 2;
+teensy_rx = teensy_cx + teensy_w / 2 + clr;
 spine_cx1 = teensy_paddle_w + hole_d / 2 + 1;
 
 // Z heights
@@ -137,8 +137,6 @@ module bulkheads() {
 module spine_cutout() {
     translate([10 - eps, spine_y, deck_z])
          cube([board_w, board_h, top_z]);
-     // translate([0, 0, deck_z])
-     //     cube([teensy_paddle_w, board_h, top_z]);
 }
 
 module screw_support(x, y, z) {
@@ -208,7 +206,7 @@ module under_teensy() {
             translate([0, 0, deck_z - eps])
                 cube([uw, board_h, eps]);
         }
-    translate([2, 0, eps])
+    translate([2.5, 0, eps])
         cube([2, 4.5 * 2.54, teensy_z - eps]);
 }
 
@@ -272,12 +270,6 @@ module clips() {
             }
     }
 }
-
-//module clips() {
-//    for (x = [20, 40, 60])
-//        translate([x, -10, 0])
-//            clip();
-//}
 
 translate([0, -10, 0])
     clips();
