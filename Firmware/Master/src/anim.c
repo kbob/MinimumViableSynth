@@ -22,15 +22,25 @@
 
 #define DIM_LEVEL            40
 
-#define FAST_PERIOD_MSEC    200
-#define FAST_ON_MSEC        200
+#define AA_PERIOD_MSEC      200
+#define AA_PERIOD_MSEC    200
+#define AA_ON_MSEC        200
 
-#define SLOW_PERIOD_MSEC     (3 * FAST_PERIOD_MSEC)
-#define SLOW_ON_MSEC         FAST_ON_MSEC
+#define IA_PERIOD_MSEC     100
+#define IA_ON_MSEC         90
 
 static uint16_t gentle_mult;
 static uint16_t active_assign_mult;
 static uint16_t inactive_assign_mult;
+
+static uint8_t biramp(uint32_t i, uint32_t n)
+{
+    if (i >= n/2)
+        i = n - i - 1;
+    if (i >= n/2)
+        return 0;
+    return i * 255 / (n/2 - 1);
+}
 
 void anim_update(uint32_t msec)
 {
@@ -55,30 +65,30 @@ void anim_update(uint32_t msec)
 
     // Calculate the multiplier for the fast throb.
 
-    static uint32_t fast_period_start;
-    period = FAST_PERIOD_MSEC;
-    phase = msec - fast_period_start;
+    static uint32_t aa_period_start;
+    period = AA_PERIOD_MSEC;
+    phase = msec - aa_period_start;
     if (phase > period) {
         phase -= period;
-        fast_period_start += period;
+        aa_period_start += period;
     }
-    if (phase < FAST_ON_MSEC)
-        active_assign_mult = 256;
+    if (phase < AA_ON_MSEC)
+        active_assign_mult = 255;
     else
         active_assign_mult = 0;
 
 
     // Calculate the multiplier for the slow throb.
 
-    static uint32_t slow_period_start;
-    period = SLOW_PERIOD_MSEC;
-    phase = msec - slow_period_start;
+    static uint32_t ia_period_start;
+    period = IA_PERIOD_MSEC;
+    phase = msec - ia_period_start;
     if (phase > period) {
         phase -= period;
-        slow_period_start += period;
+        ia_period_start += period;
     }
-    if (phase < SLOW_ON_MSEC)
-        inactive_assign_mult = 256;
+    if (phase < IA_ON_MSEC)
+        inactive_assign_mult = biramp(phase, AA_ON_MSEC);
     else
         inactive_assign_mult = 0;
 }
