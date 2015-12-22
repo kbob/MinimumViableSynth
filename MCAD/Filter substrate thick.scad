@@ -92,10 +92,11 @@ module round_rect(size, r) {
 
 
 module base() {
+    nhs = 5;
     difference() {
         round_rect([board_w, board_h, base_z], board_r);
-        for (x = [4, 20, board_w - 12])
-            translate([x, -eps, 1])
+        for (i = [0 : nhs - 1])
+            translate([4 + (board_w - 16) * i / 4, -eps, 1])
                 cube([2, board_h + 2 * eps, base_z - 2]);
         for (y = [10, board_h - 13])
             translate([-eps, y, 1])
@@ -106,10 +107,16 @@ module base() {
 module spine() {
     lx = teensy_rx + clr;
     difference() {
-        translate([lx, spine_y, eps])
-            round_rect([board_w - lx, board_h - spine_y, deck_z - eps],
+        translate([lx, spine_y, base_z - eps])
+            round_rect([board_w - lx, board_h - spine_y, deck_z - base_z + eps],
                        r=board_r);
         // strain relief
+        translate([(hole1_x + hole2_x) / 2, spine_y - eps, base_z])
+            cube([2, board_h, deck_z - base_z - 1]);
+        translate([(hole2_x + hole3_x) / 2, spine_y - eps, base_z])
+            cube([2, board_h, deck_z - base_z - 1]);
+        translate([(hole3_x + hole4_x) / 2, spine_y - eps, base_z])
+            cube([2, board_h, deck_z - base_z - 1]);
         translate([board_w - 16, spine_y - eps, base_z])
             cube([2, board_h, deck_z - base_z - 1]);
     }
@@ -195,10 +202,10 @@ module switch_pillars() {
 
 module under_teensy() {
     uw = teensy_paddle_w - teensy_rx;
-    translate([teensy_rx + clr, 0, 0])
+    translate([teensy_rx + clr, 0, base_z - eps])
         hull() {
             cube([2 * uw, board_h, eps]);
-            translate([0, 0, deck_z - eps])
+            translate([0, 0, deck_z - base_z])
                 cube([uw, board_h, eps]);
         }
     translate([2.5, 0, base_z - eps])
