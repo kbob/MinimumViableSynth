@@ -112,6 +112,17 @@ static void cancel_assignment()
     a_dest_knob_index = K_NONE;
 }
 
+bool source_is_assigned(size_t module_index)
+{
+    module_config const *mc = &sc.sc_modules[module_index];
+    module_state  const *ms = &ss.ss_modules[module_index];
+    assign_config const *ac = &mc->mc_assign;
+    assign_state  const *as = &ms->ms_assign;
+    assert(mc->mc_has_assign);
+    assert(as->as_index < ac->ac_dest_count);
+    return ac->ac_dests[as->as_index].ad_module != M_NONE;
+}
+
 bool assignment_is_active(void)
 {
     if (a_state == AS_ACTIVE &&

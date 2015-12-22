@@ -219,6 +219,10 @@ uint8_t anim_assign_brightness(uint32_t msec, size_t module_index)
             return (active_assign_mult * 0xFF) >> 8;
         else
             return 0;
-    } else
-        return 0x0F;
+    } else {
+        if (source_is_assigned(module_index))
+            return 0x0F;
+        else
+            return 0;
+    }
 }
