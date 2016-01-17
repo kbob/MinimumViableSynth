@@ -47,7 +47,8 @@ inch2mm = Fraction('25.4')
 rack_unit = Fraction('1.75') * inch2mm
 FULL_PANEL_WIDTH = Fraction('438')  # 438mm makes grid_width an even 21.5mm.
 FULL_PANEL_HEIGHT = 3 * Fraction('44.50') - Fraction(1, 32) * inch2mm
-# print("PANEL_HEIGHT %g" % PANEL_HEIGHT)
+print("FULL_PANEL_WIDTH %g" % FULL_PANEL_WIDTH)
+print("FULL_PANEL_HEIGHT %g" % FULL_PANEL_HEIGHT)
 assert type(FULL_PANEL_WIDTH) is Fraction
 assert type(FULL_PANEL_HEIGHT) is Fraction
 
@@ -430,6 +431,7 @@ def LFO(label, *args, **kwargs):
                         (Choice('Waveform', lf_waveforms, color=LED_blue),
                          DestKnob('Speed')),
                         color=LED_blue,
+                        jack=(7.79, 39.73),
                         **kwargs)
 
 def Envelope(label, *controls, assign=True, **kwargs):
@@ -439,24 +441,30 @@ def Envelope(label, *controls, assign=True, **kwargs):
                  Knob('Release', align=Layout.right))
     if assign:
         return SourceModule(label, controls,
-                            side=Layout.right, color=ENV_COLOR, **kwargs)
+                            side=Layout.right,
+                            color=ENV_COLOR,
+                            **kwargs)
     else:
-        return Module(label, controls, color=ENV_COLOR, **kwargs)
+        return Module(label, controls,
+                      color=ENV_COLOR,
+                      **kwargs)
 
 ## Front Panel Definition
 
 lfo1 = LFO('LFO 1')
 lfo2 = LFO('LFO 2')
 
-env1 = Envelope('Envelope 1')
+env1 = Envelope('Envelope 1', jack=(51.43, 6.27))
 env2 = Envelope('Filter Envelope',
                 AmountKnob(align=Layout.right),
                 assign=False,
                 align=Layout.right,
+                jack=(51.43 - 21.5, 6.27),
                 destination='Cutoff', early=True)
 env3 = Envelope('Amp Envelope',
                 assign=False, align=Layout.right,
                 destination='Master Volume',
+                jack=((51.43 - 43, 6.27), (62 - 43, 6.27)),
                 early=True)
 
 ctls = SourceModule('Controllers',
@@ -466,6 +474,7 @@ ctls = SourceModule('Controllers',
                                            'Other'], color=LED_blue),
                      Blank()),
                     side=Layout.left,
+                    jack=(7.79, 39.73),
                     color=LED_blue)
 
 title = Title('Minimum Viable Synth')
@@ -478,16 +487,19 @@ osc1 = Module('Oscillator 1',
                DestKnob('Pitch'),
                # Knob('Fine Pitch'),
                AmountKnob(align=Layout.right)),
+              jack=(7.67, 39.6),
               color=LED_amber)
 osc2 = Module('Oscillator 2',
               (Choice('Waveform', af_waveforms, color=LED_amber),
                DestKnob('Width'),
                DestKnob('Pitch'),
                AmountKnob(align=Layout.left)),
+              jack=(7.67, 39.6),
               color=LED_amber)
 noise = Module('Noise',
                (Choice('Spectrum', ['White', 'Pink', 'Red'], color=LED_amber),
                 AmountKnob()),
+               jack=(7.67, 39.6),
                color=LED_amber)
 mixer = Module('Mix',
                (Choice('Operator',
@@ -495,6 +507,7 @@ mixer = Module('Mix',
                        color=LED_green),
                 Blank()),
                align=Layout.center,
+               jack=(7.67, 39.6),
                color=LED_green)
 filter = Module('Filter',
                 (Choice('Type',
@@ -505,6 +518,7 @@ filter = Module('Filter',
                  DestKnob('Drive', align=Layout.right),
                  DestKnob('Key Track', align=Layout.right)),
                 early=True,
+               jack=(7.67, 39.6),
                 color=LED_red)
 # amp = Module('Amp',
 #              (AmountKnob('Master Volume', align=Layout.stretch),),
@@ -512,6 +526,7 @@ filter = Module('Filter',
 amp = Module('Amp',
              (AmountKnob('Master Volume', align=Layout.stretch),),
              color=AMP_COLOR,
+             jack=(26.94, 30.45),
              x_pad=5)
 
 col0 = PanelColumn([lfo1, lfo2, ctls])
@@ -965,6 +980,10 @@ def render_boxes(c, boxes, early=False):
         w = box.widget
         if getattr(w, 'early', False) != early:
             continue
+        # def unfrac(x): return float(x) if isinstance(x, Fraction) else x
+        # def name(w): return getattr(w, 'name', w)
+        # bbbox = Box(*(unfrac(i) for i in box))
+        # print(name(w), bbbox)
         if isinstance(w, Panel):
             render_panel(c, box)
         elif isinstance(w, Title):
@@ -1022,6 +1041,7 @@ def render_title(c, box):
 
 
 def render_touchscreen(c, box):
+    print('touchscreen: box=%r' % (box,))
     with cutter(c) as cut:
         cut.rect(box.x * mm, box.y * mm, box.w * mm, box.h * mm)
     for g in graphics(c):
@@ -1156,9 +1176,6 @@ def render_module_dest(c, box):
 
 
 def render_module(c, box):
-
-    # if not do_engrave:
-    #     return
 
     # Dims: dimension that change between outer and inner outline
     # x0: left edge
@@ -1406,6 +1423,20 @@ def render_module(c, box):
                              margin[1] + label_pos[1] +
                              label_pad[1])*mm,
                             mod)
+
+    # back panel jacks
+    if hasattr(mod, 'jack'):
+        try:
+            mod.jack[0][0]
+            jacks = mod.jack
+        except TypeError:
+            jacks = [mod.jack]
+        
+        for jack in jacks:
+            jx = box.x + 2 + jack[0]
+            jy = box.y + 2 + jack[1]
+            render_jack(c, jx, jy)
+
         # if mod == filter:
         #     print('Filter')
         #     print('  box origin = (%s, %s)' % (box.x, box.y))
@@ -1428,6 +1459,19 @@ def render_module(c, box):
     #     c.setLineWidth(1/mm)
     #     c.rect(label_x0, label_pos[1], label_w + 2 * label_pad[0], 7)
 
+
+def render_jack(c, jx, jy):
+    if do_jacks:
+        with state(c):
+            c.translate(jx*mm, jy*mm)
+            c.canvas.setLineWidth(1)
+            c.canvas.setStrokeColorRGB(0, 0, 0) # black
+            c.canvas.rect(-0.15*inch, -0.1*inch,
+                          +0.3*inch, +0.2*inch,
+                          fill=0, stroke=1)
+            c.canvas.circle(0, 0, 7/16*inch / 2, stroke=1, fill=0)
+            c.canvas.line(-1/2*inch, 0, +1/2*inch, 0)
+            c.canvas.line(0, -1/2*inch, 0, +1/2*inch)
 
 def render_blank(c, box):
     """What?  It's blank."""
@@ -2015,10 +2059,10 @@ def create_panel(output_file):
         panel_size = (FULL_PANEL_WIDTH, FULL_PANEL_HEIGHT)
     boxes = layout_panel(panel, panel_size)
     print('grid width %g' % (g_grid_width))
-    for b in boxes:
-        w = b.widget
-        if isinstance(w, SourceModule):
-            print(float(b.y), str(w))
+    # for b in boxes:
+    #     w = b.widget
+    #     if isinstance(w, SourceModule):
+    #         print(float(b.y), str(w))
     render(boxes, output_file, panel_size)
 
 def main(argv):
@@ -2031,11 +2075,13 @@ def main(argv):
     parser.add_option('--outline', choices=['all', 'vec'])
     parser.add_option('--engrave', action='store_true')
     parser.add_option('--cuts', action='store_true')
+    parser.add_option('--jacks', action='store_true')
     (options, args) = parser.parse_args()
 
     global detail, flip, paginate
     global do_vector, do_engrave, do_cut
     global do_art, outline_all
+    global do_jacks
     # global cutting_guide
 
     detail = bool(options.detail)
@@ -2055,6 +2101,7 @@ def main(argv):
     do_engrave = bool(options.engrave)
     do_cut = bool(options.cuts)
     do_art = not any((do_cut, do_vector, do_engrave))
+    do_jacks = bool(options.jacks)
     # cutting_guide = 
     # if cutting_guide:
     #     global FG
