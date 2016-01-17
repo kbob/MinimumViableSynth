@@ -8,7 +8,7 @@
 #define AMBER  { 0xFF, 0x77, 0x00 }
 #define BLUE   { 0x00, 0x00, 0xFF }
 #define GREEN  { 0x00, 0xFF, 0x00 }
-#define RED    { 0xFF, 0x33, 0x33 }
+#define RED    { 0xFF, 0x00, 0x00 }
 #define YELLOW { 0xFF, 0xFF, 0x00 }
 #define LIGHT_BLUE {0x44, 0x44, 0xFF }
 #define WHITE  { 0xFF, 0xFF, 0xFF }
@@ -396,7 +396,7 @@ const synth_config sc = {
             .mc_choice = {
                 .cc_name = "Type",
                 .cc_CC = 111,
-                .cc_count = 6,
+                .cc_count = 3,
             },
             .mc_knobs = {
                [K_FILT_FRQ] = {
