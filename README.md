@@ -9,6 +9,8 @@ engine runs as an Apple Audio Unit on a Macintosh.  The control panel,
 shown here, will provide dedicated controls for most of the synth's
 functions.
 
+![assembly animation](image/assembly.gif?raw=true)
+
 ## Status
 
 Check out synth-notes.txt for my thoughts as I worked things out.
