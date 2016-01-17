@@ -25,7 +25,8 @@ static const size_t active_modules[] = {
     // M_LFO2,
     // M_CTLRS,
     M_OSC1,
-    // M_OSC2,
+    M_OSC2,
+    M_FILT,
     // M_NOIS,
     // M_MIX,
     // M_FILT,
@@ -305,12 +306,21 @@ static bool parse_incoming_packet(spi_buf const packet,
                                   size_t        module_index,
                                   slave_state  *state_out)
 {
+#if 0
+    #define PARSE_DBG(fmt, ...)                             \
+        (printf("%s: " fmt "\n",                            \
+                sc.sc_modules[module_index].mc_name,        \
+                __VA_ARGS__))
+#else
+    #define PARSE_DBG(fmt, ...) ((void)0)
+#endif
+
     if (count < 6) {
-        // printf("%s: count = %u < 6, fail\n", mod->mc_name, count);
+        PARSE_DBG("count = %u < 6, fail", count);
         return false;
     }
     if (packet[0] != STX) {
-        // printf("%s: packet[0] = %#o != STX\n", mod->mc_name, packet[0]);
+        PARSE_DBG("packet[0] = %#o != STX", packet[0]);
         return false;
     }
     size_t len = 6;             // 6 bytes: STX bmask amask chk chk ETX
@@ -320,27 +330,25 @@ static bool parse_incoming_packet(spi_buf const packet,
         if (amask & i)
             len++;
     if (count < len) {
-        // printf("%s: received %u bytes, expected %u bytes\n",
-        //        mod->mc_name, count, len);
+        PARSE_DBG("received %u bytes, expected %u bytes", count, len);
         return false;
     }
     uint16_t rx_chk = (uint16_t)packet[len - 3] << 8 | packet[len - 2];
     uint16_t cc_chk = fletcher16(packet + 1, len - 4);
     if (rx_chk != cc_chk) {
-        // printf("%s: chk: got %#x, not %#x\n", mod->mc_name, rx_chk, cc_chk);
+        PARSE_DBG("chk: got %#x, not %#x", rx_chk, cc_chk);
         return false;
     }
     if (packet[len - 1] != ETX) {
-        // printf("%s: packet[%u] = %#o, expected ETX\n",
-        //        mod->mc_name, len - 1, packet[len - 1]);
+        PARSE_DBG("packet[%u] = %#o, expected ETX", len - 1, packet[len - 1]);
         return false;
     }
     if (!check_buttons(bmask, module_index)) {
-        // printf("%s: bmask %#x invalid\n", mod->mc_name, bmask);
+        PARSE_DBG("bmask %#x invalid", bmask);
         return false;
     }
     if (!check_analog(amask, module_index)) {
-        // printf("%s: amask %#x invalid\n", mod->mc_name, amask);
+        PARSE_DBG("amask %#x invalid", amask);
         return false;
     }
 
@@ -371,12 +379,17 @@ static void start_SPI_group(int grp)
     }
 }
 
-static void process_SPI_group(int grp)
+static void stop_SPI_group(int grp)
 {
     int bus;
     for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++)
         spi_finish_transfer(bus);
     spi_deselect_group(grp);
+}
+
+static void process_SPI_group(int grp)
+{
+    int bus;
     for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
         size_t mod_idx = spi_to_module(grp, bus);
         bool ok = parse_incoming_packet(incoming_packets[mod_idx],
@@ -420,6 +433,8 @@ void exti0_isr(void)
         int prev_grp_idx = current_grp_idx;
         current_grp_idx++;
         int current_grp = active_spi_groups(current_grp_idx);
+        if (prev_grp_idx != -1)
+            stop_SPI_group(active_spi_groups(prev_grp_idx));
         if (current_grp != NO_GROUP) {
             sp_state = SS_ACTIVE;
             start_SPI_group(current_grp);
