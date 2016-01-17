@@ -29,12 +29,16 @@ void button_poll(void)
     button_state = (button_state << 1) | (GPIOA_IDR & 1);
     if (!button_state != !old_button_state) {
         static const uint8_t note_sequence[] = { 60, 64, 69, 62, 67 };
-        static size_t i;
+        static size_t i, j;
+        uint8_t note = note_sequence[i];
+        if (j == 5)
+            note -= 36;
         if (button_state)
-            MIDI_send_note_on(MIDI_default_channel, note_sequence[i], 96);
+            MIDI_send_note_on(MIDI_default_channel, note, 96);
         else {
-            MIDI_send_note_off(MIDI_default_channel, note_sequence[i], 96);
+            MIDI_send_note_off(MIDI_default_channel, note, 96);
             i = (i + 1) % sizeof note_sequence;
+            j = (j + 1) % 6;
         }
     }
 }
