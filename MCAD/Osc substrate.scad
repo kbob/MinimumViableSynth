@@ -1,4 +1,3 @@
-inch = 25.4;
 hq = true;
 clr = 0.2;
 
@@ -11,11 +10,11 @@ eps = 0.1;
 // Board dimensions
 board_x = 0;
 board_y = 0;
-board_w = 81.75;
+board_w = 86;
 board_h = 43.5;
 board_r = 2;
 board_ne_r = 3.3;
-board_min_y = 1;
+board_min_y = 1;                // screwup: make board 1mm shorter.
 
 // Teensy location
 teensy_cx =  9.08;
@@ -29,13 +28,24 @@ sw1_x = 32.25;
 sw1_y = 7;
 sw2_x = 53.75;
 sw2_y = 7;
+sw3_x = 75.25;
+sw3_y = 7;
+swlast_x = sw3_x;
 sw_d = 2.5;
 
 // Screw holes
-hole1_x = 75.25;
-hole1_y = 10;
-hole2_x = 76.5;
-hole2_y = 38;
+hole1_x = 21.25;
+hole1_y = 36.75;
+
+hole2_x = 43;
+hole2_y = 36.75;
+
+hole3_x = 64.5;
+hole3_y = 36.75;
+
+hole4_x = 82.75;
+hole4_y = 40.25;
+
 hole_d = 3;
 hole_clr = 0;
 
@@ -55,25 +65,14 @@ header_h = 2 * 2.54;
 
 // End Eagle constants
 
-spine_screw_y = spine_y - hole_d / 2;
-teensy_rx = teensy_cx + teensy_w / 2 + clr;
-spine_cx1 = teensy_paddle_w + hole_d / 2 + 1;
+teensy_rx = teensy_cx + teensy_w / 2 + clr; // Teensy right side x coord.
 
 // Z heights
 base_z = 1;
 deck_z = base_z + 9;
-top_z = deck_z + 1.6;
 sw_z = deck_z - 1.6;
 teensy_z = deck_z - 4.1;
-pin_z = deck_z - 9;
 bulkhead_z = deck_z - 3;
-
-// The booboo
-booboo_x0 = 19.5 - 2;
-booboo_x1 = 31.75 + 2;
-booboo_y = 39.5;
-booboo_h = 2 * (booboo_y - spine_y);
-booboo_t = 1.0;
 
 module centered_cube(size, zt=0) {
     translate([-size[0] / 2, -size[1] / 2, zt])
@@ -97,10 +96,12 @@ module base() {
 module spine() {
     lx = teensy_rx + clr;
     difference() {
-        translate([lx, spine_y, eps])
-            round_rect([board_w - lx, board_h - spine_y, top_z - eps], r=board_r);
+        translate([lx + eps, spine_y, eps])
+            cube([board_w - lx - board_ne_r - eps,
+                  board_h - spine_y,
+                  deck_z - eps]);
         // strain relief
-        translate([board_w - 12, spine_y - eps, base_z])
+        translate([board_w - 16, spine_y - eps, base_z])
             cube([2, board_h, deck_z - base_z - 1]);
     }
 }
@@ -110,7 +111,7 @@ module bulkheads() {
     bt1 = 1.5;
     bx = teensy_rx + clr;
     by = sw1_y;
-    bw = hole1_x - bx;
+    bw = swlast_x - bx;
     bh = board_h - by;
     translate([bx + eps, by, 0])
         hull() {
@@ -129,13 +130,8 @@ module bulkheads() {
             }
 }
 
-module spine_cutout() {
-    translate([10 - eps, spine_y, deck_z])
-         cube([board_w, board_h, top_z]);
-}
-
 module screw_support(x, y, z) {
-    support_d = hole_d + 2 * 3;
+    support_d = hole_d + 2.5;
     hull() {
         translate([x, y, base_z - eps])
             centered_cube([support_d, support_d, eps]);
@@ -144,23 +140,17 @@ module screw_support(x, y, z) {
     }
 }
 
-module assign_screw_supports() {
-    screw_support(hole1_x, hole1_y, deck_z);
-    screw_support(hole2_x, hole2_y, deck_z);
+module end_screw_support(x, y ,z) {
+    support_r = board_ne_r;
+    translate([x, y, base_z - eps])
+        cylinder(r = support_r, h = z - base_z + eps);
 }
 
-module spine_screw_supports() {
-    y = spine_screw_y;
-    intersection() {
-        screw_support(spine_cx1, spine_screw_y, top_z);
-        union() {
-            cube([board_w, board_h, deck_z - eps]);
-            translate([teensy_paddle_w, 0, eps])
-                round_rect([board_w, spine_y, top_z + eps], r=2);
-        }
-    }
-    screw_support(spine_cx2, spine_screw_y, top_z);
-    screw_support(spine_cx3, spine_screw_y, top_z);
+module screw_supports() {
+    screw_support(hole1_x, hole1_y, deck_z);
+    screw_support(hole2_x, hole2_y, deck_z);
+    screw_support(hole3_x, hole3_y, deck_z);
+    end_screw_support(hole4_x, hole4_y, deck_z);
 }
 
 module screw_hole(x, y, z) {
@@ -168,14 +158,11 @@ module screw_hole(x, y, z) {
         cylinder(d=hole_d + hole_clr, h=deck_z + 3);
 }
 
-module assign_screw_holes() {
+module screw_holes() {
     screw_hole(hole1_x, hole1_y, base_z);
     screw_hole(hole2_x, hole2_y, base_z);
-}
-
-module spine_screw_holes() {
-    for (x = [spine_cx1, spine_cx2, spine_cx3])
-        screw_hole(x, spine_screw_y, base_z);
+    screw_hole(hole3_x, hole3_y, base_z);
+    screw_hole(hole4_x, hole4_y, base_z);
 }
 
 module switch_pillars() {
@@ -191,6 +178,7 @@ module switch_pillars() {
     }
     switch_pillar(sw1_x, sw1_y);
     switch_pillar(sw2_x, sw2_y);
+    switch_pillar(sw3_x, sw3_y);
 }
 
 module under_teensy() {
@@ -201,20 +189,17 @@ module under_teensy() {
             translate([0, 0, deck_z - eps])
                 cube([uw, board_h - board_min_y, eps]);
         }
-    translate([2.5, board_min_y, eps])
-        cube([2, 4.5 * 2.54 - board_min_y, teensy_z - eps]);
+    translate([2.5, board_min_y, base_z - eps])
+        cube([2, 4.5 * 2.54 - board_min_y, teensy_z - base_z - eps]);
 }
 
 module header_cutout() {
     hdr_clr = 2;
     translate([-eps, header_cy - header_h / 2 - hdr_clr, -eps])
-        round_rect([header_cx + header_w / 2 + hdr_clr, board_h, deck_z + 2 * eps],
+        round_rect([header_cx + header_w / 2 + hdr_clr,
+                    board_h,
+                    deck_z + 2 * eps],
                    r=0.5);
-}
-
-module booboo_cutout() {
-    translate([booboo_x0, booboo_y - booboo_h / 2, deck_z - booboo_t])
-        cube([booboo_x1 - booboo_x0, booboo_h, booboo_t + eps]);
 }
 
 module substrate() {
@@ -225,47 +210,11 @@ module substrate() {
             bulkheads();
             switch_pillars();
             under_teensy();
-            assign_screw_supports();
-            spine_screw_supports();
+            screw_supports();
         };
-        assign_screw_holes();
-        spine_screw_holes();
-        spine_cutout();
+        screw_holes();
         header_cutout();
-        booboo_cutout();
     };
 }
 
-module clips() {
-    clip_t = 7;
-    od = hole_d + 5;
-    x0 = spine_cx1 - od/2;
-    x1 = spine_cx3 + od/2;
-    y = board_h - spine_screw_y;
-    y1 = spine_y - spine_screw_y;
-    y2 = board_h - spine_y;
-
-    difference() {
-        union() {
-            for (x = [spine_cx1, spine_cx2, spine_cx3])
-                translate([x, 0, 0])
-                    hull() {
-                        cylinder(d=od, h=clip_t);
-                        translate([-od/2, y - eps, 0])
-                            cube([od, eps, clip_t]);
-                    }
-            translate([x0, y1, 0])
-                cube([x1 - x0, y2, clip_t]);
-        }
-        for (x = [spine_cx1, spine_cx2, spine_cx3])
-            translate([x, 0, 0]) {
-                cylinder(d=hole_d + hole_clr + 2 * clr, h=3 * clip_t, center=true);
-                translate([0, 0, clip_t - 2])
-                    cylinder(d=6.5, h=3);
-            }
-    }
-}
-
-translate([0, -10, 0])
-    clips();
 substrate();
