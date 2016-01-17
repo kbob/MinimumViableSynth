@@ -259,8 +259,8 @@ static const struct usb_config_descriptor config = {
 };
 
 static const char *usb_strings[] = {
-	"libopencm3.org",
-	"MIDI demo",
+	"kbob",
+	"Minimum Viable MIDI",
 };
 
 static usbd_device *usbd_dev;
