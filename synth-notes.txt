@@ -1,3 +1,35 @@
+2016-01-18
+The enclosure
+
+The enclosure is supposed to be 3u rack mountable.  But I don't
+actually plan to put it into a rack.  Instead, I'll put wooden end
+pieces on it to prop it up at an angle.  I made an animated GIF.
+
+Tomorrow I'm meeting a friend to fabricate two pieces of aluminum.
+I'm calling them the inner and outer covers.  The inner cover is a
+thin aluminum sheet, 0.019" (0.48 mm).  It wraps around the ends of
+the electronics.  The front panel will rest on it at the ends.  It
+will have holes on the ends and M5 nuts epoxied on so that end caps
+(or rack ears) can be screwed on.
+
+The outer cover is a very nice copper colored brushed aluminum that I
+found at Home Depot.[1]  It wraps around the top and bottom of the
+electronics and around the panel.
+
+Since I like the copper color so much, I'm thinking about decorative
+end caps.  I considered Plasti-Dip, tile, cut glass, stone, faux stone
+finishes, bamboo, hardwood (cherry, mahogany or walnut).  I think I've
+decided I want to paint MDF with a high gloss finish.  I'm looking
+into candy paint now.
+
+Ure-Kem has good information here.[2]
+
+
+[1] http://www.homedepot.com/p/MD-Building-Products-12-in-x-24-in-Copper-Aluminum-Sheet-57525/205518999
+
+[2] http://www.urekem-paints.com/candy-paint-colors
+
+----------------------------------
 2015-12-09
 
 Going back to 2015-08-16 Color Indications, I had some big ideas about
