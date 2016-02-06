@@ -6,6 +6,10 @@ $fs = hq ? 1 : 4;
 $fa = hq ? 1 : 4;
 eps = 0.1;
 
+X = [1, 0, 0];
+Y = [0, 1, 0];
+Z = [0, 0, 1];
+
 // Constants from the Eagle file
 
 // Board dimensions
@@ -89,9 +93,10 @@ module round_rect(size, r) {
 }
 
 
-module base() {
-    translate([0, board_min_y, 0])
-        round_rect([board_w, board_h - board_min_y, base_z], board_r);
+module base(hy) {
+    xx = (hy == 0) ? 0 : board_r;
+    translate([-xx, board_min_y, 0])
+        round_rect([board_w + xx, board_h - board_min_y, base_z], board_r);
 }
 
 module spine() {
@@ -217,16 +222,38 @@ module booboo_cutout() {
         cube([booboo_x1 - booboo_x0, booboo_h, booboo_t + eps]);
 }
 
-module substrate() {
+module bore_block(hy) {
+    bbh = 19;
+    bbw = 12;
+    bbt = 3.8;
+    bz = 11;
+    bd = 4.9;
+    difference() {
+        hull() {
+            translate([-bbt, board_min_y, 0])
+                cube([bbt + eps, board_h - board_min_y, base_z]);
+             translate([-bbt, hy - bbw/2, 0])
+                 cube([bbt, bbw, bbh]);
+        }
+        translate([-0.2, hy, bz])
+            rotate(-90, Y)
+                cylinder(d=bd, h=bbt);
+    }
+}
+
+module substrate(hy) {
     difference() {
         union() {
-            base();
+            base(hy);
             spine();
             bulkheads();
             switch_pillars();
             under_teensy();
             assign_screw_supports();
             spine_screw_supports();
+            if (hy != 0) {
+                bore_block(hy);
+            }
         };
         assign_screw_holes();
         spine_screw_holes();
@@ -266,6 +293,11 @@ module clips() {
     }
 }
 
-translate([0, -10, 0])
-    clips();
-substrate();
+// translate([0, -10, 0])
+//     clips();
+
+hy = (66 - board_h) / 2;        // LFO 1
+// hy = 0;                         // LFO 2
+// hy = board_h * 3/2 - 33;        // CTLRS
+
+substrate(hy=hy);
