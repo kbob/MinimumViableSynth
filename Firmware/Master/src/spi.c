@@ -81,39 +81,112 @@ typedef struct spi_config {
 } spi_config;
 
 static const spi_config spi1_config = {
-    .sc_reg_base = SPI1_BASE,
-    .sc_sck      = { GPIOA, GPIO5, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLDOWN },
-    .sc_miso     = { GPIOB, GPIO4, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLUP   },
-    .sc_mosi     = { GPIOA, GPIO7, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_NONE     },
-    .sc_rx_dma   = { DMA2,  DMA_STREAM2, 3 },
-    .sc_tx_dma   = { DMA2,  DMA_STREAM3, 3 },
+    .sc_reg_base  = SPI1_BASE,
+    .sc_sck       = {
+        .gp_port  =     GPIOA,
+        .gp_pin   =     GPIO5,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLDOWN,
+        .gp_af    =     GPIO_AF5,
+        .gp_ospeed =    GPIO_OSPEED_50MHZ,
+    },
+    .sc_miso      = {
+        .gp_port  =     GPIOB,
+        .gp_pin   =     GPIO4,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_af    =     GPIO_AF5,
+        .gp_pupd  =     GPIO_PUPD_PULLUP,
+    },
+    .sc_mosi      = {
+        .gp_port  =     GPIOA,
+        .gp_pin   =     GPIO7,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_NONE,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_rx_dma    = { DMA2,  DMA_STREAM2, 3 },
+    .sc_tx_dma    = { DMA2,  DMA_STREAM3, 3 },
 };
 
 static const spi_config spi3_config = {
-    .sc_reg_base = SPI3_BASE,
-    .sc_sck     = { GPIOB, GPIO3,  GPIO_MODE_AF, GPIO_AF6, GPIO_PUPD_PULLDOWN },
-    .sc_miso    = { GPIOC, GPIO11, GPIO_MODE_AF, GPIO_AF6, GPIO_PUPD_PULLUP   },
-    .sc_mosi    = { GPIOC, GPIO12, GPIO_MODE_AF, GPIO_AF6, GPIO_PUPD_NONE     },
-    .sc_rx_dma   = { DMA1,  DMA_STREAM0, 0 },
-    .sc_tx_dma   = { DMA1,  DMA_STREAM5, 0 },
+    .sc_reg_base  = SPI3_BASE,
+    .sc_sck       = {
+        .gp_port  =     GPIOB,
+        .gp_pin   =     GPIO3,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLDOWN,
+        .gp_af    =     GPIO_AF6,
+    },
+    .sc_miso      = {
+        .gp_port  =     GPIOC,
+        .gp_pin   =     GPIO11,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLUP,
+        .gp_af    =     GPIO_AF6,
+    },
+    .sc_mosi      = {
+        .gp_port  =     GPIOC,
+        .gp_pin   =     GPIO12,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_NONE,
+        .gp_af    =     GPIO_AF6,
+    },
+    .sc_rx_dma    = { DMA1,  DMA_STREAM0, 0 },
+    .sc_tx_dma    = { DMA1,  DMA_STREAM5, 0 },
 };
 
 static const spi_config spi4_config = {
-    .sc_reg_base = SPI4_BASE,
-    .sc_sck      = { GPIOE, GPIO2, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLDOWN },
-    .sc_miso     = { GPIOE, GPIO5, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLUP   },
-    .sc_mosi     = { GPIOE, GPIO6, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_NONE     },
-    .sc_rx_dma   = { DMA2,  DMA_STREAM0, 4 },
-    .sc_tx_dma   = { DMA2,  DMA_STREAM1, 4 },
+    .sc_reg_base  = SPI4_BASE,
+    .sc_sck       = {
+        .gp_port  =     GPIOE,
+        .gp_pin   =     GPIO2,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLDOWN,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_miso      = {
+        .gp_port  =     GPIOE,
+        .gp_pin   =     GPIO5,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLUP,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_mosi      = {
+        .gp_port  =     GPIOE,
+        .gp_pin   =     GPIO6,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_NONE,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_rx_dma    = { DMA2,  DMA_STREAM0, 4 },
+    .sc_tx_dma    = { DMA2,  DMA_STREAM1, 4 },
 };
 
 static const spi_config spi5_config = {
-    .sc_reg_base = SPI5_BASE,
-    .sc_sck      = { GPIOF, GPIO7, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLDOWN },
-    .sc_miso     = { GPIOF, GPIO8, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_PULLUP   },
-    .sc_mosi     = { GPIOF, GPIO9, GPIO_MODE_AF, GPIO_AF5, GPIO_PUPD_NONE     },
-    .sc_rx_dma   = { DMA2,  DMA_STREAM5, 7 },
-    .sc_tx_dma   = { DMA2,  DMA_STREAM6, 7 },
+    .sc_reg_base  = SPI5_BASE,
+    .sc_sck       = {
+        .gp_port  =     GPIOF,
+        .gp_pin   =     GPIO7,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLDOWN,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_miso      = {
+        .gp_port  =     GPIOF,
+        .gp_pin   =     GPIO8,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_PULLUP,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_mosi      = {
+        .gp_port  =     GPIOF,
+        .gp_pin   =     GPIO9,
+        .gp_mode  =     GPIO_MODE_AF,
+        .gp_pupd  =     GPIO_PUPD_NONE,
+        .gp_af    =     GPIO_AF5,
+    },
+    .sc_rx_dma    = { DMA2,  DMA_STREAM5, 7 },
+    .sc_tx_dma    = { DMA2,  DMA_STREAM6, 7 },
 };
 
 static const spi_config *config_map[SPI_BUS_RANGE] = {
@@ -127,10 +200,30 @@ static const spi_config *config_map[SPI_BUS_RANGE] = {
 };
 
 static const gpio_pin group_ss_pins[] = {
-    { GPIOB, GPIO7,  GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
-    { GPIOC, GPIO13, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
-    { GPIOA, GPIO10, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
-    { GPIOC, GPIO8,  GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
+    {
+        .gp_port = GPIOB,
+        .gp_pin  = GPIO7,
+        .gp_mode = GPIO_MODE_OUTPUT,
+        .gp_pupd = GPIO_PUPD_NONE,
+    },
+    {
+        .gp_port = GPIOC,
+        .gp_pin  = GPIO13,
+        .gp_mode = GPIO_MODE_OUTPUT,
+        .gp_pupd = GPIO_PUPD_NONE,
+    },
+    {
+        .gp_port = GPIOA,
+        .gp_pin  = GPIO10,
+        .gp_mode = GPIO_MODE_OUTPUT,
+        .gp_pupd = GPIO_PUPD_NONE,
+    },
+    {
+        .gp_port = GPIOC,
+        .gp_pin  = GPIO8,
+        .gp_mode = GPIO_MODE_OUTPUT,
+        .gp_pupd = GPIO_PUPD_NONE,
+    },
 };
 static const size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
 

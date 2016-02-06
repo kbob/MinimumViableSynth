@@ -10,21 +10,23 @@
 #define CONSOLE_UART USART1
 #define CONSOLE_BAUD 115200
 
-static const gpio_pin usart1_tx_pin = {
-    .gp_port = GPIOA,
-    .gp_pin  = GPIO9,
-    .gp_mode = GPIO_MODE_AF,
-    .gp_af   = GPIO_AF7,
-    .gp_pupd = GPIO_PUPD_NONE,
+static const gpio_pin usart1_pins[] = {
+    {                           // TX
+        .gp_port = GPIOA,
+        .gp_pin  = GPIO9,
+        .gp_mode = GPIO_MODE_AF,
+        .gp_pupd = GPIO_PUPD_NONE,
+        .gp_af   = GPIO_AF7,
+    },
+    {                           // RX
+        .gp_port = GPIOA,
+        .gp_pin  = GPIO10,
+        .gp_mode = GPIO_MODE_AF,
+        .gp_pupd = GPIO_PUPD_NONE,
+        .gp_af   = GPIO_AF7,
+    },
 };
-
-static const gpio_pin usart1_rx_pin = {
-    .gp_port = GPIOA,
-    .gp_pin  = GPIO10,
-    .gp_mode = GPIO_MODE_AF,
-    .gp_af   = GPIO_AF7,
-    .gp_pupd = GPIO_PUPD_NONE,
-};
+const size_t usart1_pin_count = (&usart1_pins)[1] - usart1_pins;
 
 void console_setup(void)
 {
@@ -32,8 +34,7 @@ void console_setup(void)
     rcc_periph_clock_enable(RCC_USART1);
 
     // GPIO
-    gpio_init_pin(&usart1_tx_pin);
-    gpio_init_pin(&usart1_rx_pin);
+    gpio_init_pins(usart1_pins, usart1_pin_count);
 
     // USART
     usart_set_baudrate(CONSOLE_UART, CONSOLE_BAUD);

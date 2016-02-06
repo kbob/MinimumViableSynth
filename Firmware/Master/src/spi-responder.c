@@ -226,8 +226,8 @@ static void handle_knob(size_t  module_index,
     current_knob_index = knob_index;
 
     uint8_t old_value = ks->ks_actual_value;
-    printf("Knob %s.%s changed %u -> %u\n",
-           mc->mc_name, kc->kc_name, old_value, new_value);
+    // printf("Knob %s.%s changed %u -> %u\n",
+    //        mc->mc_name, kc->kc_name, old_value, new_value);
     if (!ks->ks_should_export) {
         if (old_value < ks->ks_exported_value) {
             if (new_value >= ks->ks_exported_value)

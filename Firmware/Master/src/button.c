@@ -7,7 +7,7 @@ static const gpio_pin button_gpio = {
     .gp_port = GPIOA,
     .gp_pin  = GPIO0,
     .gp_mode = GPIO_MODE_INPUT,
-    .gp_pupd = GPIO_PUPD_NONE,
+    .gp_pupd = GPIO_PUPD_NONE,  // board has external pulldown resistor R22.
 };
 
 void button_setup(void)

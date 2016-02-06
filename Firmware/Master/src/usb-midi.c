@@ -296,24 +296,24 @@ static const gpio_pin usb_id_pin = {
     .gp_port = GPIOB,
     .gp_pin  = GPIO12,
     .gp_mode = GPIO_MODE_AF,
-    .gp_af   = GPIO_AF12,
     .gp_pupd = GPIO_PUPD_NONE,
+    .gp_af   = GPIO_AF12,
 };
 
 static const gpio_pin usb_dm_pin = {
     .gp_port = GPIOB,
     .gp_pin  = GPIO14,
     .gp_mode = GPIO_MODE_AF,
-    .gp_af   = GPIO_AF12,
     .gp_pupd = GPIO_PUPD_NONE,
+    .gp_af   = GPIO_AF12,
 };
 
 static const gpio_pin usb_dp_pin = {
     .gp_port = GPIOB,
     .gp_pin  = GPIO15,
     .gp_mode = GPIO_MODE_AF,
-    .gp_af   = GPIO_AF12,
     .gp_pupd = GPIO_PUPD_NONE,
+    .gp_af   = GPIO_AF12,
 };
 
 typedef uint8_t usb_midi_packet[4];

@@ -25,14 +25,20 @@ void gpio_init_pin(const gpio_pin *pin)
                     pin->gp_pupd,
                     pin->gp_pin);
 
-    // gpio_set_output_options(pin->gp_port,
-    //                         GPIO_OTYPE_PP,
-    //                         GPIO_OSPEED_2MHZ,
-    //                         pin->gp_pin);
+    // if (pin->gp_mode == GPIO_MODE_OUTPUT || pin->gp_mode == GPIO_MODE_AF)
+    //     gpio_set_output_options(pin->gp_port,
+    //                             pin->gp_otype,
+    //                             pin->gp_ospeed,
+    //                             pin->gp_pin);
 
-    if (pin->gp_mode == GPIO_MODE_AF) {
+    if (pin->gp_mode == GPIO_MODE_AF)
         gpio_set_af(pin->gp_port,
                     pin->gp_af,
                     pin->gp_pin);
-    }
+}
+
+void gpio_init_pins(const gpio_pin *pins, size_t count)
+{
+    for (size_t i = 0; i < count; i++)
+        gpio_init_pin(&pins[i]);
 }
