@@ -5,7 +5,9 @@
 
 #include "button.h"
 #include "console.h"
+#include "lcd-dma.h"
 #include "midi.h"
+#include "sdram.h"
 #include "spi.h"
 #include "spi-proto.h"
 #include "spi-responder.h"
@@ -39,12 +41,14 @@ int main()
     systick_setup(CPU_FREQ);
     console_setup();
     console_stdio_setup();
+    sdram_setup();
     MIDI_setup();
     usb_midi_setup();
     button_setup();
     spi_setup();
     SPI_proto_setup();
     SPI_responder_setup();
+    lcd_dma_setup();
 
     printf("Minimum Viable Firmware\n");
 

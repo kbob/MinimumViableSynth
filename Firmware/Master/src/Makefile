@@ -4,9 +4,9 @@ ifeq '$(LIBOPENCM3)' ''
 endif
 
 ########################################################################
-   SOURCES := main.c anim.c button.c config.c console.c gpio.c midi.c	\
-              spi.c spi-proto.c spi-responder.c state.c systick.c       \
-              usb-midi.c
+   SOURCES := main.c anim.c button.c config.c console.c gpio.c          \
+              lcd-dma.c midi.c sdram.c spi.c spi-proto.c                \
+              spi-responder.c state.c systick.c usb-midi.c
     CFILES := $(filter %.c, $(SOURCES))
     OFILES := $(CFILES:%.c=%.o)
 
