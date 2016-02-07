@@ -218,8 +218,8 @@ static const gpio_pin group_ss_pins[] = {
         .gp_pupd = GPIO_PUPD_NONE,
     },
     {
-        .gp_port = GPIOC,
-        .gp_pin  = GPIO13,
+        .gp_port = GPIOD,
+        .gp_pin  = GPIO2,
         .gp_mode = GPIO_MODE_OUTPUT,
         .gp_pupd = GPIO_PUPD_NONE,
     },

@@ -26,7 +26,6 @@ static const size_t active_modules[] = {
     M_CTLRS,
     M_OSC1,
     M_OSC2,
-    M_FILT,
     M_NOIS,
     M_MIX,
     M_FILT,
