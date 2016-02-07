@@ -87,9 +87,191 @@ layer2_pixel *const lcd_layer2_frame_buffer =
  *     NRST    = NRST
  */
 
-// static const gpio_pin lcd_tft_gpio_pins[] = {
-//     { GPIOC, GPIO10, GPIO_MODE_OUTPUT, 0, GPIO_PUPD_NONE },
-// };
+static const gpio_pin lcd_tft_pins[] = {
+    {                           // LCD_CLK
+        .gp_port   = GPIOG,
+        .gp_pin    = GPIO7,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_HSYNC
+        .gp_port   = GPIOC,
+        .gp_pin    = GPIO6,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_VSYNC
+        .gp_port   = GPIOA,
+        .gp_pin    = GPIO4,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_DE
+        .gp_port   = GPIOF,
+        .gp_pin    = GPIO10,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+
+
+    {                           // LCD_R[2]
+        .gp_port   = GPIOC,
+        .gp_pin    = GPIO10,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_R[3]
+        .gp_port   = GPIOB,
+        .gp_pin    = GPIO0,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF9,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_R[4]
+        .gp_port   = GPIOA,
+        .gp_pin    = GPIO11,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_R[5]
+        .gp_port   = GPIOA,
+        .gp_pin    = GPIO12,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_R[6]
+        .gp_port   = GPIOB,
+        .gp_pin    = GPIO1,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF9,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_R[7]
+        .gp_port   = GPIOG,
+        .gp_pin    = GPIO6,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+
+
+    {                           // LCD_G[2]
+        .gp_port   = GPIOA,
+        .gp_pin    = GPIO6,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_G[3]
+        .gp_port   = GPIOG,
+        .gp_pin    = GPIO10,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF9,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_G[4]
+        .gp_port   = GPIOB,
+        .gp_pin    = GPIO10,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_G[5]
+        .gp_port   = GPIOB,
+        .gp_pin    = GPIO11,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_G[6]
+        .gp_port   = GPIOC,
+        .gp_pin    = GPIO7,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_G[7]
+        .gp_port   = GPIOD,
+        .gp_pin    = GPIO3,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+
+
+    {                           // LCD_B[2]
+        .gp_port   = GPIOD,
+        .gp_pin    = GPIO6,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_B[3]
+        .gp_port   = GPIOG,
+        .gp_pin    = GPIO11,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF11,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_B[4]
+        .gp_port   = GPIOG,
+        .gp_pin    = GPIO12,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF9,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_B[5]
+        .gp_port   = GPIOA,
+        .gp_pin    = GPIO3,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_B[6]
+        .gp_port   = GPIOB,
+        .gp_pin    = GPIO8,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+    {                           // LCD_B[7]
+        .gp_port   = GPIOB,
+        .gp_pin    = GPIO9,
+        .gp_mode   = GPIO_MODE_AF,
+        .gp_pupd   = GPIO_PUPD_NONE,
+        .gp_af     = GPIO_AF14,
+        .gp_ospeed = GPIO_OSPEED_50MHZ,
+    },
+};
+static const size_t lcd_tft_pin_count = (&lcd_tft_pins)[1] - lcd_tft_pins;
 
 /*
  * Checkerboard pattern.  Odd squares are transparent; even squares are
@@ -126,11 +308,10 @@ static void draw_layer_1(void)
              * (The origin is in the lower left!)
              */
             if (row == 0 || col == 0 ||
-                row == LCD_LAYER1_HEIGHT - 1 || col == LCD_LAYER1_WIDTH - 1) {
+                row == LCD_LAYER1_HEIGHT - 1 || col == LCD_LAYER1_WIDTH - 1)
                 pix = 0xFFFFFFFF;
-            } else if (row < 20 && col < 20) {
+            else if (row < 20 && col < 20)
                 pix = 0xFF000000;
-            }
             lcd_layer1_frame_buffer[i] = pix;
         }
     }
@@ -143,35 +324,33 @@ static void draw_layer_1(void)
 
 static void draw_layer_2(void)
 {
-        int row, col;
-        const uint8_t hw = LCD_LAYER2_WIDTH / 2;
-        const uint8_t hh = LCD_LAYER2_HEIGHT / 2;
-        const uint8_t sz = (hw + hh) / 2;
+    int row, col;
+    const uint8_t hw = LCD_LAYER2_WIDTH / 2;
+    const uint8_t hh = LCD_LAYER2_HEIGHT / 2;
+    const uint8_t sz = (hw + hh) / 2;
 
-        for (row = 0; row < LCD_LAYER2_HEIGHT; row++) {
-                for (col = 0; col < LCD_LAYER2_WIDTH; col++) {
-                        size_t i = row * LCD_LAYER2_WIDTH + col;
-                        uint8_t dx = abs(col  - hw);
-                        uint8_t dy = abs(row  - hh);
-                        uint8_t dxy = dx + dy;
-                        uint8_t a = dxy <= sz ? 0xF * dxy / (sz / 2) : 0x0;
-                        if (a > 0xF) {
-                                if (a < 0x14) {
-                                        a = 0xF;
-                                } else {
-                                        a &= 0xF;
-                                }
-                        }
-                        uint8_t r = dx >= dy ? 0xF : 0x0;
-                        uint8_t g = dy >= dx ? 0xF : 0x0;
-                        uint8_t b = 0xF;
-                        if (dx + dy >= sz - 2 || dx == dy) {
-                                r = g = b = 0;
-                        }
-                        layer2_pixel pix = a << 12 | r << 8 | g << 4 | b << 0;
-                        lcd_layer2_frame_buffer[i] = pix;
-                }
+    for (row = 0; row < LCD_LAYER2_HEIGHT; row++) {
+        for (col = 0; col < LCD_LAYER2_WIDTH; col++) {
+            size_t i = row * LCD_LAYER2_WIDTH + col;
+            uint8_t dx = abs(col  - hw);
+            uint8_t dy = abs(row  - hh);
+            uint8_t dxy = dx + dy;
+            uint8_t a = dxy <= sz ? 0xF * dxy / (sz / 2) : 0x0;
+            if (a > 0xF) {
+                if (a < 0x14)
+                    a = 0xF;
+                else
+                    a &= 0xF;
+            }
+            uint8_t r = dx >= dy ? 0xF : 0x0;
+            uint8_t g = dy >= dx ? 0xF : 0x0;
+            uint8_t b = 0xF;
+            if (dx + dy >= sz - 2 || dx == dy)
+                r = g = b = 0;
+            layer2_pixel pix = a << 12 | r << 8 | g << 4 | b << 0;
+            lcd_layer2_frame_buffer[i] = pix;
         }
+    }
 }
 
 void lcd_dma_setup(void)
@@ -179,6 +358,7 @@ void lcd_dma_setup(void)
     draw_layer_1();
     draw_layer_2();
 
+#if 0
     /* init GPIO clocks */
     rcc_periph_clock_enable(RCC_GPIOA | RCC_GPIOB | RCC_GPIOC |
                             RCC_GPIOD | RCC_GPIOF | RCC_GPIOG);
@@ -222,6 +402,9 @@ void lcd_dma_setup(void)
                             GPIO6 | GPIO7 | GPIO10 | GPIO11 | GPIO12);
     gpio_set_af(GPIOG, GPIO_AF9, GPIO10 | GPIO12);
     gpio_set_af(GPIOG, GPIO_AF14, GPIO6 | GPIO7 | GPIO11);
+#else
+    gpio_init_pins(lcd_tft_pins, lcd_tft_pin_count);
+#endif
 
     /*
      * The datasheet says (Figure 16, page 151):
@@ -258,9 +441,8 @@ void lcd_dma_setup(void)
                       sair << RCC_PLLSAICFGR_PLLSAIR_SHIFT);
     RCC_DCKCFGR |= RCC_DCKCFGR_PLLSAIDIVR_DIVR_2;
     RCC_CR |= RCC_CR_PLLSAION;
-    while ((RCC_CR & RCC_CR_PLLSAIRDY) == 0) {
+    while ((RCC_CR & RCC_CR_PLLSAIRDY) == 0)
         continue;
-    }
     RCC_APB2ENR |= RCC_APB2ENR_LTDCEN;
 
     /*
@@ -437,9 +619,8 @@ static void move_sprite(void)
         y = LCD_HEIGHT - LCD_LAYER2_HEIGHT - 1;
         age = 0;
     }
-    if (dy == 0 && dx == 0) {
+    if (dy == 0 && dx == 0)
         dy = y ? -1 : +1;
-    }
     uint32_t h_start = HSYNC + HBP + x;
     uint32_t h_stop = h_start + LCD_LAYER2_WIDTH - 1;
     LTDC_L2WHPCR = h_stop << LTDC_LxWHPCR_WHSPPOS_SHIFT |

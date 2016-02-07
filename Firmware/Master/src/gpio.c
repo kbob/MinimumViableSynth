@@ -25,11 +25,11 @@ void gpio_init_pin(const gpio_pin *pin)
                     pin->gp_pupd,
                     pin->gp_pin);
 
-    // if (pin->gp_mode == GPIO_MODE_OUTPUT || pin->gp_mode == GPIO_MODE_AF)
-    //     gpio_set_output_options(pin->gp_port,
-    //                             pin->gp_otype,
-    //                             pin->gp_ospeed,
-    //                             pin->gp_pin);
+    if (pin->gp_mode == GPIO_MODE_OUTPUT || pin->gp_mode == GPIO_MODE_AF)
+        gpio_set_output_options(pin->gp_port,
+                                pin->gp_otype,
+                                pin->gp_ospeed,
+                                pin->gp_pin);
 
     if (pin->gp_mode == GPIO_MODE_AF)
         gpio_set_af(pin->gp_port,

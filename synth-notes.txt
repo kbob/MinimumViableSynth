@@ -1,3 +1,25 @@
+2016-02-06
+Bugs
+
+Here are the outstanding bugs, so I can stop thinking about them.
+
+        The CTLRs module needs to be flashed.
+
+        Animations for assignment destinations are bad.
+
+        Knobs are too sensitive to noise.
+
+        The display needs to follow the power-on protocol.
+
+        USB writes hang when nothing is listening for them.
+
+        Need to move SPI Group B Slave Select to a higher-current pin.
+
+FIXED   gpio module doesn't support OSPEED, open collector, etc.
+
+        slave self-test mode leaves choice LEDs on.
+
+----------------------------------
 2016-01-18
 The enclosure
 
