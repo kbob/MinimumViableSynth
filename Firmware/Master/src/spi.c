@@ -43,7 +43,7 @@
 // select line.  The nSS lines are controlled by software.
 //
 //    Group A: PB7
-//    Group B: PA9
+//    Group B: PAD2
 //    Group C: PA10
 //    Group D: PC8
 
@@ -218,8 +218,8 @@ static const gpio_pin group_ss_pins[] = {
         .gp_pupd = GPIO_PUPD_NONE,
     },
     {
-        .gp_port = GPIOD,
-        .gp_pin  = GPIO2,
+        .gp_port = GPIOE,
+        .gp_pin  = GPIO3,
         .gp_mode = GPIO_MODE_OUTPUT,
         .gp_pupd = GPIO_PUPD_NONE,
     },
