@@ -43,7 +43,7 @@
 // select line.  The nSS lines are controlled by software.
 //
 //    Group A: PB7
-//    Group B: PAD2
+//    Group B: PE3
 //    Group C: PA10
 //    Group D: PC8
 
