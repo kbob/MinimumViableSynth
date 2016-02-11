@@ -17,7 +17,7 @@ FIXED   Need to move SPI Group B Slave Select to a higher-current pin.
 
 FIXED   gpio module doesn't support OSPEED, open collector, etc.
 
-        slave self-test mode leaves choice LEDs on.
+FIXED   slave self-test mode leaves choice LEDs on.
 
         libopencm3 should be a submodule.
 

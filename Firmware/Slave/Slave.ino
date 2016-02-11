@@ -75,16 +75,6 @@ const int analog_pins[] = {
 };
 static const size_t analog_count = (&analog_pins)[1] - analog_pins;
 
-static const uint8_t choice_LED_pins[] = {
-    CHOICE_LED_1_pin,
-    CHOICE_LED_2_pin,
-    CHOICE_LED_3_pin,
-    CHOICE_LED_4_pin,
-    CHOICE_LED_5_pin,
-    CHOICE_LED_6_pin,
-};
-static const size_t choice_LED_count = (&choice_LED_pins)[1] - choice_LED_pins;
-
 static const uint8_t dest_button_pins[] = {
     DEST_BUTTON_1_pin,
     DEST_BUTTON_2_pin,
@@ -107,13 +97,17 @@ Bounce k2_button(DEST_BUTTON_2_pin, DEBOUNCE_MSEC);
 Bounce k3_button(DEST_BUTTON_3_pin, DEBOUNCE_MSEC);
 Bounce k4_button(DEST_BUTTON_4_pin, DEBOUNCE_MSEC);
 Bounce a_button(ASSIGN_BUTTON_pin, DEBOUNCE_MSEC);
-LED_state c1_led = { CHOICE_LED_1_pin, 0 };
-LED_state c2_led = { CHOICE_LED_2_pin, 0 };
-LED_state c3_led = { CHOICE_LED_3_pin, 0 };
-LED_state c4_led = { CHOICE_LED_4_pin, 0 };
-LED_state c5_led = { CHOICE_LED_5_pin, 0 };
-LED_state c6_led = { CHOICE_LED_6_pin, 0 };
+
 LED_state a_led  = { ASSIGN_LED_pin,   0 };
+static LED_state choice_LEDs[] = {
+    { CHOICE_LED_1_pin, 0},
+    { CHOICE_LED_2_pin, 0},
+    { CHOICE_LED_3_pin, 0},
+    { CHOICE_LED_4_pin, 0},
+    { CHOICE_LED_5_pin, 0},
+    { CHOICE_LED_6_pin, 0},
+};
+static const size_t choice_LED_count = (&choice_LEDs)[1] - choice_LEDs;
 UniWS LED_strand(MAX_PIXELS);
 int analog_values[MAX_ANALOGS];
 DMAChannel SPI_rx_dma;
@@ -364,17 +358,17 @@ static void self_test_loop()
     bool cb_down = digitalRead(CHOICE_BUTTON_pin) == LOW;
     for (size_t i = 0; i < choice_LED_count; i++)
         if (cb_down)
-            analogWrite(choice_LED_pins[i], 10);
+            update_LED(&choice_LEDs[i], 10);
         else
-            analogWrite(choice_LED_pins[i], (choice == i) * choice_level);
+            update_LED(&choice_LEDs[i], (choice == i) * choice_level);
 
     // Assign button blink 10 Hz.
     uint8_t assign_level = biramp(now % 100, 100);
     bool ab_down = digitalRead(ASSIGN_BUTTON_pin) == LOW;
     if (ab_down)
-        analogWrite(ASSIGN_LED_pin, 10);
+        update_LED(&a_led, 10);
     else
-        analogWrite(ASSIGN_LED_pin, assign_level);
+        update_LED(&a_led, assign_level);
 
     // Strand cycles through R, G, B, 1/6 Hz.
     uint32_t npix = LED_strand.numPixels();
@@ -451,12 +445,8 @@ void loop()
     const uint8_t *rx_ptr = recv_buf + 3;
 
     // Update the PWM LEDs
-    update_LED(&c1_led, cfg0 & (1 << 0) ? *rx_ptr++ : 0);
-    update_LED(&c2_led, cfg0 & (1 << 1) ? *rx_ptr++ : 0);
-    update_LED(&c3_led, cfg0 & (1 << 2) ? *rx_ptr++ : 0);
-    update_LED(&c4_led, cfg0 & (1 << 3) ? *rx_ptr++ : 0);
-    update_LED(&c5_led, cfg0 & (1 << 4) ? *rx_ptr++ : 0);
-    update_LED(&c6_led, cfg0 & (1 << 5) ? *rx_ptr++ : 0);
+    for (uint8_t i = 0; i < choice_LED_count; i++)
+        update_LED(&choice_LEDs[i], cfg0 & (1 << i) ? *rx_ptr++ : 0);
     update_LED(&a_led,  cfg0 & (1 << 7) ? *rx_ptr++ : 0);
 
     // Update the pixels.
