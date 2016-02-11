@@ -5,7 +5,7 @@ Here are the outstanding bugs, so I can stop thinking about them.
 
         The CTLRs module needs to be flashed.
 
-        Animations for assignment destinations are bad.
+FIXED   Animations for assignment destinations are bad.
 
         Knobs are too sensitive to noise.
 
@@ -21,7 +21,7 @@ FIXED   gpio module doesn't support OSPEED, open collector, etc.
 
         libopencm3 should be a submodule.
 
-        Remove "#if 0" dead code.
+FIXED   Remove "#if 0" dead code.
 
 ----------------------------------
 2016-01-18

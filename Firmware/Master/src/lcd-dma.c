@@ -358,53 +358,7 @@ void lcd_dma_setup(void)
     draw_layer_1();
     draw_layer_2();
 
-#if 0
-    /* init GPIO clocks */
-    rcc_periph_clock_enable(RCC_GPIOA | RCC_GPIOB | RCC_GPIOC |
-                            RCC_GPIOD | RCC_GPIOF | RCC_GPIOG);
-
-    /* set GPIO pin modes */
-    gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO3 | GPIO4 | GPIO6 | GPIO11 | GPIO12);
-    gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                            GPIO3 | GPIO4 | GPIO6 | GPIO11 | GPIO12);
-    gpio_set_af(GPIOA, GPIO_AF14, GPIO3 | GPIO4 | GPIO6 | GPIO11 | GPIO12);
-
-    gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO0 | GPIO1 | GPIO8 | GPIO9 | GPIO10 | GPIO11);
-    gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                            GPIO0 | GPIO1 | GPIO8 |
-                            GPIO9 | GPIO10 | GPIO11);
-    gpio_set_af(GPIOB, GPIO_AF9, GPIO0 | GPIO1);
-    gpio_set_af(GPIOB, GPIO_AF14, GPIO8 | GPIO9 | GPIO10 | GPIO11);
-
-    gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO6 | GPIO7 | GPIO10);
-    gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                            GPIO6 | GPIO7 | GPIO10);
-    gpio_set_af(GPIOC, GPIO_AF14, GPIO6 | GPIO7 | GPIO10);
-
-    gpio_mode_setup(GPIOD, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO3 | GPIO6);
-    gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                            GPIO3 | GPIO6);
-    gpio_set_af(GPIOD, GPIO_AF14, GPIO3 | GPIO6);
-
-    gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO10);
-    gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                            GPIO10);
-    gpio_set_af(GPIOF, GPIO_AF14, GPIO10);
-
-    gpio_mode_setup(GPIOG, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                    GPIO6 | GPIO7 | GPIO10 | GPIO11 | GPIO12);
-    gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                            GPIO6 | GPIO7 | GPIO10 | GPIO11 | GPIO12);
-    gpio_set_af(GPIOG, GPIO_AF9, GPIO10 | GPIO12);
-    gpio_set_af(GPIOG, GPIO_AF14, GPIO6 | GPIO7 | GPIO11);
-#else
     gpio_init_pins(lcd_tft_pins, lcd_tft_pin_count);
-#endif
 
     /*
      * The datasheet says (Figure 16, page 151):
