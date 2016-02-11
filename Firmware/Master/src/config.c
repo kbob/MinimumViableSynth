@@ -673,8 +673,8 @@ size_t dest_index_by_knob(size_t src_mod_idx,
                           size_t dst_knob_idx)
 {
     assert(src_mod_idx < MODULE_COUNT);
-    module_config const *mc = &sc.sc_modules[src_mod_idx];
-    assign_config const *ac = &mc->mc_assign;
+    module_config const *mc    = &sc.sc_modules[src_mod_idx];
+    assign_config const *ac    = &mc->mc_assign;
     assign_dest   const *dests = ac->ac_dests;
     size_t               ndest = ac->ac_dest_count;
     for (size_t i = 0; i < ndest; i++) {

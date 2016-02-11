@@ -92,8 +92,8 @@ size_t spi_to_module(int spi_group, int spi_bus)
 
 int active_spi_groups(uint8_t index)
 {
-    static int active_groups[SPI_GROUP_COUNT];
-    static int active_group_count;
+    static uint8_t active_groups[SPI_GROUP_COUNT];
+    static size_t active_group_count;
 
     if (!active_group_count) {
         bool active[SPI_GROUP_COUNT];
@@ -116,8 +116,8 @@ int active_spi_groups(uint8_t index)
 
 int active_spi_buses(uint8_t group, uint8_t index)
 {
-    static int active_buses[SPI_GROUP_COUNT][SPI_BUS_COUNT];
-    static int active_bus_count[SPI_GROUP_COUNT];
+    static uint8_t active_buses[SPI_GROUP_COUNT][SPI_BUS_COUNT];
+    static size_t active_bus_count[SPI_GROUP_COUNT];
     static bool initialized;
 
     if (!initialized) {
@@ -185,9 +185,7 @@ static uint16_t fletcher16(const uint8_t *p, size_t count)
 //   checksum : 2 bytes
 //   ETX : 1 byte
 
-static size_t assemble_outgoing_packet(spi_buf packet,
-                                       uint32_t msec,
-                                       size_t module_index)
+static size_t assemble_outgoing_packet(spi_buf packet, size_t module_index)
 {
     const module_config *mcp = &sc.sc_modules[module_index];
     const module_state *msp = &ss.ss_modules[module_index];
@@ -204,15 +202,15 @@ static size_t assemble_outgoing_packet(spi_buf packet,
     if (mcp->mc_has_choice) {
         uint8_t first = 6 - mcp->mc_choice.cc_count;
         cfg0 |= 1 << (first + msp->ms_choice.cs_value);
-        pwm[pwm_count++] = anim_choice_brightness(msec, module_index);
+        pwm[pwm_count++] = anim_choice_brightness(module_index);
     }
 
     if (mcp->mc_has_assign) {
         cfg0 |= 1 << 7;
-        pwm[pwm_count++] = anim_assign_brightness(msec, module_index);
+        pwm[pwm_count++] = anim_assign_brightness(module_index);
     }
     
-    packed_RGB rgb = anim_module_color(msec, module_index);
+    packed_RGB rgb = anim_module_color(module_index);
     uint8_t pix = mcp->mc_LED;
     pixels[pix][0] = rgb >> 16 & 0xFF;
     pixels[pix][1] = rgb >>  8 & 0xFF;
@@ -227,7 +225,7 @@ static size_t assemble_outgoing_packet(spi_buf packet,
     for (size_t ki = 0; ki < mcp->mc_knob_count; ki++) {
         const knob_config *kcp = &mcp->mc_knobs[ki];
         if (kcp->kc_name) {     // if knob exists...
-            packed_RGB rgb = anim_knob_color(msec, module_index, ki);
+            packed_RGB rgb = anim_knob_color(module_index, ki);
             uint8_t pix = kcp->kc_LED;
             pixels[pix][0] = rgb >> 16 & 0xFF;
             pixels[pix][1] = rgb >>  8 & 0xFF;
@@ -368,9 +366,8 @@ static void start_SPI_group(int grp)
     int bus;
     for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
         size_t mod_idx = spi_to_module(grp, bus);
-        uint32_t msec = system_millis;
         size_t bytes_out =
-            assemble_outgoing_packet(outgoing_packets[mod_idx], msec, mod_idx);
+            assemble_outgoing_packet(outgoing_packets[mod_idx], mod_idx);
         spi_start_transfer(bus,
                            outgoing_packets[mod_idx],
                            incoming_packets[mod_idx],

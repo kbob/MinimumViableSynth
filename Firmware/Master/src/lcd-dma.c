@@ -634,7 +634,7 @@ static void move_sprite(void)
     age += 1;
     if (age > 0xFF)
         age = 0xFF;
-    LTDC_L2CACR = 0x000000FF - age;
+    // LTDC_L2CACR = 0x000000FF - age;
 }
 
 /*

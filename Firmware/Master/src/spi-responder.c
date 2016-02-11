@@ -1,147 +1,14 @@
 #include "spi-responder.h"
 
 #include <assert.h>
-#include <stdio.h>              // XXX
+#include <stdio.h>
+#include <stddef.h>
 
 #include "config.h"
 #include "midi.h"
+#include "modes.h"
 #include "spi-proto.h"
 #include "state.h"
-#include "systick.h"
-
-#define ASSIGN_TIMEOUT_MSEC  2000
-#define CONFIRM_TIMEOUT_MSEC  500
-
-typedef enum AssignmentState {
-    AS_INACTIVE,
-    AS_ACTIVE,
-    AS_CONFIRMING,          // when the confirming animation runs.
-} AssignmentState;
-
-static AssignmentState a_state;
-static uint32_t a_start_time;
-static uint32_t a_confirm_time;
-static size_t   a_src_mod_index      = M_NONE;
-static size_t   a_dest_mod_index     = M_NONE;
-static size_t   a_dest_knob_index    = K_NONE;
-static size_t   current_module_index = M_NONE;
-static size_t   current_knob_index   = K_NONE;
-
-bool module_is_current(size_t module_index)
-{
-    return module_index == current_module_index;
-}
-
-bool module_is_active(size_t module_index)
-{
-    return true;                // XXX do this right.
-}
-
-bool knob_is_current(size_t module_index, size_t knob_index)
-{
-    return (module_index == current_module_index &&
-            knob_index == current_knob_index);
-}
-
-bool knob_is_working(size_t module_index, size_t knob_index)
-{
-    const knob_state *ks = &ss.ss_modules[module_index].ms_knobs[knob_index];
-    return ks->ks_should_export;
-}
-
-bool module_is_active_assign_source(size_t module_index)
-{
-    return module_index == a_src_mod_index;
-}
-
-bool knob_is_active_assign_dest(size_t module_index, size_t knob_index)
-{
-    return module_index == a_dest_mod_index && knob_index == a_dest_knob_index;
-}
-
-bool knob_is_assign_dest(size_t module_index, size_t knob_index)
-{
-    if (a_src_mod_index == M_NONE)
-        return false;
-    size_t dest_idx = dest_index_by_knob(a_src_mod_index,
-                                         module_index, knob_index);
-    return dest_idx != D_NONE;
-}
-
-static void begin_assignment(size_t src_mod_index)
-{
-    module_config const *src_mc     = &sc.sc_modules[src_mod_index];
-    module_state  const *src_ms     = &ss.ss_modules[src_mod_index];
-    assign_config const *ac         = &src_mc->mc_assign;
-    assign_dest   const *dest       = &ac->ac_dests[src_ms->ms_assign.as_index];
-    assert(src_mc->mc_has_assign);
-    a_state = AS_ACTIVE;
-    a_start_time = system_millis;
-    a_confirm_time = 0;
-    a_src_mod_index = src_mod_index;
-    a_dest_mod_index = dest->ad_module;
-    a_dest_knob_index = dest->ad_control;
-}
-
-static void confirm_assignment(size_t dest_mod_index, size_t dest_knob_index)
-{
-    a_state = AS_CONFIRMING;
-    a_start_time = 0;
-    a_confirm_time = system_millis;
-    a_dest_mod_index = dest_mod_index;
-    a_dest_knob_index = dest_knob_index;
-
-    // printf("Confirm %d.%d\n", dest_mod_index, dest_knob_index);
-    module_config const *src_mc = &sc.sc_modules[a_src_mod_index];
-    assign_config const *ac     = &src_mc->mc_assign;
-    size_t dest_idx = dest_index_by_knob(a_src_mod_index,
-                                         dest_mod_index, dest_knob_index);
-    assert(dest_idx != D_NONE);
-    assign_dest const *ad = &ac->ac_dests[dest_idx];
-    ss.ss_modules[a_src_mod_index].ms_assign.as_index = dest_idx;
-    MIDI_send_control_change(MIDI_default_channel, ac->ac_CC, ad->ad_CC_val);
-}
-
-static void cancel_assignment()
-{
-    a_state = AS_INACTIVE;
-    a_start_time = 0;
-    a_confirm_time = 0;
-    a_src_mod_index = M_NONE;
-    a_dest_mod_index = M_NONE;
-    a_dest_knob_index = K_NONE;
-}
-
-bool source_is_assigned(size_t module_index)
-{
-    module_config const *mc = &sc.sc_modules[module_index];
-    module_state  const *ms = &ss.ss_modules[module_index];
-    assign_config const *ac = &mc->mc_assign;
-    assign_state  const *as = &ms->ms_assign;
-    assert(mc->mc_has_assign);
-    assert(as->as_index < ac->ac_dest_count);
-    return ac->ac_dests[as->as_index].ad_module != M_NONE;
-}
-
-bool assignment_is_active(void)
-{
-    if (a_state == AS_ACTIVE &&
-        system_millis - a_start_time > ASSIGN_TIMEOUT_MSEC)
-    {
-        cancel_assignment();
-    }
-    return a_state == AS_ACTIVE;
-}
-
-bool assignment_is_confirmed(void)
-{
-    if (a_state == AS_CONFIRMING &&
-        system_millis - a_confirm_time > CONFIRM_TIMEOUT_MSEC)
-    {
-        cancel_assignment();
-    }
-    return a_state == AS_CONFIRMING;
-}
 
 static void handle_choice(size_t module_index)
 {
@@ -149,8 +16,7 @@ static void handle_choice(size_t module_index)
     module_state        *ms = &ss.ss_modules[module_index];
 
     cancel_assignment();
-    current_module_index = module_index;
-    current_knob_index = K_NONE;
+    set_current_knob(module_index, K_NONE);
     uint8_t value = ms->ms_choice.cs_value + 1;
     if (value >= mc->mc_choice.cc_count)
         value = 0;
@@ -160,27 +26,32 @@ static void handle_choice(size_t module_index)
 
 static void handle_assign(size_t module_index)
 {
-    switch (a_state) {
-
-    case AS_INACTIVE:
-    case AS_CONFIRMING:
-        current_module_index = module_index;
-        current_knob_index = K_NONE;
-        begin_assignment(module_index);
-        break;
-
-    case AS_ACTIVE:
-        if (module_index == a_src_mod_index) {
-            current_module_index = M_NONE;
-            current_knob_index = K_NONE;
+    if (assignment_is_active()) {
+        if (module_index == active_source_mod_index()) {
+            set_current_knob(M_NONE, K_NONE);
             cancel_assignment();
         } else {
-            current_module_index = module_index;
-            current_knob_index = K_NONE;
+            set_current_knob(module_index, K_NONE);
             begin_assignment(module_index);
         }
-        break;
+    } else {
+        set_current_knob(module_index, K_NONE);
+        begin_assignment(module_index);
     }
+}
+
+static void send_MIDI_assign(size_t src_mod_idx,
+                             size_t dst_mod_idx,
+                             size_t dst_knob_idx)
+{
+    module_config const *src_mc = &sc.sc_modules[src_mod_idx];
+    assign_config const *ac     = &src_mc->mc_assign;
+    size_t dest_idx = dest_index_by_knob(src_mod_idx,
+                                         dst_mod_idx, dst_knob_idx);
+    assert(dest_idx != D_NONE);
+    assign_dest const *ad = &ac->ac_dests[dest_idx];
+    ss.ss_modules[src_mod_idx].ms_assign.as_index = dest_idx;
+    MIDI_send_control_change(MIDI_default_channel, ac->ac_CC, ad->ad_CC_val);
 }
 
 static void handle_knob_button(size_t module_index,
@@ -193,17 +64,21 @@ static void handle_knob_button(size_t module_index,
 
     if (assignment_is_active()) {
         if (knob_is_assign_dest(module_index, knob_index)) {
+            size_t src_mod_index = active_source_mod_index();
+            size_t dest_mod_index, dest_knob_index;
             if (knob_is_active_assign_dest(module_index, knob_index)) {
-                confirm_assignment(M_NONE, K_NONE);
+                dest_mod_index = M_NONE;
+                dest_knob_index = K_NONE;
             } else {
-                confirm_assignment(module_index, knob_index);
+                dest_mod_index = module_index;
+                dest_knob_index = knob_index;
             }
-        } else {
+            confirm_assignment(dest_mod_index, dest_knob_index);
+            send_MIDI_assign(src_mod_index, dest_mod_index, dest_knob_index);
+        } else
             cancel_assignment();
-        }
     } else {
-        current_module_index = module_index;
-        current_knob_index = knob_index;
+        set_current_knob(module_index, knob_index);
         if (kc->kc_flags & KCF_PITCH) {
             // XXX do something here
         }
@@ -222,8 +97,6 @@ static void handle_knob(size_t  module_index,
     knob_state          *ks = &ms->ms_knobs[knob_index];
 
     // cancel_assignment();
-    current_module_index = module_index;
-    current_knob_index = knob_index;
 
     uint8_t old_value = ks->ks_actual_value;
     // printf("Knob %s.%s changed %u -> %u\n",
@@ -239,6 +112,8 @@ static void handle_knob(size_t  module_index,
     }
     ks->ks_actual_value = new_value;
 
+    if (ks->ks_should_export)
+        set_current_knob(module_index, knob_index);
     uint8_t CC_value = new_value / 2;
     if (ks->ks_should_export && CC_value != ks->ks_exported_value) {
         MIDI_send_control_change(MIDI_default_channel, kc->kc_CC_msb, CC_value);
