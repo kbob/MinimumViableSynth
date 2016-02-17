@@ -109,7 +109,7 @@ static LED_state choice_LEDs[] = {
 };
 static const size_t choice_LED_count = (&choice_LEDs)[1] - choice_LEDs;
 UniWS LED_strand(MAX_PIXELS);
-int analog_values[MAX_ANALOGS];
+uint16_t analog_values[MAX_ANALOGS];
 DMAChannel SPI_rx_dma;
 DMAChannel SPI_tx_dma;
 
@@ -305,10 +305,10 @@ static uint8_t update_analog(uint8_t index, uint8_t **pptr)
     int new_value = analogRead(analog_pins[index]);
     int old_value = analog_values[index];
     
-    if (new_value >> 2 != old_value >> 2) {
+    if (new_value >> 9 != old_value >> 9) {
         if (new_value > old_value + 1 || new_value < old_value - 1) {
             analog_values[index] = new_value;
-            *(*pptr)++ = new_value >> 2;
+            *(*pptr)++ = new_value >> 9;
             return 1 << index;
         }
     }
@@ -388,8 +388,8 @@ static void self_test_loop()
             pix_level = 63;
         else if (pixel == i)
             pix_level = level;
-        uint8_t primary_level = pix_level * (1023 - analog) / 1023;
-        uint8_t secondary_level = pix_level * analog / 1023;
+        uint8_t primary_level = pix_level * (65535 - (uint32_t)analog) / 65535;
+        uint8_t secondary_level = pix_level * (uint32_t)analog / 65535;
         uint8_t r = (component == 0) ? primary_level : secondary_level;
         uint8_t g = (component == 1) ? primary_level : secondary_level;
         uint8_t b = (component == 2) ? primary_level : secondary_level;
@@ -409,6 +409,8 @@ void setup()
     pinMode(DEST_BUTTON_4_pin, INPUT_PULLUP);
     pinMode(ASSIGN_BUTTON_pin, INPUT_PULLUP);
     
+    analogReadResolution(16);
+
     LED_strand.begin();
 
     begin_slave();

@@ -114,7 +114,7 @@ static void handle_knob(size_t  module_index,
 
     if (ks->ks_should_export)
         set_current_knob(module_index, knob_index);
-    uint8_t CC_value = new_value / 2;
+    uint8_t CC_value = new_value;
     if (ks->ks_should_export && CC_value != ks->ks_exported_value) {
         MIDI_send_control_change(MIDI_default_channel, kc->kc_CC_msb, CC_value);
         ks->ks_exported_value = CC_value;
