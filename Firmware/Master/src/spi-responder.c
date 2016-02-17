@@ -98,6 +98,11 @@ static void handle_knob(size_t  module_index,
 
     // cancel_assignment();
 
+    if (new_value > 127) {
+        printf("Knob %s.%s illegal value %d\n",
+               mc->mc_name, kc->kc_name, new_value);
+        return;
+    }
     uint8_t old_value = ks->ks_actual_value;
     // printf("Knob %s.%s changed %u -> %u\n",
     //        mc->mc_name, kc->kc_name, old_value, new_value);

@@ -1,0 +1,82 @@
+LEDs off, no caps
+
+Hello from Slave: 3738978
+
+0: n=3333 min=0 max=65531 mean=65483 dev=12.89
+1: n=3333 min=0 max=65535 mean=65482 dev=15.19
+
+0: n=3333 min=65432 max=65534 mean=65483 dev=13.16
+1: n=3333 min=65415 max=65535 mean=65481 dev=13.88
+
+0: n=3333 min=65408 max=65535 mean=65483 dev=13.23
+1: n=3333 min=65408 max=65535 mean=65482 dev=14.46
+
+0: n=3333 min=65428 max=65535 mean=65484 dev=13.00
+1: n=3333 min=65414 max=65535 mean=65482 dev=14.25
+
+0: n=2731 min=33762 max=65530 mean=44002 dev=14268.42
+1: n=2731 min=30571 max=65534 mean=43253 dev=15158.56
+
+0: n=2322 min=33415 max=34279 mean=33855 dev=91.85
+1: n=2322 min=30572 max=30822 mean=30701 dev=30.31
+
+0: n=2401 min=33780 max=34297 mean=33868 dev=83.49
+1: n=2401 min=30563 max=30823 mean=30703 dev=30.66
+
+0: n=2301 min=33447 max=34281 mean=33863 dev=89.75
+1: n=2301 min=30571 max=30821 mean=30707 dev=31.19
+
+0: n=3011 min=4 max=34106 mean=4617 dev=11548.28
+1: n=3011 min=4 max=30803 mean=4168 dev=10437.96
+
+0: n=3333 min=4 max=70 mean=7 dev=8.28
+1: n=3333 min=4 max=128 mean=8 dev=11.13
+
+0: n=3333 min=4 max=67 mean=7 dev=8.16
+1: n=3333 min=4 max=127 mean=8 dev=11.31
+
+0: n=3333 min=4 max=86 mean=7 dev=8.09
+1: n=3333 min=4 max=106 mean=9 dev=11.58
+
+
+----------------------------------
+LEDs Amber, no caps
+
+Hello from Slave: 3144479
+
+0: n=3333 min=0 max=65535 mean=65485 dev=13.31
+1: n=3333 min=0 max=65535 mean=65483 dev=14.36
+
+0: n=3333 min=65407 max=65535 mean=65485 dev=13.34
+1: n=3333 min=65404 max=65535 mean=65482 dev=14.45
+
+0: n=3333 min=65404 max=65535 mean=65485 dev=13.16
+1: n=3333 min=65405 max=65535 mean=65483 dev=13.80
+
+0: n=3334 min=65404 max=65535 mean=65486 dev=13.11
+1: n=3334 min=65401 max=65535 mean=65482 dev=14.31
+
+0: n=2968 min=24713 max=65535 mean=47780 dev=18515.05
+1: n=2968 min=25663 max=65535 mean=56509 dev=15757.36
+
+0: n=2712 min=30341 max=31209 mean=30754 dev=85.28
+1: n=2712 min=25711 max=25989 mean=25848 dev=30.89
+
+0: n=2917 min=30426 max=31197 mean=30771 dev=72.69
+1: n=2917 min=25713 max=25955 mean=25845 dev=30.61
+
+0: n=2743 min=30343 max=31187 mean=30754 dev=76.50
+1: n=2743 min=25698 max=25951 mean=25846 dev=29.74
+
+0: n=3184 min=6 max=31202 mean=6443 dev=12449.11
+1: n=3184 min=6 max=25941 mean=7310 dev=11590.15
+
+0: n=3333 min=6 max=191 mean=13 dev=10.70
+1: n=3333 min=6 max=148 mean=15 dev=12.70
+
+0: n=3333 min=6 max=123 mean=13 dev=12.15
+1: n=3333 min=6 max=169 mean=15 dev=14.08
+
+0: n=3333 min=6 max=128 mean=13 dev=10.19
+1: n=3333 min=6 max=151 mean=16 dev=14.97
+

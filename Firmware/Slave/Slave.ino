@@ -1,9 +1,12 @@
+#include <math.h>
+
 #include <Bounce.h>
 #include <DMAChannel.h>
 #include <SPI.h>
 #include <UniWS.h>
 
 #define USE_SERIAL 1
+#define PRINT_STATS 0
 
 // See synth-notes.txt for full information.
     // Teensy     Attributes        Use
@@ -124,6 +127,26 @@ Bounce *const buttons[] = {
 const size_t button_count = sizeof buttons / sizeof buttons[0];
 
 message_buf recv_buf, send_buf;
+
+#if PRINT_STATS
+
+typedef struct analog_stats {
+    uint32_t x;
+    uint64_t x2;
+    uint32_t n;
+    uint16_t min;
+    uint16_t max;
+} analog_stats;
+
+typedef struct stat {
+    uint32_t start_time;
+    uint32_t stop_time;
+    analog_stats astats[MAX_ANALOGS];
+} stat;
+
+stat stats;
+
+#endif /* PRINT_STATS */
 
 #if USE_SERIAL
 
@@ -283,7 +306,7 @@ namespace {                     // declare these functions in an
         if (rx_chk != cc_chk) {
             SERIAL_PRINTF("chk: got %#x, not %#x\n", rx_chk, cc_chk);
             SERIAL_PRINTF("    len = %u\n", len);
-            for (int i = 0; i < len; i++)
+            for (size_t i = 0; i < len; i++)
                 SERIAL_PRINTF("    %3d: %d\n", i, buf[i]);
             return false;
         }
@@ -300,17 +323,46 @@ namespace {                     // declare these functions in an
     }
 };
 
+uint8_t condition(uint16_t raw, uint8_t expected)
+{
+    const int buffer = 3;
+
+    uint8_t c = raw * (128 + buffer) >> 16;
+    if (c >= expected && c <= expected + buffer)
+        return expected;
+    if (c < expected)
+        return c;
+    else {
+        if (c < buffer)
+            return 0;
+        return c - buffer;
+    }
+}
+
 static uint8_t update_analog(uint8_t index, uint8_t **pptr)
 {
-    int new_value = analogRead(analog_pins[index]);
+    int raw_value = analogRead(analog_pins[index]);
     int old_value = analog_values[index];
     
-    if (new_value >> 9 != old_value >> 9) {
-        if (new_value > old_value + 1 || new_value < old_value - 1) {
-            analog_values[index] = new_value;
-            *(*pptr)++ = new_value >> 9;
-            return 1 << index;
-        }
+#if PRINT_STATS
+    uint32_t now = millis();
+    if (now >= stats.start_time && now < stats.stop_time) {
+        analog_stats *astats = &stats.astats[index];
+        if (astats->min > raw_value)
+            astats->min = raw_value;
+        if (astats->max < raw_value)
+            astats->max = raw_value;
+        astats->x += raw_value;
+        astats->x2 += (uint32_t)raw_value * (uint32_t)raw_value;
+        astats->n++;
+    }
+#endif /* PRINT_STATS */
+
+    uint8_t new_value = condition(raw_value, old_value);
+    if (new_value != old_value) {
+        analog_values[index] = new_value;
+        *(*pptr)++ = new_value;
+        return 1 << index;
     }
     return 0;
 }
@@ -423,7 +475,7 @@ void loop()
 {
     static uint32_t alive_time;
     uint32_t timeout_msec = SPI_TIMEOUT_MSEC;
-    if ((int32_t)(millis() - alive_time) > timeout_msec)
+    if ((int32_t)(millis() - alive_time) > (int32_t)timeout_msec)
         timeout_msec = 10;
 
     size_t receive_count = do_transfer(recv_buf, MSG_MAX,
@@ -491,4 +543,31 @@ void loop()
     *tx_ptr++ = ETX;
     while (tx_ptr < send_buf + MSG_MAX)
         *tx_ptr++ = SYN;
+
+#if PRINT_STATS
+    if (alive_time >= stats.stop_time) {
+        for (size_t i = 0; i < MAX_ANALOGS; i++) {
+            analog_stats *astats = &stats.astats[i];
+            if (!astats->n)
+                continue;
+
+            uint64_t x = astats->x;
+            uint64_t x2 = astats->x2;
+            uint64_t n = astats->n;
+            uint32_t mean = x / n;
+            float stddev = sqrt(n * x2 - x * x) / n;
+            uint32_t idev = stddev * 100;
+
+            SERIAL_PRINTF("%u: n=%u min=%d max=%d mean=%d dev=%d.%02d\n",
+                          i,
+                          astats->n, astats->min, astats->max,
+                          mean, idev / 100, idev % 100);
+            astats->x = astats->x2 = astats->n = astats->max = 0;
+            astats->min = UINT16_MAX;
+        }
+        SERIAL_PRINTF("\n");
+        stats.start_time = millis() + 100;
+        stats.stop_time = stats.start_time + 10000;
+    }
+#endif /* PRINT_STATS */
 }
