@@ -3,11 +3,11 @@ Bugs
 
 Here are the outstanding bugs, so I can stop thinking about them.
 
-        The CTLRs module needs to be flashed.
+FIXED   The CTLRs module needs to be flashed.
 
 FIXED   Animations for assignment destinations are bad.
 
-        Knobs are too sensitive to noise.
+FIXED   Knobs are too sensitive to noise.
 
         The display needs to follow the power-on protocol.
 
@@ -22,6 +22,8 @@ FIXED   slave self-test mode leaves choice LEDs on.
         libopencm3 should be a submodule.
 
 FIXED   Remove "#if 0" dead code.
+
+FIXED   CTLRs module needs to have missing pot wiper tied to ground.
 
 ----------------------------------
 2016-01-18
