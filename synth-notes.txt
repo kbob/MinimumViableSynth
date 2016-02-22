@@ -1,3 +1,48 @@
+2016-02-19
+
+FPGA Fun
+
+    http://www.fpga4fun.com/
+
+
+Algorithms
+
+Sin and cos.
+
+    This calculates sin (or cos) theta using two lookup tables, one
+    for the high-order bits and another for the low-order bits.  That
+    uses a smaller table than LERP, and has better resolution, at the
+    cost of two load and two MAC operations per sample.  Probably
+    works well on an FPGA.
+
+    It uses these trig identities to decompose the angle.
+
+        sin (a + b) = sin a cos b + cos a sin b
+        cos (a + b) = cos a cos b - sin a sin b
+
+    http://www.embedded.com/design/configurable-systems/4007682/5/What-s-your-sine-Finding-the-right-algorithm-for-digital-frequency-synthesis-on-a-DSP
+
+    Here is the original paper.
+    Sunderland, D.A., et al., CMOS/SOS Frequency Synthesizer LSI Circuit
+    for Spread Spectrum Communications, IEEE Journal of Solid-State
+    Circuits Vol. SC-19, No. 4, pp 497-506, August 1984.
+
+    A similar trick would work for tanh, but would still require a
+    divide.
+
+        tanh (x + y) = (tanh x + tanh y) / (1 + tanh x tanh y)
+
+Pink Noise Generator
+
+    http://stenzel.waldorfmusic.de/post/pink/
+    https://github.com/Stenzel/newshadeofpink
+
+    This is a new pink noise generator.  It is fairly
+    incomprehensible, but it looks well-suited to an FPGA.  The
+    claimed spectrum is awesomely flat.  Paul Stoffregen uses it
+    in the Teensy Audio Library.
+
+----------------------------------
 2016-02-06
 Bugs
 

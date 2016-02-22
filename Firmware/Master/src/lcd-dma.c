@@ -78,17 +78,10 @@ layer2_pixel *const lcd_layer2_frame_buffer =
  *     DOTCLK  = PG7,  AF14
  *     HSYNC   = PC6,  AF14
  *     VSYNC   = PA4,  AF14
- *     CSX     = PC2         used in lcd-spi
- *     RDX     = PD12        not used: read SPI
- *     TE      = PD11        not used: tearing effect interrupt
- *     WRX_DCX = PD13        used in lcd-spi
- *     DCX_SCL = PF7         used in lcd-spi
- *     SDA     = PF9         used in lcd-spi
- *     NRST    = NRST
  */
 
 static const gpio_pin lcd_tft_pins[] = {
-    {                           // LCD_CLK
+    {                           // PG7 = LCD_CLK
         .gp_port   = GPIOG,
         .gp_pin    = GPIO7,
         .gp_mode   = GPIO_MODE_AF,
@@ -96,7 +89,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_HSYNC
+    {                           // PC6 = LCD_HSYNC
         .gp_port   = GPIOC,
         .gp_pin    = GPIO6,
         .gp_mode   = GPIO_MODE_AF,
@@ -104,7 +97,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_VSYNC
+    {                           // PA4 = LCD_VSYNC
         .gp_port   = GPIOA,
         .gp_pin    = GPIO4,
         .gp_mode   = GPIO_MODE_AF,
@@ -112,7 +105,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_DE
+    {                           // PF10 = LCD_DE
         .gp_port   = GPIOF,
         .gp_pin    = GPIO10,
         .gp_mode   = GPIO_MODE_AF,
@@ -122,7 +115,7 @@ static const gpio_pin lcd_tft_pins[] = {
     },
 
 
-    {                           // LCD_R[2]
+    {                           // PC10 = LCD_R[2]
         .gp_port   = GPIOC,
         .gp_pin    = GPIO10,
         .gp_mode   = GPIO_MODE_AF,
@@ -130,7 +123,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_R[3]
+    {                           // PB0 = LCD_R[3]
         .gp_port   = GPIOB,
         .gp_pin    = GPIO0,
         .gp_mode   = GPIO_MODE_AF,
@@ -138,7 +131,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF9,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_R[4]
+    {                           // PA11 = LCD_R[4]
         .gp_port   = GPIOA,
         .gp_pin    = GPIO11,
         .gp_mode   = GPIO_MODE_AF,
@@ -146,7 +139,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_R[5]
+    {                           // PA12 = LCD_R[5]
         .gp_port   = GPIOA,
         .gp_pin    = GPIO12,
         .gp_mode   = GPIO_MODE_AF,
@@ -154,7 +147,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_R[6]
+    {                           // PB1 = LCD_R[6]
         .gp_port   = GPIOB,
         .gp_pin    = GPIO1,
         .gp_mode   = GPIO_MODE_AF,
@@ -162,7 +155,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF9,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_R[7]
+    {                           // PG6 = LCD_R[7]
         .gp_port   = GPIOG,
         .gp_pin    = GPIO6,
         .gp_mode   = GPIO_MODE_AF,
@@ -172,7 +165,7 @@ static const gpio_pin lcd_tft_pins[] = {
     },
 
 
-    {                           // LCD_G[2]
+    {                           // PA6 = LCD_G[2]
         .gp_port   = GPIOA,
         .gp_pin    = GPIO6,
         .gp_mode   = GPIO_MODE_AF,
@@ -180,7 +173,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_G[3]
+    {                           // PG10 = LCD_G[3]
         .gp_port   = GPIOG,
         .gp_pin    = GPIO10,
         .gp_mode   = GPIO_MODE_AF,
@@ -188,7 +181,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF9,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_G[4]
+    {                           // PB10 = LCD_G[4]
         .gp_port   = GPIOB,
         .gp_pin    = GPIO10,
         .gp_mode   = GPIO_MODE_AF,
@@ -196,7 +189,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_G[5]
+    {                           // PB11 = LCD_G[5]
         .gp_port   = GPIOB,
         .gp_pin    = GPIO11,
         .gp_mode   = GPIO_MODE_AF,
@@ -204,7 +197,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_G[6]
+    {                           // PC7 = LCD_G[6]
         .gp_port   = GPIOC,
         .gp_pin    = GPIO7,
         .gp_mode   = GPIO_MODE_AF,
@@ -212,7 +205,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_G[7]
+    {                           // PD3 = LCD_G[7]
         .gp_port   = GPIOD,
         .gp_pin    = GPIO3,
         .gp_mode   = GPIO_MODE_AF,
@@ -222,7 +215,7 @@ static const gpio_pin lcd_tft_pins[] = {
     },
 
 
-    {                           // LCD_B[2]
+    {                           // PD6 = LCD_B[2]
         .gp_port   = GPIOD,
         .gp_pin    = GPIO6,
         .gp_mode   = GPIO_MODE_AF,
@@ -230,7 +223,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_B[3]
+    {                           // PG11 = LCD_B[3]
         .gp_port   = GPIOG,
         .gp_pin    = GPIO11,
         .gp_mode   = GPIO_MODE_AF,
@@ -238,7 +231,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF11,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_B[4]
+    {                           // PG12 = LCD_B[4]
         .gp_port   = GPIOG,
         .gp_pin    = GPIO12,
         .gp_mode   = GPIO_MODE_AF,
@@ -246,7 +239,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF9,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_B[5]
+    {                           // PA3 = LCD_B[5]
         .gp_port   = GPIOA,
         .gp_pin    = GPIO3,
         .gp_mode   = GPIO_MODE_AF,
@@ -254,7 +247,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_B[6]
+    {                           // PB8 = LCD_B[6]
         .gp_port   = GPIOB,
         .gp_pin    = GPIO8,
         .gp_mode   = GPIO_MODE_AF,
@@ -262,7 +255,7 @@ static const gpio_pin lcd_tft_pins[] = {
         .gp_af     = GPIO_AF14,
         .gp_ospeed = GPIO_OSPEED_50MHZ,
     },
-    {                           // LCD_B[7]
+    {                           // PB9 = LCD_B[7]
         .gp_port   = GPIOB,
         .gp_pin    = GPIO9,
         .gp_mode   = GPIO_MODE_AF,
@@ -398,6 +391,14 @@ void lcd_dma_setup(void)
     while ((RCC_CR & RCC_CR_PLLSAIRDY) == 0)
         continue;
     RCC_APB2ENR |= RCC_APB2ENR_LTDCEN;
+
+    /*
+     * Busy-wait until the CPU has been up for 16 msec.
+     * The KD50G21 datasheet says that power needs to be stable for
+     * 16 msec before the video signal starts.
+     */
+    while (system_millis < 16)
+        continue;
 
     /*
      * Configure the Synchronous timings: VSYNC, HSNC,

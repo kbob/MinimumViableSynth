@@ -44,7 +44,7 @@
 //
 //    Group A: PB7
 //    Group B: PE3
-//    Group C: PA10
+//    Group C: PC3
 //    Group D: PC8
 
 // Each active DMA requires a controller/stream/channel triple.
@@ -211,32 +211,49 @@ static const spi_config *config_map[SPI_BUS_RANGE] = {
 };
 
 static const gpio_pin group_ss_pins[] = {
-    {
-        .gp_port = GPIOB,
-        .gp_pin  = GPIO7,
-        .gp_mode = GPIO_MODE_OUTPUT,
-        .gp_pupd = GPIO_PUPD_NONE,
+    {                           // Group A CS: PB7
+        .gp_port  = GPIOB,
+        .gp_pin   = GPIO7,
+        .gp_mode  = GPIO_MODE_OUTPUT,
+        .gp_level = 1,
     },
-    {
-        .gp_port = GPIOE,
-        .gp_pin  = GPIO3,
-        .gp_mode = GPIO_MODE_OUTPUT,
-        .gp_pupd = GPIO_PUPD_NONE,
+    {                           // Group B CS: PE3
+        .gp_port  = GPIOE,
+        .gp_pin   = GPIO3,
+        .gp_mode  = GPIO_MODE_OUTPUT,
+        .gp_level = 1,
     },
-    {
-        .gp_port = GPIOA,
-        .gp_pin  = GPIO10,
-        .gp_mode = GPIO_MODE_OUTPUT,
-        .gp_pupd = GPIO_PUPD_NONE,
+    {                           // Group C CS: PC3
+        .gp_port  = GPIOC,
+        .gp_pin   = GPIO3,
+        .gp_mode  = GPIO_MODE_OUTPUT,
+        .gp_level = 1,
     },
-    {
-        .gp_port = GPIOC,
-        .gp_pin  = GPIO8,
-        .gp_mode = GPIO_MODE_OUTPUT,
-        .gp_pupd = GPIO_PUPD_NONE,
+    {                           // Group D CS: PC8
+        .gp_port  = GPIOC,
+        .gp_pin   = GPIO8,
+        .gp_mode  = GPIO_MODE_OUTPUT,
+        .gp_level = 1,
     },
 };
 static const size_t group_count = (&group_ss_pins)[1] - group_ss_pins;
+
+static const gpio_pin disable_cs_pins[] = {
+    {
+        .gp_port  = GPIOC,
+        .gp_pin   = GPIO1,
+        .gp_mode  = GPIO_MODE_OUTPUT,
+        .gp_level = 1,
+    },
+    {
+        .gp_port  = GPIOC,
+        .gp_pin   = GPIO2,
+        .gp_mode  = GPIO_MODE_OUTPUT,
+        .gp_level = 1,
+    },
+};
+static const size_t disable_cs_pin_count =
+    (&disable_cs_pins)[1] - disable_cs_pins;
 
 static volatile uint8_t active_bus_mask;
 static spi_completion_handler *completion_handler;
@@ -328,17 +345,8 @@ void spi_setup(void)
     spi_setup_config(&spi5_config);
 
     // Configure nSS pins
-    for (size_t i = 0; i < group_count; i++) {
-        const gpio_pin *gp = &group_ss_pins[i];
-        gpio_init_pin(gp);
-        gpio_set(gp->gp_port, gp->gp_pin);
-    }
-
-    // Hold pins PC1 and PC2 permanently high to disable SPI on LCD
-    // and MEMS device.
-    gpio_mode_setup(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO1 | GPIO2);
-    gpio_set(GPIOC, GPIO1);
-    gpio_set(GPIOC, GPIO2);
+    gpio_init_pins(group_ss_pins, group_count);
+    gpio_init_pins(disable_cs_pins, disable_cs_pin_count);
 }
 
 void spi_register_completion_handler(spi_completion_handler *handler)

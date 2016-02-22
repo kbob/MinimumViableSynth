@@ -5,8 +5,8 @@ endif
 
 ########################################################################
    SOURCES := main.c anim.c button.c config.c console.c gpio.c          \
-              lcd-dma.c midi.c modes.c sdram.c spi.c spi-proto.c        \
-              spi-responder.c state.c systick.c usb-midi.c
+              lcd-dma.c lcd-pwm.c midi.c modes.c sdram.c spi.c          \
+              spi-proto.c spi-responder.c state.c systick.c usb-midi.c
     CFILES := $(filter %.c, $(SOURCES))
     OFILES := $(CFILES:%.c=%.o)
 

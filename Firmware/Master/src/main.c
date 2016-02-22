@@ -6,6 +6,7 @@
 #include "button.h"
 #include "console.h"
 #include "lcd-dma.h"
+#include "lcd-pwm.h"
 #include "midi.h"
 #include "sdram.h"
 #include "spi.h"
@@ -35,19 +36,34 @@ static void clock_setup(void)
     }
 }
 
+static void adjust_LCD_brightness(uint32_t t0, uint32_t now)
+{
+    static bool done;
+    if (done)
+        return;
+    uint32_t b0 = (now - t0);
+    uint32_t b1 = b0 * (b0 + 1) >> 2;
+    if (b1 > 65535) {
+        b1 = 65535;
+        done = true;
+    }
+    lcd_pwm_set_brightness(b1);
+}
+
 int main()
 {
     clock_setup();
     systick_setup(CPU_FREQ);
+    lcd_pwm_setup(); // Do this early to keep the uninitialized screen dark.
     console_setup();
     console_stdio_setup();
-    sdram_setup();
     MIDI_setup();
     usb_midi_setup();
     button_setup();
     spi_setup();
     SPI_proto_setup();
     SPI_responder_setup();
+    sdram_setup();
     lcd_dma_setup();
 
     printf("Minimum Viable Firmware\n");
@@ -58,8 +74,10 @@ int main()
 #endif
 
     uint32_t next_time = REPORT_INTERVAL_MSEC;
+    uint32_t pwm_t0 = system_millis;
 
     while (1) {
+        adjust_LCD_brightness(pwm_t0, system_millis);
         usb_midi_poll();
         button_poll();
 

@@ -11,14 +11,14 @@
 #define CONSOLE_BAUD 115200
 
 static const gpio_pin usart1_pins[] = {
-    {                           // TX
+    {                           // PA9 = TX
         .gp_port = GPIOA,
         .gp_pin  = GPIO9,
         .gp_mode = GPIO_MODE_AF,
         .gp_pupd = GPIO_PUPD_NONE,
         .gp_af   = GPIO_AF7,
     },
-    {                           // RX
+    {                           // PA10 = RX
         .gp_port = GPIOA,
         .gp_pin  = GPIO10,
         .gp_mode = GPIO_MODE_AF,

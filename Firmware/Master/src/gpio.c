@@ -8,11 +8,13 @@
 #define GPIO_PORT_COUNT 11
 
 static bool gpio_clock_enabled[GPIO_PORT_COUNT];
+static uint16_t gpio_pin_used[GPIO_PORT_COUNT];
 
 void gpio_init_pin(const gpio_pin *pin)
 {
-    uint32_t index =
-        ((uint32_t)pin->gp_port - (uint32_t)PERIPH_BASE_AHB1) >> 10;
+    uint32_t port = pin->gp_port;
+    uint16_t pinmask = pin->gp_pin;
+    uint32_t index = ((uint32_t)port - (uint32_t)PERIPH_BASE_AHB1) >> 10;
     assert(index < GPIO_PORT_COUNT);
 
     if (!gpio_clock_enabled[index]) {
@@ -20,21 +22,31 @@ void gpio_init_pin(const gpio_pin *pin)
         gpio_clock_enabled[index] = true;
     }
 
-    gpio_mode_setup(pin->gp_port,
+    assert(!(gpio_pin_used[index] & pinmask));
+    gpio_pin_used[index] |= pinmask;
+
+    gpio_mode_setup(port,
                     pin->gp_mode,
                     pin->gp_pupd,
-                    pin->gp_pin);
+                    pinmask);
+
+    if (pin->gp_mode == GPIO_MODE_OUTPUT) {
+        if (pin->gp_level)
+            gpio_set(port, pinmask);
+        else
+            gpio_clear(port, pinmask);
+    }
 
     if (pin->gp_mode == GPIO_MODE_OUTPUT || pin->gp_mode == GPIO_MODE_AF)
-        gpio_set_output_options(pin->gp_port,
+        gpio_set_output_options(port,
                                 pin->gp_otype,
                                 pin->gp_ospeed,
-                                pin->gp_pin);
+                                pinmask);
 
     if (pin->gp_mode == GPIO_MODE_AF)
-        gpio_set_af(pin->gp_port,
+        gpio_set_af(port,
                     pin->gp_af,
-                    pin->gp_pin);
+                    pinmask);
 }
 
 void gpio_init_pins(const gpio_pin *pins, size_t count)
