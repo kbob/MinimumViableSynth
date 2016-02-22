@@ -54,7 +54,7 @@ FIXED   Animations for assignment destinations are bad.
 
 FIXED   Knobs are too sensitive to noise.
 
-        The display needs to follow the power-on protocol.
+FIXED   The display needs to follow the power-on protocol.
 
         USB writes hang when nothing is listening for them.
 
