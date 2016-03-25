@@ -4,7 +4,7 @@ ifeq '$(LIBOPENCM3)' ''
 endif
 
 ########################################################################
-   SOURCES := main.c anim.c button.c config.c console.c gpio.c          \
+   SOURCES := main.c anim.c button.c config.c console.c delay.c gpio.c  \
               lcd-dma.c lcd-pwm.c midi.c modes.c sdram.c spi.c          \
               spi-proto.c spi-responder.c state.c systick.c usb-midi.c
     CFILES := $(filter %.c, $(SOURCES))
@@ -38,8 +38,14 @@ master.elf: $(OFILES)
 	$(LINK.o) $^ $(LDLIBES) $(LDLIBS) -o $@
 
 clean:
-	rm -f *.d *.o *.elf *.map
+	rm -f *.d *.o *.elf *.map TAGS
+
+tags:
+	make-etags-SimplicityStudio $(LIBOPENCM3)/lib/stm32/f4/*.c $$(strings "$(LIBOPENCM3)/lib/libopencm3_stm32f4.a" | sed -n -E "s,^(\.\./common|\.\./\.\./usb)/.*\.c\$$,$(LIBOPENCM3)/lib/stm32/f4/&,p")
+
 
 ifeq '$(filter clean$ help,$(or $(MAKECMDGOALS),help))' ''
   -include $(CFILES:%.c=%.d)
 endif
+
+.PHONY: default clean tags

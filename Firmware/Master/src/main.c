@@ -5,6 +5,7 @@
 
 #include "button.h"
 #include "console.h"
+#include "delay.h"
 #include "lcd-dma.h"
 #include "lcd-pwm.h"
 #include "midi.h"
@@ -65,6 +66,7 @@ int main()
     SPI_responder_setup();
     sdram_setup();
     lcd_dma_setup();
+    init_delay(CPU_FREQ);
 
     printf("Minimum Viable Firmware\n");
 
@@ -86,6 +88,7 @@ int main()
         next_time += REPORT_INTERVAL_MSEC;
 
         SPI_proto_report_and_clear_stats();
+        // USB_midi_report_and_clear_stats();
     }
     return 0;
 }

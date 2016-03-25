@@ -9,6 +9,7 @@
 
 #include "anim.h"
 #include "config.h"
+#include "delay.h"
 #include "spi.h"
 #include "state.h"
 #include "systick.h"
@@ -291,7 +292,7 @@ static bool check_buttons(uint8_t button_mask, size_t module_index)
 static bool check_analog(uint8_t analog_mask, size_t module_index)
 {
     const module_config *mod = &sc.sc_modules[module_index];
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < MAX_KNOBS; i++)
         if (analog_mask & (1 << i) &&
             (i >= mod->mc_knob_count || !mod->mc_knobs[i].kc_has_button))
             return false;
@@ -363,6 +364,7 @@ static bool parse_incoming_packet(spi_buf const packet,
 static void start_SPI_group(int grp)
 {
     spi_select_group(grp);
+    delay_usec(20);
     int bus;
     for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++) {
         size_t mod_idx = spi_to_module(grp, bus);
@@ -380,6 +382,7 @@ static void stop_SPI_group(int grp)
     int bus;
     for (int i = 0; (bus = active_spi_buses(grp, i)) != NO_BUS; i++)
         spi_finish_transfer(bus);
+    delay_usec(20);
     spi_deselect_group(grp);
 }
 
