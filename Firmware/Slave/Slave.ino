@@ -304,7 +304,7 @@ namespace {                     // declare these functions in an
         uint16_t rx_chk = (uint16_t)buf[len - 3] << 8 | buf[len - 2];
         uint16_t cc_chk = fletcher16(buf + 1, len - 4);
         if (rx_chk != cc_chk) {
-            SERIAL_PRINTF("chk: got %#x, not %#x\n", rx_chk, cc_chk);
+            SERIAL_PRINTF("chk: got %#x, wanted %#x\n", rx_chk, cc_chk);
             SERIAL_PRINTF("    len = %u\n", len);
             for (size_t i = 0; i < len; i++)
                 SERIAL_PRINTF("    %3d: %d\n", i, buf[i]);
@@ -367,24 +367,24 @@ static uint8_t update_analog(uint8_t index, uint8_t **pptr)
     return 0;
 }
 
-// static void print_buf(const char *label, const uint8_t *buf, size_t count)
-// {
-//     SERIAL_PRINTF("%s", label);
-//     for (size_t i = 0; i < count; i++) {
-//         uint8_t c = buf[i];
-//         if (c == STX)
-//             SERIAL_PRINTF(" STX");
-//         else if (c == ETX)
-//             SERIAL_PRINTF(" ETX");
-//         else if (c == SYN)
-//             SERIAL_PRINTF(" SYN");
-//         else if (c >= ' ' && c < '\177')
-//             SERIAL_PRINTF(" %c", c);
-//         else
-//             SERIAL_PRINTF(" \\%03o", c);
-//     }
-//     SERIAL_PRINTF("\n");
-// }
+static void print_buf(const char *label, const uint8_t *buf, size_t count)
+{
+    SERIAL_PRINTF("%s", label);
+    for (size_t i = 0; i < count; i++) {
+        uint8_t c = buf[i];
+        if (c == STX)
+            SERIAL_PRINTF(" STX");
+        else if (c == ETX)
+            SERIAL_PRINTF(" ETX");
+        else if (c == SYN)
+            SERIAL_PRINTF(" SYN");
+        // else if (c >= ' ' && c < '\177')
+        //     SERIAL_PRINTF(" %c", c);
+        else
+            SERIAL_PRINTF(" \\%03o", c);
+    }
+    SERIAL_PRINTF("\n");
+}
 
 static uint8_t biramp(uint32_t i, uint32_t n)
 {
@@ -484,11 +484,13 @@ void loop()
     // print_buf("received: ", recv_buf, MSG_MAX);
     if (receive_count == 0) {
         memset(send_buf, SYN, sizeof send_buf);
-        self_test_loop();
+        if ((int32_t)(millis() - alive_time) >= SPI_TIMEOUT_MSEC)
+            self_test_loop();
         return;
     }
     if (!message_valid(recv_buf, receive_count)) {
-        // SERIAL_PRINTF("invalid message received\n");
+        SERIAL_PRINTF("invalid message received\n");
+        print_buf("received: ", recv_buf, MSG_MAX);
         memset(send_buf, SYN, sizeof send_buf);
         return;
     }
