@@ -7,8 +7,7 @@
 
 #define GPIO_PORT_COUNT 11
 
-static bool gpio_clock_enabled[GPIO_PORT_COUNT];
-static uint16_t gpio_pin_used[GPIO_PORT_COUNT];
+static uint16_t gpio_pins_used[GPIO_PORT_COUNT];
 
 void gpio_init_pin(const gpio_pin *pin)
 {
@@ -17,13 +16,11 @@ void gpio_init_pin(const gpio_pin *pin)
     uint32_t index = ((uint32_t)port - (uint32_t)PERIPH_BASE_AHB1) >> 10;
     assert(index < GPIO_PORT_COUNT);
 
-    if (!gpio_clock_enabled[index]) {
+    if (!gpio_pins_used[index])
         rcc_periph_clock_enable((0x30 << 5) | index);
-        gpio_clock_enabled[index] = true;
-    }
 
-    assert(!(gpio_pin_used[index] & pinmask));
-    gpio_pin_used[index] |= pinmask;
+    assert(!(gpio_pins_used[index] & pinmask));
+    gpio_pins_used[index] |= pinmask;
 
     gpio_mode_setup(port,
                     pin->gp_mode,
