@@ -13,4 +13,6 @@ extern void usb_midi_poll(void);
 
 extern void usb_midi_send_message(uint8_t const *msg, size_t size);
 
+extern void usb_midi_report_and_clear_stats(void);
+
 #endif /* !USB_MIDI_included */

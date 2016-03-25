@@ -12,10 +12,15 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
+
+#include <libopencm3/cm3/cortex.h>
+#include <libopencm3/cm3/nvic.h>
 
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/audio.h>
 #include <libopencm3/usb/midi.h>
+
 #include <libopencm3/stm32/rcc.h>
 
 #include "gpio.h"
@@ -349,6 +354,7 @@ static void usb_midi_set_config(usbd_device *usbd_dev, uint16_t wValue)
 void usb_midi_setup(void)
 {
     // Clock
+    // rcc_periph_clock_enable(RCC_OTGFS);
     rcc_periph_clock_enable(RCC_OTGHS);
 
     // GPIO
@@ -403,4 +409,24 @@ void usb_midi_send_message(uint8_t const *msg, size_t size)
             continue;
     }
     return;
+}
+
+typedef struct usb_midi_stats {
+} usb_midi_stats;
+
+static usb_midi_stats stats;
+
+void usb_midi_proto_report_and_clear_stats(void)
+{
+    bool interrupts_are_masked = cm_is_masked_interrupts();
+    cm_disable_interrupts();
+
+    usb_midi_stats tmp = stats;
+    memset(&stats, 0, sizeof stats);
+
+    if (!interrupts_are_masked)
+        cm_enable_interrupts();
+
+    printf("   OK  fail module\n");
+    tmp = tmp;
 }
