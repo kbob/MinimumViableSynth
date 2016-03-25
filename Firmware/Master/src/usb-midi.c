@@ -354,7 +354,6 @@ static void usb_midi_set_config(usbd_device *usbd_dev, uint16_t wValue)
 void usb_midi_setup(void)
 {
     // Clock
-    // rcc_periph_clock_enable(RCC_OTGFS);
     rcc_periph_clock_enable(RCC_OTGHS);
 
     // GPIO
