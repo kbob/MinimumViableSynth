@@ -265,8 +265,16 @@ static inline void mark_bus_inactive(uint8_t bus)
         (*completion_handler)();
 }
 
+#define WITH_INTERRUPTS_MASKED                                          \
+     for (bool wim_interrupts_are_masked = cm_is_masked_interrupts(),   \
+               wim_first_time = (cm_disable_interrupts(), true);        \
+          wim_first_time;                                               \
+          wim_interrupts_are_masked ? (void)0 : cm_enable_interrupts(), \
+          wim_first_time = false)
+
 static inline void mark_bus_active(uint8_t bus)
 {
+#if 0
     bool interrupts_are_masked = cm_is_masked_interrupts();
     cm_disable_interrupts();
 
@@ -274,6 +282,11 @@ static inline void mark_bus_active(uint8_t bus)
 
     if (!interrupts_are_masked)
         cm_enable_interrupts();
+#else
+    WITH_INTERRUPTS_MASKED {
+        active_bus_mask |= 1 << bus;
+    }
+#endif
 }
 
 void dma2_stream2_isr(void)
