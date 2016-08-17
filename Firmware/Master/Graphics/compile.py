@@ -65,9 +65,11 @@ def emit_bytes(lenruns):
                 count -= scount
 
 # Testing, write bin file
-#bb = bytes(emit_bytes(lenruns))
-#with open('foo.bin', 'wb') as out:
-#    out.write(bb)
+bi = list(emit_bytes(lenruns))
+bb = bytes(bi)
+# bb = bytes(emit_bytes(lenruns))
+with open('foo.bin', 'wb') as out:
+   out.write(bb)
 
 def isplit(s, n):
     z = []
@@ -93,7 +95,6 @@ with open('foo.h', 'w') as out:
     print('#define IMG_HEIGHT %d' % im.size[1], file=out)
     print(file=out)
     print('uint8_t img_data[] = {', file=out)
-    bb = emit_bytes(lenruns)
-    for x in isplit(bb, 12):
+    for x in isplit(bi, 12):
         print('    ' + ', '.join('%3d' % i for i in x) + ',', file=out)
     print(postamble, file=out)

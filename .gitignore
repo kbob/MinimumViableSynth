@@ -8,3 +8,6 @@ Synth Pages.pdf
 *.d
 *.elf
 *.map
+TAGS
+.*.lck
+*.bin
