@@ -1,3 +1,99 @@
+2016-11-07
+
+Master Daughter card
+Functional Spec
+
+Barrel connector for +5V.
+16 connectors for slaves with buffers
+LCD connector
+  40 pin FPC
+  36 pins for LCD
+  4 pins for touch
+STMPE811 for resistive touch
+external I2C header and 5V, 3.3V for capacitive touch
+header for serial MIDI.  5V, serial in/out, ground.
+
+
+----------------------------------
+2016-11-07
+
+Cross-checking STM32F429I-Discovery pinout.
+
+Touch sensor (STMP#811) is missing.  Needs I2C bus.
+    don't forget to connect the interrupt pin.
+N.B., MB1075 schematic says "USB_OTF_FS" but actually uses _HS pins.
+SWD pins are not in spreadsheet.
+USB_OTG_HS pins are not in spreadsheet.
+RCC_OSC pins are not in spreadsheet.
+
+... and I ordered a panel with a capacitive touch sensor.  It is
+completely incompatible with the resistive sensor on the Adafruit
+panels.
+
+I think I will draw room on the board for the STMP3811 chip, but will
+also have an external header for connecting the capacitive sensor.
+
+I used PG2 for the STMPE811 touch interrupt.
+
+
+----------------------------------
+2016-11-04
+
+Looking for switched line buffers.
+
+74LVC4066 - actually an analog switch.  Used in SiLabs dev board.
+TS3A4751  - ditto
+MC74VHC125 - quad bus buffer with 3 state control inputs
+SN74AHC125 - quadruple 2-input positive-nand gates
+SN74LVC1G125 - Single Bus Buffer Gate With 3-State Output
+The last one is interesting.  It's a single gate on a 5-pin chip.
+
+Update 11/7: I already bought some NXP 74HC244PW chips.  Octal buffer,
+             one enable line for every four lines.  20 pin TSSOP package.
+             Perfect.
+       
+
+----------------------------------
+2016-09-17
+
+If I'm tweaking a knob on a modulator, I want to see the modulator
+parameters, but I also want to see how it affects the target module.
+Do they both need to be visible side by side?
+
+----------------------------------
+2016-08-17
+
+(Long time no update)
+
+Let's list all the controls and think about what display we'd like to
+see when each is changed.
+
+Control: LFO1.waveform
+Display: "LFO 1", "waveform", Scope of waveform.
+         Graph shows blue highlights (how?) if LFO1.speed or
+         LFO1.amount is being modified.
+
+Control: LFO1.Speed
+Display: "LFO 1", "Speed: 3.0 Hz", knob outline, graph of waveform.
+
+
+Control: LFO1.Amount
+Display: "LFO 1", "Amount: 0.5", knob outline, graph of waveform.
+
+Control: LFO2.waveform, .speed, .amount
+Display: as above.
+
+Control: Osc1.waveform
+Display: "Osc 1", "Pitch: +2 octaves, -2 semitones, +23 cents." or
+         "Pitch: 2 8va  2♭  +23¢", knob outline, graph of waveform.
+
+Control: Osc1.waveform
+Display: "Osc 1", "Width: 5%", knob outline, graph of waveform.
+
+... seems to be a pattern..
+
+
+----------------------------------
 2016-03-05
 
 Here's a silly macro to wrap critical sections.
