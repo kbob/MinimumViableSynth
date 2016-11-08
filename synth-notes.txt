@@ -1,3 +1,27 @@
+2016-11-08
+Election Day
+
+Components on the I/O Daughter Card
+   barrel connector for power
+   64 pin headers for master
+   FPC 40 pin for LCD
+   16 JST-SM connectors for slaves
+   header for serial MIDI
+   header for capacitive touch
+
+   3v3 regulator
+   22V Boost for backlight: FAN5333BSX
+
+   STMPE811 for resistive touch
+   6 74HC244PW octal buffers
+   misc. passives
+
+Which regulator?
+   Adafruit uses an MIC5225-3.3v on the TFT Friend.  150 mA.
+   Teensy 3.2-3.6 use LP38691SDX-3.3/NOPB.  500 mA.
+
+
+----------------------------------
 2016-11-07
 
 Master Daughter card
@@ -12,6 +36,7 @@ LCD connector
 STMPE811 for resistive touch
 external I2C header and 5V, 3.3V for capacitive touch
 header for serial MIDI.  5V, serial in/out, ground.
+header for 4 touch pins on FPC
 
 
 ----------------------------------
