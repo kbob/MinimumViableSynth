@@ -1,24 +1,103 @@
+2016-11-09
+
+Parts
+
+  Barrel Jack
+  Adafruit #373
+  CUI PJ-102AH
+  5 on hand
+
+  64 pin headers
+  Digi-Key SAM1212-32-ND
+  Samtec SSW-132-01-T-D
+  4 on hand; need 6
+
+  LCD FPC Connector
+  Digi-Key A100229CT-ND
+  TE Connectivity AMP 4-1734839-0
+  4 on hand
+
+  Slave SPI Headers
+  Digi-Key 455-1738-1-ND
+  JST B6B-PH-SM4-TB
+  need 48
+
+  Serial MIDI Header
+  generic 2.54" header, 5 pos.
+  many on hand
+
+  Capacitive Touch Header
+  Digi-Key OR748CT-ND
+  Omron XF2L-0625-1A
+  need 3
+
+    Capacitive Touch Alt. Header 1
+    BuyDesign.com CON06HT-1
+    ordered 1
+
+    Capacitive Touch Alt. Header 2
+    generic 2.54" header, 6 pos.
+    many on hand
+
+  3v3 Regulator
+  Digi-Key 1016-1873-1-ND
+  Exar SPX3819M5-L-3-3/TR
+
+  LCD Backlight Driver
+  Digi-Key FAN5333BSXCT-ND
+  Fairchild FAN5333BSX
+  need 3
+
+  Resistive Touch Controller
+  Digi-Key 497-8387-1-ND
+  ST STMPE811QTR
+  need 3   
+
+  SPI Buffers
+  Digi-Key 568-8285-5-ND
+  NXP 74HC244PW.112
+  20 on hand
+
+More parts
+
+  Slave SPI Connectors
+  JST PHR-6
+  9 on hand; need 16
+
+  Slave SPI Contacts
+  Digi-Key 455-2148-1-ND
+  JST SPH-002T-P0.5L
+  85 on hand; need 96
+
+----------------------------------
 2016-11-08
 Election Day
 
 Components on the I/O Daughter Card
-   barrel connector for power
+   barrel jack for power
    64 pin headers for master
    FPC 40 pin for LCD
-   16 JST-SM connectors for slaves
+   16 JST-PH connectors for slaves
    header for serial MIDI
    header for capacitive touch
+     FPC ZIF 6 position, 0.5mm pitch
+     Omron XF2L-0625-1A
 
-   3v3 regulator
+   3v3 regulator: SPX3819M5-L-3-3
    22V Boost for backlight: FAN5333BSX
 
    STMPE811 for resistive touch
    6 74HC244PW octal buffers
    misc. passives
 
-Which regulator?
+Which 3v3 regulator?
    Adafruit uses an MIC5225-3.3v on the TFT Friend.  150 mA.
    Teensy 3.2-3.6 use LP38691SDX-3.3/NOPB.  500 mA.
+   Piotr uses SPX3819M5-L-3-3/TR.
+
+Which backlight driver?
+   Adafruit uses FAN5333BSX on the TFT Friend
+   Piotr recommended the TPS61042.
 
 
 ----------------------------------
