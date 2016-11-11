@@ -1,3 +1,13 @@
+2016-11-10
+I/O Daughter Board - Sections
+
+Power
+Video
+Slaves
+MIDI
+Toucha
+
+----------------------------------
 2016-11-09
 
 Parts
@@ -55,7 +65,7 @@ Parts
 
   SPI Buffers
   Digi-Key 568-8285-5-ND
-  NXP 74HC244PW.112
+  NXP 74HC244PW,112
   20 on hand
 
 More parts
