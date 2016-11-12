@@ -717,15 +717,15 @@ Text Label 800  6300 0    60   ~ 0
 LCD_CLK
 NoConn ~ 1350 6400
 Wire Wire Line
-	2250 3500 2200 3500
+	2300 3500 2200 3500
 Wire Wire Line
-	2200 3600 2250 3600
+	2200 3600 2300 3600
 Wire Wire Line
-	2250 3700 2200 3700
+	2300 3700 2200 3700
 Wire Wire Line
-	2200 3800 2250 3800
+	2200 3800 2300 3800
 Wire Wire Line
-	2250 3900 2200 3900
+	2300 3900 2200 3900
 Wire Wire Line
 	2200 4000 3100 4000
 Wire Wire Line
@@ -815,19 +815,19 @@ F 3 "" H 2400 4400 50  0000 C CNN
 	1    2400 4400
 	0    1    1    0   
 $EndComp
-Text Label 2250 3500 0    60   ~ 0
+Text Label 2300 3500 0    60   ~ 0
 PF5
-Text Label 2250 3600 0    60   ~ 0
+Text Label 2300 3600 0    60   ~ 0
 PF3
-Text Label 2250 3700 0    60   ~ 0
+Text Label 2300 3700 0    60   ~ 0
 PF1
-Text Label 2250 3800 0    60   ~ 0
+Text Label 2300 3800 0    60   ~ 0
 PC15
-Text Label 2250 3900 0    60   ~ 0
+Text Label 2300 3900 0    60   ~ 0
 PC13
-Text Label 2250 4000 0    60   ~ 0
+Text Label 2300 4000 0    60   ~ 0
 PE5
-Text Label 2250 4100 0    60   ~ 0
+Text Label 2300 4100 0    60   ~ 0
 PE3
 Text Label 2250 4200 0    60   ~ 0
 PE1
