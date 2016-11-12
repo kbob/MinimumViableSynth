@@ -5,7 +5,7 @@ Power
 Video
 Slaves
 MIDI
-Toucha
+Touch
 
 ----------------------------------
 2016-11-09
@@ -79,6 +79,11 @@ More parts
   JST SPH-002T-P0.5L
   85 on hand; need 96
 
+  Pushbuttons
+  Digi-Key 732-7004-1-ND
+  Würth 430182043816
+  need 2
+
 ----------------------------------
 2016-11-08
 Election Day
@@ -126,7 +131,7 @@ STMPE811 for resistive touch
 external I2C header and 5V, 3.3V for capacitive touch
 header for serial MIDI.  5V, serial in/out, ground.
 header for 4 touch pins on FPC
-
+Duplicate user and reset buttons.
 
 ----------------------------------
 2016-11-07
