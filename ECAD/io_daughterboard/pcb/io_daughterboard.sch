@@ -102,13 +102,13 @@ $EndComp
 $Comp
 L CONN_02X32 P2
 U 1 1 5825086E
-P 5250 4950
-F 0 "P2" H 5250 6600 50  0000 C CNN
-F 1 "CONN_02X32" V 5250 4950 50  0000 C CNN
-F 2 "" H 5250 4550 50  0000 C CNN
-F 3 "" H 5250 4550 50  0000 C CNN
-	1    5250 4950
-	1    0    0    -1  
+P 4950 4950
+F 0 "P2" H 4950 6600 50  0000 C CNN
+F 1 "CONN_02X32" V 4950 4950 50  0000 C CNN
+F 2 "" H 4950 4550 50  0000 C CNN
+F 3 "" H 4950 4550 50  0000 C CNN
+	1    4950 4950
+	1    0    0    1   
 $EndComp
 $Comp
 L CONN_01X06 P?
@@ -456,23 +456,23 @@ $EndComp
 $Comp
 L GND #PWR?
 U 1 1 5826D321
-P 5600 6600
-F 0 "#PWR?" H 5600 6350 50  0001 C CNN
-F 1 "GND" H 5600 6450 50  0000 C CNN
-F 2 "" H 5600 6600 50  0000 C CNN
-F 3 "" H 5600 6600 50  0000 C CNN
-	1    5600 6600
+P 5300 6600
+F 0 "#PWR?" H 5300 6350 50  0001 C CNN
+F 1 "GND" H 5300 6450 50  0000 C CNN
+F 2 "" H 5300 6600 50  0000 C CNN
+F 3 "" H 5300 6600 50  0000 C CNN
+	1    5300 6600
 	1    0    0    -1  
 $EndComp
 $Comp
 L GND #PWR?
 U 1 1 5826D398
-P 4900 6600
-F 0 "#PWR?" H 4900 6350 50  0001 C CNN
-F 1 "GND" H 4900 6450 50  0000 C CNN
-F 2 "" H 4900 6600 50  0000 C CNN
-F 3 "" H 4900 6600 50  0000 C CNN
-	1    4900 6600
+P 4600 6600
+F 0 "#PWR?" H 4600 6350 50  0001 C CNN
+F 1 "GND" H 4600 6450 50  0000 C CNN
+F 2 "" H 4600 6600 50  0000 C CNN
+F 3 "" H 4600 6600 50  0000 C CNN
+	1    4600 6600
 	1    0    0    -1  
 $EndComp
 Wire Notes Line
@@ -558,37 +558,37 @@ Wire Wire Line
 Wire Wire Line
 	1700 4100 800  4100
 Wire Wire Line
-	1700 4200 1350 4200
+	1700 4200 1400 4200
 Wire Wire Line
 	1700 4300 800  4300
 Wire Wire Line
-	1700 4400 1350 4400
+	1700 4400 1400 4400
 Wire Wire Line
-	1700 4500 1350 4500
+	1700 4500 1400 4500
 Wire Wire Line
 	1700 4600 800  4600
 Wire Wire Line
-	1700 4700 1350 4700
+	1700 4700 1400 4700
 Wire Wire Line
-	1700 4800 1350 4800
+	1700 4800 1400 4800
 Wire Wire Line
 	1700 4900 800  4900
 Wire Wire Line
-	1700 5000 1350 5000
+	1700 5000 1400 5000
 Wire Wire Line
-	1700 5100 1350 5100
+	1700 5100 1400 5100
 Wire Wire Line
-	1700 5200 1350 5200
+	1700 5200 1400 5200
 Wire Wire Line
 	1700 5300 800  5300
 Wire Wire Line
-	1700 5400 1350 5400
+	1700 5400 1400 5400
 Wire Wire Line
 	1700 5500 800  5500
 Wire Wire Line
 	1700 5600 800  5600
 Wire Wire Line
-	1700 5700 1350 5700
+	1700 5700 1400 5700
 Wire Wire Line
 	1700 5800 800  5800
 Wire Wire Line
@@ -602,7 +602,7 @@ Wire Wire Line
 Wire Wire Line
 	1700 6300 800  6300
 Wire Wire Line
-	1700 6400 1350 6400
+	1700 6400 1400 6400
 Wire Wire Line
 	1700 6500 1600 6500
 Wire Wire Line
@@ -612,13 +612,13 @@ Wire Wire Line
 Wire Wire Line
 	2300 6500 2200 6500
 Wire Wire Line
-	4900 6600 4900 6500
+	4600 6600 4600 6500
 Wire Wire Line
-	4900 6500 5000 6500
+	4600 6500 4700 6500
 Wire Wire Line
-	5600 6600 5600 6500
+	5300 6600 5300 6500
 Wire Wire Line
-	5600 6500 5500 6500
+	5300 6500 5200 6500
 Text Label 1400 3700 0    60   ~ 0
 PF0
 Text Label 1400 3800 0    60   ~ 0
@@ -659,20 +659,20 @@ Text Label 800  4000 0    60   ~ 0
 LCD_ON_OFF
 Text Label 800  4100 0    60   ~ 0
 SPI4_SCK
-NoConn ~ 1350 4200
+NoConn ~ 1700 4200
 Text Label 800  4300 0    60   ~ 0
 LCD_B6
-NoConn ~ 1350 4400
-NoConn ~ 1350 4500
+NoConn ~ 1700 4400
+NoConn ~ 1700 4500
 Text Label 800  4600 0    60   ~ 0
 SPI1_MISO
-NoConn ~ 1350 4700
-NoConn ~ 1350 4800
+NoConn ~ 1700 4700
+NoConn ~ 1700 4800
 Text Label 800  4900 0    60   ~ 0
 LCD_B3
-NoConn ~ 1350 5000
-NoConn ~ 1350 5100
-NoConn ~ 1350 5200
+NoConn ~ 1700 5000
+NoConn ~ 1700 5100
+NoConn ~ 1700 5200
 Text Label 800  5300 0    60   ~ 0
 LCD_G7
 Text Label 1400 5400 0    60   ~ 0
@@ -697,12 +697,12 @@ Text Label 1400 6300 0    60   ~ 0
 PG7
 Text Label 1400 6400 0    60   ~ 0
 PG5
-NoConn ~ 1350 5400
+NoConn ~ 1700 5400
 Text Label 800  5600 0    60   ~ 0
 LCD_R2
 Text Label 800  5500 0    60   ~ 0
 SPI3_MOSI
-NoConn ~ 1350 5700
+NoConn ~ 1700 5700
 Text Label 800  5800 0    60   ~ 0
 LCD_R5
 Text Label 800  5900 0    60   ~ 0
@@ -715,7 +715,7 @@ Text Label 800  6200 0    60   ~ 0
 LCD_HSYNC
 Text Label 800  6300 0    60   ~ 0
 LCD_CLK
-NoConn ~ 1350 6400
+NoConn ~ 1700 6400
 Wire Wire Line
 	2300 3500 2200 3500
 Wire Wire Line
@@ -731,19 +731,19 @@ Wire Wire Line
 Wire Wire Line
 	3100 4100 2200 4100
 Wire Wire Line
-	2200 4200 2550 4200
+	2200 4200 2300 4200
 Wire Wire Line
 	3100 4300 2200 4300
 Wire Wire Line
-	2200 4400 2400 4400
+	2200 4400 2450 4400
 Wire Wire Line
 	2200 4500 3100 4500
 Wire Wire Line
-	2200 4600 2550 4600
+	2200 4600 2300 4600
 Wire Wire Line
 	2200 4700 3100 4700
 Wire Wire Line
-	2200 4800 2550 4800
+	2200 4800 2300 4800
 Wire Wire Line
 	2200 4900 3100 4900
 Wire Wire Line
@@ -751,17 +751,17 @@ Wire Wire Line
 Wire Wire Line
 	2200 5100 3100 5100
 Wire Wire Line
-	2200 5200 2550 5200
+	2200 5200 2300 5200
 Wire Wire Line
-	2200 5300 2550 5300
+	2200 5300 2300 5300
 Wire Wire Line
-	2200 5400 2550 5400
+	2200 5400 2300 5400
 Wire Wire Line
 	2200 5500 3100 5500
 Wire Wire Line
-	2200 5600 3100 5600
+	2200 5600 2300 5600
 Wire Wire Line
-	2200 5700 2550 5700
+	2200 5700 2300 5700
 Wire Wire Line
 	2200 5800 3100 5800
 Wire Wire Line
@@ -771,11 +771,11 @@ Wire Wire Line
 Wire Wire Line
 	2200 6100 3100 6100
 Wire Wire Line
-	2200 6200 2550 6200
+	2200 6200 2300 6200
 Wire Wire Line
 	2200 6300 3100 6300
 Wire Wire Line
-	2200 6400 2550 6400
+	2200 6400 2300 6400
 $Comp
 L +5V #PWR?
 U 1 1 58272027
@@ -807,12 +807,12 @@ Wire Wire Line
 $Comp
 L VDD #PWR?
 U 1 1 58272D08
-P 2400 4400
-F 0 "#PWR?" H 2400 4250 50  0001 C CNN
-F 1 "VDD" H 2400 4550 50  0000 C CNN
-F 2 "" H 2400 4400 50  0000 C CNN
-F 3 "" H 2400 4400 50  0000 C CNN
-	1    2400 4400
+P 2450 4400
+F 0 "#PWR?" H 2450 4250 50  0001 C CNN
+F 1 "VDD" H 2450 4550 50  0000 C CNN
+F 2 "" H 2450 4400 50  0000 C CNN
+F 3 "" H 2450 4400 50  0000 C CNN
+	1    2450 4400
 	0    1    1    0   
 $EndComp
 Text Label 2300 3500 0    60   ~ 0
@@ -829,49 +829,49 @@ Text Label 2300 4000 0    60   ~ 0
 PE5
 Text Label 2300 4100 0    60   ~ 0
 PE3
-Text Label 2250 4200 0    60   ~ 0
+Text Label 2300 4200 0    60   ~ 0
 PE1
-Text Label 2250 4300 0    60   ~ 0
+Text Label 2300 4300 0    60   ~ 0
 PB9
-Text Label 2250 4500 0    60   ~ 0
+Text Label 2300 4500 0    60   ~ 0
 PB7
-Text Label 2250 4600 0    60   ~ 0
+Text Label 2300 4600 0    60   ~ 0
 PB5
-Text Label 2250 4700 0    60   ~ 0
+Text Label 2300 4700 0    60   ~ 0
 PB3
-Text Label 2250 4800 0    60   ~ 0
+Text Label 2300 4800 0    60   ~ 0
 PG14
-Text Label 2250 4900 0    60   ~ 0
+Text Label 2300 4900 0    60   ~ 0
 PG12
-Text Label 2250 5000 0    60   ~ 0
+Text Label 2300 5000 0    60   ~ 0
 PG10
-Text Label 2250 5100 0    60   ~ 0
+Text Label 2300 5100 0    60   ~ 0
 PD6
-Text Label 2250 5200 0    60   ~ 0
+Text Label 2300 5200 0    60   ~ 0
 PD4
-Text Label 2250 5300 0    60   ~ 0
+Text Label 2300 5300 0    60   ~ 0
 PD2
-Text Label 2250 5400 0    60   ~ 0
+Text Label 2300 5400 0    60   ~ 0
 PD0
-Text Label 2250 5500 0    60   ~ 0
+Text Label 2300 5500 0    60   ~ 0
 PC11
-Text Label 2250 5600 0    60   ~ 0
+Text Label 2300 5600 0    60   ~ 0
 PA15
-Text Label 2250 5700 0    60   ~ 0
+Text Label 2300 5700 0    60   ~ 0
 PA13
-Text Label 2250 5800 0    60   ~ 0
+Text Label 2300 5800 0    60   ~ 0
 PA11
-Text Label 2250 5900 0    60   ~ 0
+Text Label 2300 5900 0    60   ~ 0
 PA9
-Text Label 2250 6000 0    60   ~ 0
+Text Label 2300 6000 0    60   ~ 0
 PC9
-Text Label 2250 6100 0    60   ~ 0
+Text Label 2300 6100 0    60   ~ 0
 PC7
-Text Label 2250 6200 0    60   ~ 0
+Text Label 2300 6200 0    60   ~ 0
 PG8
-Text Label 2250 6300 0    60   ~ 0
+Text Label 2300 6300 0    60   ~ 0
 PG6
-Text Label 2250 6400 0    60   ~ 0
+Text Label 2300 6400 0    60   ~ 0
 PG4
 NoConn ~ 2200 3500
 NoConn ~ 2200 3600
@@ -882,70 +882,402 @@ Text Label 3100 4000 2    60   ~ 0
 SPI4_MISO
 Text Label 3100 4100 2    60   ~ 0
 SPI_B_~CS
-NoConn ~ 2550 4200
-Text Label 2600 4300 0    60   ~ 0
+NoConn ~ 2200 4200
+Text Label 3100 4300 2    60   ~ 0
 LCD_B7
-Text Label 2600 4500 0    60   ~ 0
+Text Label 3100 4500 2    60   ~ 0
 SPI_A_~CS
-NoConn ~ 2550 4600
-Text Label 2600 4700 0    60   ~ 0
+NoConn ~ 2200 4600
+Text Label 3100 4700 2    60   ~ 0
 SPI3_SCK
-NoConn ~ 2550 4800
-Text Label 2600 4900 0    60   ~ 0
+NoConn ~ 2200 4800
+Text Label 3100 4900 2    60   ~ 0
 LCD_B4
-Text Label 2600 5000 0    60   ~ 0
+Text Label 3100 5000 2    60   ~ 0
 LCD_G3
-Text Label 2600 5100 0    60   ~ 0
+Text Label 3100 5100 2    60   ~ 0
 LCD_B2
-NoConn ~ 2550 5200
-NoConn ~ 2550 5300
-NoConn ~ 2550 5400
-Text Label 2600 5500 0    60   ~ 0
+NoConn ~ 2200 5200
+NoConn ~ 2200 5300
+NoConn ~ 2200 5400
+Text Label 3100 5500 2    60   ~ 0
 SPI3_MISO
-Text Label 2600 5600 0    60   ~ 0
-TOUCH_INT
-NoConn ~ 2550 5700
-Text Label 2650 5800 0    60   ~ 0
+NoConn ~ 2200 5700
+Text Label 3100 5800 2    60   ~ 0
 LCD_R4
-Text Label 2650 5900 0    60   ~ 0
+Text Label 3100 5900 2    60   ~ 0
 MIDI_TX
-Text Label 2650 6000 0    60   ~ 0
+Text Label 3100 6000 2    60   ~ 0
 I²C3_SDA
-Text Label 2650 6100 0    60   ~ 0
+Text Label 3100 6100 2    60   ~ 0
 LCD_G6
-NoConn ~ 2550 6200
-Text Label 2650 6300 0    60   ~ 0
+NoConn ~ 2200 6400
+Text Label 3100 6300 2    60   ~ 0
 LCD_R7
-NoConn ~ 2550 6400
 NoConn ~ 2200 -2050
 $Comp
 L +3.3V #PWR?
 U 1 1 5827531B
-P 4900 3300
-F 0 "#PWR?" H 4900 3150 50  0001 C CNN
-F 1 "+3.3V" H 4900 3440 50  0000 C CNN
-F 2 "" H 4900 3300 50  0000 C CNN
-F 3 "" H 4900 3300 50  0000 C CNN
-	1    4900 3300
+P 4600 3300
+F 0 "#PWR?" H 4600 3150 50  0001 C CNN
+F 1 "+3.3V" H 4600 3440 50  0000 C CNN
+F 2 "" H 4600 3300 50  0000 C CNN
+F 3 "" H 4600 3300 50  0000 C CNN
+	1    4600 3300
 	1    0    0    -1  
 $EndComp
 $Comp
 L +3.3V #PWR?
 U 1 1 58275392
-P 5600 3300
-F 0 "#PWR?" H 5600 3150 50  0001 C CNN
-F 1 "+3.3V" H 5600 3440 50  0000 C CNN
-F 2 "" H 5600 3300 50  0000 C CNN
-F 3 "" H 5600 3300 50  0000 C CNN
-	1    5600 3300
+P 5300 3300
+F 0 "#PWR?" H 5300 3150 50  0001 C CNN
+F 1 "+3.3V" H 5300 3440 50  0000 C CNN
+F 2 "" H 5300 3300 50  0000 C CNN
+F 3 "" H 5300 3300 50  0000 C CNN
+	1    5300 3300
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5600 3300 5600 3400
+	5300 3300 5300 3400
 Wire Wire Line
-	5600 3400 5500 3400
+	5300 3400 5200 3400
 Wire Wire Line
-	5000 3400 4900 3400
+	4700 3400 4600 3400
 Wire Wire Line
-	4900 3400 4900 3300
+	4600 3400 4600 3300
+Wire Wire Line
+	4700 3500 3800 3500
+Text Label 4400 3500 0    60   ~ 0
+PF6
+Text Label 3800 3500 0    60   ~ 0
+LCD_PWM
+NoConn ~ 5200 3500
+Wire Wire Line
+	5200 3500 5300 3500
+Text Label 5300 3500 0    60   ~ 0
+N/C
+Wire Wire Line
+	5200 3600 6100 3600
+Text Label 5300 3600 0    60   ~ 0
+PF7
+Text Label 6100 3600 2    60   ~ 0
+SPI5_SCK
+Wire Wire Line
+	5200 3700 6100 3700
+Wire Wire Line
+	5200 3800 5300 3800
+Wire Wire Line
+	5200 3900 6100 3900
+Wire Wire Line
+	4700 3600 3800 3600
+Wire Wire Line
+	4700 3700 3800 3700
+Wire Wire Line
+	4700 3800 4400 3800
+Wire Wire Line
+	4700 3900 4400 3900
+Wire Wire Line
+	4700 4000 4400 4000
+Wire Wire Line
+	4700 4100 3800 4100
+Wire Wire Line
+	4700 4200 4400 4200
+Wire Wire Line
+	4700 4300 3800 4300
+Wire Wire Line
+	4700 4400 3800 4400
+Wire Wire Line
+	4700 4500 3800 4500
+Wire Wire Line
+	4700 4600 4400 4600
+Wire Wire Line
+	4700 4700 3800 4700
+Wire Wire Line
+	4700 4800 4400 4800
+Wire Wire Line
+	4700 4900 4400 4900
+Wire Wire Line
+	4700 5000 4400 5000
+Wire Wire Line
+	4700 5100 4400 5100
+Wire Wire Line
+	4700 5200 4400 5200
+Wire Wire Line
+	4700 5300 4400 5300
+Wire Wire Line
+	4700 5400 4400 5400
+Wire Wire Line
+	4700 5500 4400 5500
+Wire Wire Line
+	4700 5600 4400 5600
+Wire Wire Line
+	4700 5700 3800 5700
+Wire Wire Line
+	4700 5800 4400 5800
+Wire Wire Line
+	4700 5900 4400 5900
+Wire Wire Line
+	4700 6000 4400 6000
+Wire Wire Line
+	4700 6100 4400 6100
+Wire Wire Line
+	4700 6200 4400 6200
+Wire Wire Line
+	4700 6300 4400 6300
+Wire Wire Line
+	4700 6400 4400 6400
+Wire Wire Line
+	5200 4000 5300 4000
+Wire Wire Line
+	5200 4100 5300 4100
+Wire Wire Line
+	5200 4200 6100 4200
+Wire Wire Line
+	5200 4300 5300 4300
+Wire Wire Line
+	5200 4400 6100 4400
+Wire Wire Line
+	5200 4500 6100 4500
+Wire Wire Line
+	5200 4600 5300 4600
+Wire Wire Line
+	5200 4700 6100 4700
+Wire Wire Line
+	5200 4800 5300 4800
+Wire Wire Line
+	5200 4900 5300 4900
+Wire Wire Line
+	5200 5000 5300 5000
+Wire Wire Line
+	5200 5100 5300 5100
+Wire Wire Line
+	5200 5200 5300 5200
+Wire Wire Line
+	5200 5300 5300 5300
+Wire Wire Line
+	5200 5400 5300 5400
+Wire Wire Line
+	5200 5500 5300 5500
+Wire Wire Line
+	5200 5600 5300 5600
+Wire Wire Line
+	5200 5700 6100 5700
+Wire Wire Line
+	5200 5800 5300 5800
+Wire Wire Line
+	5200 5900 5300 5900
+Wire Wire Line
+	5200 6000 5300 6000
+Wire Wire Line
+	5200 6100 5300 6100
+Wire Wire Line
+	5200 6200 5300 6200
+Wire Wire Line
+	5200 6300 5300 6300
+Wire Wire Line
+	5200 6400 6100 6400
+Text Label 4400 3600 0    60   ~ 0
+PF8
+Text Label 4400 3700 0    60   ~ 0
+PF10
+Text Label 4400 3800 0    60   ~ 0
+PH1
+Text Label 4400 4000 0    60   ~ 0
+PC1
+NoConn ~ 4700 4000
+$Comp
+L GND #PWR?
+U 1 1 5827D7CC
+P 4400 3900
+F 0 "#PWR?" H 4400 3650 50  0001 C CNN
+F 1 "GND" H 4400 3750 50  0000 C CNN
+F 2 "" H 4400 3900 50  0000 C CNN
+F 3 "" H 4400 3900 50  0000 C CNN
+	1    4400 3900
+	0    1    1    0   
+$EndComp
+NoConn ~ 4700 3800
+Text Label 4400 4100 0    60   ~ 0
+PC3
+Text Label 3800 4100 0    60   ~ 0
+SPI_C_~CS
+Text Label 3800 3700 0    60   ~ 0
+LCD_DE
+Text Label 3800 3600 0    60   ~ 0
+SPI5_MISO
+$Comp
+L GND #PWR?
+U 1 1 5827DA38
+P 4400 4800
+F 0 "#PWR?" H 4400 4550 50  0001 C CNN
+F 1 "GND" H 4400 4650 50  0000 C CNN
+F 2 "" H 4400 4800 50  0000 C CNN
+F 3 "" H 4400 4800 50  0000 C CNN
+	1    4400 4800
+	0    1    1    0   
+$EndComp
+Text Label 4400 4200 0    60   ~ 0
+PA1
+Text Label 4400 4300 0    60   ~ 0
+PA3
+Text Label 4400 4400 0    60   ~ 0
+PA5
+Text Label 4400 4500 0    60   ~ 0
+PA7
+Text Label 4400 4600 0    60   ~ 0
+PC5
+Text Label 4400 4700 0    60   ~ 0
+PB1
+Text Label 4400 4900 0    60   ~ 0
+PF12
+Text Label 4400 5000 0    60   ~ 0
+PF14
+Text Label 4400 5100 0    60   ~ 0
+PG0
+Text Label 4400 5200 0    60   ~ 0
+PE7
+Text Label 4400 5300 0    60   ~ 0
+PE9
+Text Label 4400 5400 0    60   ~ 0
+PE11
+Text Label 4400 5500 0    60   ~ 0
+PE13
+Text Label 4400 5600 0    60   ~ 0
+PE15
+Text Label 4400 5700 0    60   ~ 0
+PB11
+Text Label 4400 5800 0    60   ~ 0
+PB13
+Text Label 4400 5900 0    60   ~ 0
+PB15
+Text Label 4400 6000 0    60   ~ 0
+PD9
+Text Label 4400 6100 0    60   ~ 0
+PD11
+Text Label 4400 6200 0    60   ~ 0
+PD13
+Text Label 4400 6300 0    60   ~ 0
+PD15
+Text Label 4400 6400 0    60   ~ 0
+PG3
+NoConn ~ 4700 4200
+Text Label 3800 4300 0    60   ~ 0
+LCD_B5
+Text Label 3800 4400 0    60   ~ 0
+SPI1_SCK
+Text Label 3800 4500 0    60   ~ 0
+SPI1_MOSI
+NoConn ~ 4700 4600
+Text Label 3800 4700 0    60   ~ 0
+LCD_R6
+NoConn ~ 4700 4900
+NoConn ~ 4700 5000
+NoConn ~ 4700 5100
+NoConn ~ 4700 5200
+NoConn ~ 4700 5300
+NoConn ~ 4700 5400
+NoConn ~ 4700 5500
+NoConn ~ 4700 5600
+Text Label 3800 5700 0    60   ~ 0
+LCD_G5
+NoConn ~ 4700 5800
+NoConn ~ 4700 5900
+NoConn ~ 4700 6000
+NoConn ~ 4700 6100
+NoConn ~ 4700 6200
+NoConn ~ 4700 6300
+Text Label 5300 3700 0    60   ~ 0
+PF9
+Text Label 5300 3800 0    60   ~ 0
+PH0
+Text Label 5300 3900 0    60   ~ 0
+NRST
+Text Label 5300 4000 0    60   ~ 0
+PC0
+Text Label 5300 4100 0    60   ~ 0
+PC2
+Text Label 5300 4200 0    60   ~ 0
+PA0
+Text Label 5300 4300 0    60   ~ 0
+PA2
+Text Label 5300 4400 0    60   ~ 0
+PA4
+Text Label 5300 4500 0    60   ~ 0
+PA6
+Text Label 5300 4600 0    60   ~ 0
+PC4
+Text Label 5300 4700 0    60   ~ 0
+PB0
+Text Label 5300 4800 0    60   ~ 0
+PB2
+Text Label 5300 4900 0    60   ~ 0
+PF11
+Text Label 5300 5000 0    60   ~ 0
+PF13
+Text Label 5300 5100 0    60   ~ 0
+PF15
+Text Label 5300 5200 0    60   ~ 0
+PG1
+Text Label 5300 5300 0    60   ~ 0
+PE8
+Text Label 5300 5400 0    60   ~ 0
+PE10
+Text Label 5300 5500 0    60   ~ 0
+PE12
+Text Label 5300 5600 0    60   ~ 0
+PE14
+Text Label 5300 5700 0    60   ~ 0
+PB10
+Text Label 5300 5800 0    60   ~ 0
+PB12
+Text Label 5300 5900 0    60   ~ 0
+PB14
+Text Label 5300 6000 0    60   ~ 0
+PD8
+Text Label 5300 6100 0    60   ~ 0
+PD10
+Text Label 5300 6200 0    60   ~ 0
+PD12
+Text Label 5300 6300 0    60   ~ 0
+PD14
+Text Label 5300 6400 0    60   ~ 0
+PG2
+Text Label 6100 3700 2    60   ~ 0
+SPI5_MOSI
+NoConn ~ 5200 3800
+Text Label 6100 3900 2    60   ~ 0
+BTN_~RESET
+NoConn ~ 5200 4000
+NoConn ~ 5200 4100
+Text Label 6100 4200 2    60   ~ 0
+BTN_USER
+NoConn ~ 5200 4300
+Text Label 6100 4400 2    60   ~ 0
+LCD_VSYNC
+Text Label 6100 4500 2    60   ~ 0
+LCD_G2
+NoConn ~ 5200 4600
+Text Label 6100 4700 2    60   ~ 0
+LCD_R3
+NoConn ~ 5200 4800
+NoConn ~ 5200 4900
+NoConn ~ 5200 5000
+NoConn ~ 5200 5100
+NoConn ~ 5200 5200
+NoConn ~ 5200 5300
+NoConn ~ 5200 5400
+NoConn ~ 5200 5500
+NoConn ~ 5200 5600
+Text Label 6100 5700 2    60   ~ 0
+LCD_G4
+NoConn ~ 5200 5800
+NoConn ~ 5200 5900
+NoConn ~ 5200 6000
+NoConn ~ 5200 6100
+NoConn ~ 5200 6200
+NoConn ~ 5200 6300
+Text Label 6100 6400 2    60   ~ 0
+TOUCH_INT
+NoConn ~ 2200 5600
+NoConn ~ 4700 6400
 $EndSCHEMATC
