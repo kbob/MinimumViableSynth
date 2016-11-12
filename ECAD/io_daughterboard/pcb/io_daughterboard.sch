@@ -427,8 +427,8 @@ Text Label 1400 3500 0    60   ~ 0
 PF4
 Text Label 800  3900 0    60   ~ 0
 SPI4_MOSI
-NoConn ~ 1350 3600
-NoConn ~ 1350 3500
+NoConn ~ 1700 3600
+NoConn ~ 1700 3500
 Text Label 1400 3600 0    60   ~ 0
 PF2
 $Comp
@@ -544,15 +544,15 @@ Wire Notes Line
 Wire Wire Line
 	1700 3400 1600 3400
 Wire Wire Line
-	1700 3500 1350 3500
+	1700 3500 1400 3500
 Wire Wire Line
-	1700 3600 1350 3600
+	1700 3600 1400 3600
 Wire Wire Line
 	1700 3900 800  3900
 Wire Wire Line
-	1700 3700 1350 3700
+	1700 3700 1400 3700
 Wire Wire Line
-	1700 3800 1350 3800
+	1700 3800 1400 3800
 Wire Wire Line
 	1700 4000 800  4000
 Wire Wire Line
@@ -635,8 +635,8 @@ Text Label 1400 4300 0    60   ~ 0
 PB8
 Text Label 1400 4400 0    60   ~ 0
 BOOT0
-NoConn ~ 1350 3700
-NoConn ~ 1350 3800
+NoConn ~ 1700 3700
+NoConn ~ 1700 3800
 Text Label 1400 4500 0    60   ~ 0
 PB6
 Text Label 1400 4600 0    60   ~ 0
@@ -717,15 +717,15 @@ Text Label 800  6300 0    60   ~ 0
 LCD_CLK
 NoConn ~ 1350 6400
 Wire Wire Line
-	2550 3500 2200 3500
+	2250 3500 2200 3500
 Wire Wire Line
-	2200 3600 2550 3600
+	2200 3600 2250 3600
 Wire Wire Line
-	2550 3700 2200 3700
+	2250 3700 2200 3700
 Wire Wire Line
-	2200 3800 2550 3800
+	2200 3800 2250 3800
 Wire Wire Line
-	2550 3900 2200 3900
+	2250 3900 2200 3900
 Wire Wire Line
 	2200 4000 3100 4000
 Wire Wire Line
@@ -873,14 +873,14 @@ Text Label 2250 6300 0    60   ~ 0
 PG6
 Text Label 2250 6400 0    60   ~ 0
 PG4
-NoConn ~ 2550 3500
-NoConn ~ 2550 3600
-NoConn ~ 2550 3700
-NoConn ~ 2550 3800
-NoConn ~ 2550 3900
-Text Label 2600 4000 0    60   ~ 0
+NoConn ~ 2200 3500
+NoConn ~ 2200 3600
+NoConn ~ 2200 3700
+NoConn ~ 2200 3800
+NoConn ~ 2200 3900
+Text Label 3100 4000 2    60   ~ 0
 SPI4_MISO
-Text Label 2600 4100 0    60   ~ 0
+Text Label 3100 4100 2    60   ~ 0
 SPI_B_~CS
 NoConn ~ 2550 4200
 Text Label 2600 4300 0    60   ~ 0
@@ -918,4 +918,34 @@ Text Label 2650 6300 0    60   ~ 0
 LCD_R7
 NoConn ~ 2550 6400
 NoConn ~ 2200 -2050
+$Comp
+L +3.3V #PWR?
+U 1 1 5827531B
+P 4900 3300
+F 0 "#PWR?" H 4900 3150 50  0001 C CNN
+F 1 "+3.3V" H 4900 3440 50  0000 C CNN
+F 2 "" H 4900 3300 50  0000 C CNN
+F 3 "" H 4900 3300 50  0000 C CNN
+	1    4900 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L +3.3V #PWR?
+U 1 1 58275392
+P 5600 3300
+F 0 "#PWR?" H 5600 3150 50  0001 C CNN
+F 1 "+3.3V" H 5600 3440 50  0000 C CNN
+F 2 "" H 5600 3300 50  0000 C CNN
+F 3 "" H 5600 3300 50  0000 C CNN
+	1    5600 3300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 3300 5600 3400
+Wire Wire Line
+	5600 3400 5500 3400
+Wire Wire Line
+	5000 3400 4900 3400
+Wire Wire Line
+	4900 3400 4900 3300
 $EndSCHEMATC
