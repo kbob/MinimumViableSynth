@@ -1,3 +1,25 @@
+2016-11-13
+MIDI board
+
+Preliminary notes on the MIDI board.
+
+The MIDI board will be all 5V.  Level converters are on the I/O Daughterboard.
+
+MIDI in/out/through.  Nobody implements through!  Nobody spells it "through"!
+
+(CA-033) MIDI 1.0 Electrical Specification Update [2014]
+
+Olivier Pichenettes says "Prefer 6N137 Opto."
+http://mutable-instruments.net/forum/discussion/5276/midi-input-with-optocouplers/p1
+
+Octopart shows a zillion variations on "ferrite bead 1K@100MHz", even
+from the same manufacturer.  Need to understand why.  The MMA spec
+says the beads are optional, so the part selection is probably not
+critical.
+
+The MIDI spec mentions MMZ1608Y102BT for the beads.
+
+----------------------------------
 2016-11-10
 I/O Daughter Board - Sections
 
@@ -68,16 +90,31 @@ Parts
   NXP 74HC244PW,112
   20 on hand
 
+  Serial Midi Header
+  Digi-Key 455-1736-1-ND
+  JST B4B-PH-SM4-TB
+  Need 6
+
+  MIDI level shifters
+  Digi-Key 296-37177-1-ND
+  TI SN74LV1T34DCKR
+  need 9
+
 More parts
 
   Slave SPI Connectors
   JST PHR-6
   9 on hand; need 16
 
-  Slave SPI Contacts
+  MIDI connectors
+  Digi-Key 455-1164-ND
+  JST PHR-4
+  10 on hand
+
+  Slave SPI, MIDI Contacts
   Digi-Key 455-2148-1-ND
   JST SPH-002T-P0.5L
-  85 on hand; need 96
+  85 on hand; need 96 + 24
 
   Pushbuttons
   Digi-Key 732-7004-1-ND
@@ -114,6 +151,12 @@ Which backlight driver?
    Adafruit uses FAN5333BSX on the TFT Friend
    Piotr recommended the TPS61042.
 
+Level Translator?
+   Piotr is using 568-9224-1-ND on BMPMv2.1.
+
+Optocoupler
+   Olivier Pichenettes argues for the 6N137.
+   http://mutable-instruments.net/forum/discussion/5276/midi-input-with-optocouplers/p1
 
 ----------------------------------
 2016-11-07
