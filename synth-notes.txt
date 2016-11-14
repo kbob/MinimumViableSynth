@@ -80,6 +80,21 @@ Parts
   Fairchild FAN5333BSX
   need 3
 
+  LCD Backlight Inductor
+  Digi-Key 587-2028-1-ND
+  Taiyo Yuden Nr6012T100ME
+  need 3
+
+  LCD Backlight Diode
+  Digi-Key MBR0540CT-ND
+  Fairchild MBR0540
+  need 3
+
+  LCD Backlight Zener
+  Digi-Key MM32Z24VT1GOSCT-ND
+  ON Semi MM3Z24VT1G
+  need 3
+
   Resistive Touch Controller
   Digi-Key 497-8387-1-ND
   ST STMPE811QTR

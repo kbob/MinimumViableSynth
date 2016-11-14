@@ -49,7 +49,10 @@ void lcd_pwm_setup(void)
     timer_set_oc_mode(TIM10, TIM_OC1, TIM_OCM_PWM1);
     timer_enable_oc_output(TIM10, TIM_OC1);
     timer_set_oc_value(TIM10, TIM_OC1, 0); // start out dark.
-    timer_set_period(TIM10, 65535);
+    // XXX FAN5333BSX datasheet says PWM frequency not to exceed 1 KHz.
+    // 168 MHz / 65536 / 3 ~= 854 Hz.
+    timer_set_period(TIM10, 65536 - 1);
+    timer_set_prescaler(TIM10, 3 - 1);
     timer_enable_counter(TIM10);
 }
 
