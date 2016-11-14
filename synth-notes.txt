@@ -67,10 +67,6 @@ Parts
     BuyDesign.com CON06HT-1
     ordered 1
 
-    Capacitive Touch Alt. Header 2
-    generic 2.54" header, 6 pos.
-    many on hand
-
   3v3 Regulator
   Digi-Key 1016-1873-1-ND
   Exar SPX3819M5-L-3-3/TR
@@ -113,7 +109,7 @@ Parts
   MIDI level shifters
   Digi-Key 296-37177-1-ND
   TI SN74LV1T34DCKR
-  need 9
+  need 9 (6 on this board, 3 on MIDI board)
 
 More parts
 
