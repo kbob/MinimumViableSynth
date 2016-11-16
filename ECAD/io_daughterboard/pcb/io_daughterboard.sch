@@ -2575,7 +2575,7 @@ F 3 "" H 1450 8150 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 800  8250 0    60   ~ 0
-SLV5A_MISO_Fred
+SLV5A_MISO
 Text Label 800  8450 0    60   ~ 0
 SLV5A_SCK
 Text Label 800  8550 0    60   ~ 0
