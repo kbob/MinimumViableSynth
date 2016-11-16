@@ -1,3 +1,21 @@
+2016-11-14
+I/O Daughter Board Errata
+
+As of commit e53f5b, I see eleven errors in the schematic.
+
+ * LED_K is also called BKLT_K.
+ * LED_N is also called BKLT_N.
+ * CTOUCH_INT is not connected to the master.
+ * CTOUCH_WAKE is not connected to the master.
+ * SLV5A_MISO is also called SLV5A_MISO_Fred.
+ * PWR_SENS is not connected to the master.
+ * There are no power flags.
+ * Vdd on Master port P1 should probably not be a power rail.
+ * There are no bypass capacitors on the SPI crossbar chips.
+ * There are no bypass capacitors on the STMPE811.
+ * There are no bypass capacitors on the MIDI level converters.
+
+----------------------------------
 2016-11-13
 MIDI board
 
