@@ -4,7 +4,7 @@ I/O Daughter Board Errata
 As of commit e53f5b, I see eleven errors in the schematic.
 
  * LED_K is also called BKLT_K.
- * LED_N is also called BKLT_N.
+ * LED_A is also called BKLT_A.
  * CTOUCH_INT is not connected to the master.
  * CTOUCH_WAKE is not connected to the master.
  * SLV5A_MISO is also called SLV5A_MISO_Fred.
