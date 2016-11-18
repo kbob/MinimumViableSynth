@@ -108,7 +108,7 @@ F 1 "CONN_02X32" V 4800 2550 50  0000 C CNN
 F 2 "Socket_Strips:Socket_Strip_Straight_2x32" H 4800 2150 50  0001 C CNN
 F 3 "" H 4800 2150 50  0000 C CNN
 	1    4800 2550
-	-1   0    0    -1  
+	1    0    0    -1  
 $EndComp
 $Comp
 L CONN_01X06 P3
