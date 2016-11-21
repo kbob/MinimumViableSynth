@@ -117,7 +117,7 @@ U 1 1 58253BEB
 P 1750 5500
 F 0 "P3" H 1750 5850 50  0000 C CNN
 F 1 "Slave 1A" V 1850 5500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 1750 5500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 1750 5500 50  0001 C CNN
 F 3 "" H 1750 5500 50  0000 C CNN
 	1    1750 5500
 	1    0    0    -1  
@@ -128,7 +128,7 @@ U 1 1 5825433B
 P 16050 7800
 F 0 "P19" H 16050 8050 50  0000 C CNN
 F 1 "CONN_01X04" V 16150 7800 50  0000 C CNN
-F 2 "daughterfeet:B4B-PH-SM4-TB" H 16050 7800 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0410_04x1.25mm_Straight" H 16050 7800 50  0001 C CNN
 F 3 "" H 16050 7800 50  0000 C CNN
 	1    16050 7800
 	1    0    0    -1  
@@ -2138,7 +2138,7 @@ U 1 1 582CC58F
 P 3150 5500
 F 0 "P7" H 3150 5850 50  0000 C CNN
 F 1 "Slave 1B" V 3250 5500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 3150 5500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 3150 5500 50  0001 C CNN
 F 3 "" H 3150 5500 50  0000 C CNN
 	1    3150 5500
 	1    0    0    -1  
@@ -2179,7 +2179,7 @@ U 1 1 582CC694
 P 4550 5500
 F 0 "P11" H 4550 5850 50  0000 C CNN
 F 1 "Slave 1C" V 4650 5500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 4550 5500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 4550 5500 50  0001 C CNN
 F 3 "" H 4550 5500 50  0000 C CNN
 	1    4550 5500
 	1    0    0    -1  
@@ -2220,7 +2220,7 @@ U 1 1 582CC78C
 P 1750 6500
 F 0 "P4" H 1750 6850 50  0000 C CNN
 F 1 "Slave 3A" V 1850 6500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 1750 6500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 1750 6500 50  0001 C CNN
 F 3 "" H 1750 6500 50  0000 C CNN
 	1    1750 6500
 	1    0    0    -1  
@@ -2261,7 +2261,7 @@ U 1 1 582CC7AA
 P 3150 6500
 F 0 "P8" H 3150 6850 50  0000 C CNN
 F 1 "Slave 3B" V 3250 6500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 3150 6500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 3150 6500 50  0001 C CNN
 F 3 "" H 3150 6500 50  0000 C CNN
 	1    3150 6500
 	1    0    0    -1  
@@ -2302,7 +2302,7 @@ U 1 1 582CC7C8
 P 4550 6500
 F 0 "P12" H 4550 6850 50  0000 C CNN
 F 1 "Slave 3C" V 4650 6500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 4550 6500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 4550 6500 50  0001 C CNN
 F 3 "" H 4550 6500 50  0000 C CNN
 	1    4550 6500
 	1    0    0    -1  
@@ -2343,7 +2343,7 @@ U 1 1 582CCF2D
 P 5950 5500
 F 0 "P15" H 5950 5850 50  0000 C CNN
 F 1 "Slave 1D" V 6050 5500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 5950 5500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 5950 5500 50  0001 C CNN
 F 3 "" H 5950 5500 50  0000 C CNN
 	1    5950 5500
 	1    0    0    -1  
@@ -2384,7 +2384,7 @@ U 1 1 582CCF4B
 P 5950 6500
 F 0 "P16" H 5950 6850 50  0000 C CNN
 F 1 "Slave 3D" V 6050 6500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 5950 6500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 5950 6500 50  0001 C CNN
 F 3 "" H 5950 6500 50  0000 C CNN
 	1    5950 6500
 	1    0    0    -1  
@@ -2425,7 +2425,7 @@ U 1 1 582CD851
 P 1750 7500
 F 0 "P5" H 1750 7850 50  0000 C CNN
 F 1 "Slave 4A" V 1850 7500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 1750 7500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 1750 7500 50  0001 C CNN
 F 3 "" H 1750 7500 50  0000 C CNN
 	1    1750 7500
 	1    0    0    -1  
@@ -2466,7 +2466,7 @@ U 1 1 582CD86F
 P 3150 7500
 F 0 "P9" H 3150 7850 50  0000 C CNN
 F 1 "Slave 4B" V 3250 7500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 3150 7500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 3150 7500 50  0001 C CNN
 F 3 "" H 3150 7500 50  0000 C CNN
 	1    3150 7500
 	1    0    0    -1  
@@ -2507,7 +2507,7 @@ U 1 1 582CD88D
 P 4550 7500
 F 0 "P13" H 4550 7850 50  0000 C CNN
 F 1 "Slave 4C" V 4650 7500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 4550 7500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 4550 7500 50  0001 C CNN
 F 3 "" H 4550 7500 50  0000 C CNN
 	1    4550 7500
 	1    0    0    -1  
@@ -2548,7 +2548,7 @@ U 1 1 582CD8AB
 P 1750 8500
 F 0 "P6" H 1750 8850 50  0000 C CNN
 F 1 "Slave 5A" V 1850 8500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 1750 8500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 1750 8500 50  0001 C CNN
 F 3 "" H 1750 8500 50  0000 C CNN
 	1    1750 8500
 	1    0    0    -1  
@@ -2589,7 +2589,7 @@ U 1 1 582CD8C9
 P 3150 8500
 F 0 "P10" H 3150 8850 50  0000 C CNN
 F 1 "Slave 5B" V 3250 8500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 3150 8500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 3150 8500 50  0001 C CNN
 F 3 "" H 3150 8500 50  0000 C CNN
 	1    3150 8500
 	1    0    0    -1  
@@ -2630,7 +2630,7 @@ U 1 1 582CD8E7
 P 4550 8500
 F 0 "P14" H 4550 8850 50  0000 C CNN
 F 1 "Slave 5C" V 4650 8500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 4550 8500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 4550 8500 50  0001 C CNN
 F 3 "" H 4550 8500 50  0000 C CNN
 	1    4550 8500
 	1    0    0    -1  
@@ -2671,7 +2671,7 @@ U 1 1 582CD905
 P 5950 7500
 F 0 "P17" H 5950 7850 50  0000 C CNN
 F 1 "Slave 4D" V 6050 7500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 5950 7500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 5950 7500 50  0001 C CNN
 F 3 "" H 5950 7500 50  0000 C CNN
 	1    5950 7500
 	1    0    0    -1  
@@ -2712,7 +2712,7 @@ U 1 1 582CD923
 P 5950 8500
 F 0 "P18" H 5950 8850 50  0000 C CNN
 F 1 "Slave 5D" V 6050 8500 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.00mm" H 5950 8500 50  0001 C CNN
+F 2 "Connectors_Molex:Molex_PicoBlade_53047-0610_06x1.25mm_Straight" H 5950 8500 50  0001 C CNN
 F 3 "" H 5950 8500 50  0000 C CNN
 	1    5950 8500
 	1    0    0    -1  
