@@ -84,7 +84,7 @@
   (pad 63 thru_hole oval (at 78.74 0) (size 1.7272 1.7272) (drill 1.016) (layers *.Cu *.Mask))
   (pad 64 thru_hole oval (at 78.74 -2.54) (size 1.7272 1.7272) (drill 1.016) (layers *.Cu *.Mask))
   (model Socket_Strips.3dshapes/Socket_Strip_Straight_2x32.wrl
-    (at (xyz 1.55 -0.05 0))
+    (at (xyz 1.55 0.05 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 180))
   )

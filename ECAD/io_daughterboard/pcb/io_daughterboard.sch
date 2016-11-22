@@ -31,7 +31,7 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:io_daughterboard-cache
-EELAYER 26 0
+EELAYER 25 0
 EELAYER END
 $Descr USLedger 17000 11000
 encoding utf-8
@@ -1819,7 +1819,7 @@ F 3 "" H 12600 5800 60  0001 C CNN
 	1    12600 5800
 	1    0    0    -1  
 $EndComp
-Text Label 13750 5350 2    60   ~ 0
+Text Label 13750 2000 2    60   ~ 0
 SLV1C_SCK
 Text Label 13750 2100 2    60   ~ 0
 SLV3C_SCK
@@ -1892,7 +1892,7 @@ Text Label 10400 1700 0    60   ~ 0
 SLV4C_MISO
 Text Label 10400 1800 0    60   ~ 0
 SLV5C_MISO
-Text Label 10400 5350 0    60   ~ 0
+Text Label 10400 2000 0    60   ~ 0
 SPI1_SCK
 Text Label 10400 2100 0    60   ~ 0
 SPI3_SCK
@@ -2052,7 +2052,7 @@ F 3 "" H 11800 3300 50  0000 C CNN
 	1    11800 3300
 	1    0    0    -1  
 $EndComp
-Text Label 10400 2000 0    60   ~ 0
+Text Label 10400 5350 0    60   ~ 0
 SPI1_MOSI
 Text Label 10400 5450 0    60   ~ 0
 SPI3_MOSI
@@ -2064,7 +2064,7 @@ Text Label 10400 5750 0    60   ~ 0
 SPI_C_~CS
 Text Label 10400 6250 0    60   ~ 0
 SPI_D_~CS
-Text Label 13750 2000 2    60   ~ 0
+Text Label 13750 5350 2    60   ~ 0
 SLV1C_MOSI
 $Comp
 L GND #PWR056
