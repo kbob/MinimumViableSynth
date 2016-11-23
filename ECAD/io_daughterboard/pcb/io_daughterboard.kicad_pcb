@@ -2,7 +2,7 @@
 
   (general
     (links 360)
-    (no_connects 297)
+    (no_connects 291)
     (area 84.650001 26.3 231.421429 122.700001)
     (thickness 1.6)
     (drawings 23)
@@ -1574,7 +1574,7 @@
   )
 
   (module Resistors_SMD:R_0603 (layer F.Cu) (tedit 5415CC62) (tstamp 583241A3)
-    (at 165.75 83.75 180)
+    (at 162.25 83.75 180)
     (descr "Resistor SMD 0603, reflow soldering, Vishay (see dcrcw.pdf)")
     (tags "resistor 0603")
     (path /582886E6)
@@ -1893,7 +1893,7 @@
   )
 
   (module Resistors_SMD:R_0603 (layer F.Cu) (tedit 5415CC62) (tstamp 583241E5)
-    (at 162.25 83.75 180)
+    (at 165.75 83.75 180)
     (descr "Resistor SMD 0603, reflow soldering, Vishay (see dcrcw.pdf)")
     (tags "resistor 0603")
     (path /58286CDA)
