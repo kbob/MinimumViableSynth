@@ -67,14 +67,24 @@ Parts
   TE Connectivity AMP 4-1734839-0
   4 on hand
 
+#  Slave SPI Headers
+#  Digi-Key 455-1738-1-ND
+#  JST B6B-PH-SM4-TB
+#  need 48
+
   Slave SPI Headers
-  Digi-Key 455-1738-1-ND
-  JST B6B-PH-SM4-TB
+  Digi-Key WM1735-ND
+  Molex PicoBlade 0530470610
   need 48
 
+#  Serial Midi Header
+#  Digi-Key 455-1736-1-ND
+#  JST B4B-PH-SM4-TB
+#  Need 6
+
   Serial Midi Header
-  Digi-Key 455-1736-1-ND
-  JST B4B-PH-SM4-TB
+  Digi-Key WM1733-ND
+  Molex PicoBlade 0530470410
   Need 6
 
   Capacitive Touch Header
@@ -130,26 +140,65 @@ Parts
   Samsung CL21F105ZBFNNNE
   need 6
 
-More parts
-
-  Slave SPI Connectors
-  JST PHR-6
-  9 on hand; need 16
-
-  MIDI connectors
-  Digi-Key 455-1164-ND
-  JST PHR-4
-  10 on hand
-
-  Slave SPI, MIDI Contacts
-  Digi-Key 455-2148-1-ND
-  JST SPH-002T-P0.5L
-  85 on hand; need 96 + 24
-
   Pushbuttons
   Digi-Key 732-7004-1-ND
   Würth 430182043816
   need 2
+
+More parts
+
+#  Slave SPI Connectors
+#  JST PHR-6
+#  9 on hand; need 16
+
+  Slave SPI Connectors
+  Digi-Key WM1724-ND
+  Molex PicoBlade 0510210600
+  need 16
+
+  Slave Connectors, Slave End
+  Digi-Key A33380-ND
+  TE 5-102393-1
+
+#  MIDI connectors
+#  Digi-Key 455-1164-ND
+#  JST PHR-4
+#  10 on hand
+
+  MIDI connectors
+  Digi-Key WM1722-ND
+  Molex PicoBlade 0510210400
+  need 2
+
+#  Slave SPI, MIDI Contacts
+#  Digi-Key 455-2148-1-ND
+#  JST SPH-002T-P0.5L
+#  85 on hand; need 96 + 24
+
+  Cables
+  need 11 red, 11 black, 44 colored
+  Red
+    Digi-Key 0500588000-12-R1-ND
+  Black
+    Digi-Key 0500588000-12-B1-ND
+  Brown
+    Digi-Key 0500588000-12-N1-ND
+  Blue
+    Digi-Key 0500588000-12-L1-ND
+  Orange
+    Digi-Key 0500588000-12-A1-ND
+  Yellow
+    Digi-Key 0500588000-12-Y1-ND
+  need 66
+
+  Slave connectors
+  Digi-Key A33380-ND
+  TE 102393-1
+  need 11
+w idc ca
+
+ChuckM recommends these.  952-1900-ND
+             32 position: 952-2521-ND
 
 ----------------------------------
 2016-11-08
