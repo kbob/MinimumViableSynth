@@ -1,3 +1,21 @@
+2016-11-28
+I/O Daughter Board silkscreen
+
+72 dpi mockup:
+   mockup is too big!  board is 472 px high, should be 66 mm.
+   scale = 2.522.
+   "Minimum Viable Synth" - Jupiter 90 pix, each line indented 5 spaces
+   "V1.0", URL - Jupiter 15 pix.
+   "Viable" - border, 1 pix.
+   Align baseline of "V1.0" with descender of Synth
+   Align left edge of "V1.0" with left edge of "Minimum"
+
+3600 DPI actual artwork:
+    90 * 50 / scale = 1783
+    15 * 50 / scale = 297
+    border width 16.
+
+----------------------------------
 2016-11-14
 I/O Daughter Board Errata
 
