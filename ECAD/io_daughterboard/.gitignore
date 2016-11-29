@@ -1,7 +1,9 @@
+*-rescue.lib
 *.bak
 *.bck
+*.dsn
 *.kicad_pcb-bak
-_autosave-*
-*-rescue.lib
 *.rpt
+*.ses
+_autosave-*
 _saved_*.sch
