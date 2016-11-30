@@ -13,4 +13,9 @@
   (pad 2 smd rect (at -3.975 2.25) (size 1.55 1.3) (layers F.Cu F.Paste F.Mask))
   (pad 3 smd rect (at 3.975 -2.25) (size 1.55 1.3) (layers F.Cu F.Paste F.Mask))
   (pad 4 smd rect (at 3.975 2.25) (size 1.55 1.3) (layers F.Cu F.Paste F.Mask))
+  (model Buttons_Switches_SMD.3dshapes/SW_SPST_PTS645.wrl
+    (at (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
 )

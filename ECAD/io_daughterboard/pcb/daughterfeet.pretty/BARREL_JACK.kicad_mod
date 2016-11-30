@@ -28,4 +28,9 @@
   (pad 1 thru_hole rect (at 6.20014 0) (size 3.50012 3.50012) (drill 1.9) (layers *.Cu *.Mask))
   (pad 2 thru_hole rect (at 0.20066 0) (size 3.50012 3.50012) (drill 1.9) (layers *.Cu *.Mask))
   (pad 3 thru_hole rect (at 3.2004 4.699) (size 3.50012 3.50012) (drill 1.9) (layers *.Cu *.Mask))
+  (model Connect.3dshapes/JACK_ALIM.wrl
+    (at (xyz 0 0 0))
+    (scale (xyz 0.75 0.75 0.75))
+    (rotate (xyz 0 0 0))
+  )
 )
