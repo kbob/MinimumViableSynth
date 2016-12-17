@@ -1,3 +1,53 @@
+2016-12-16
+Hand-editing KiCad PCBs
+
+This command will remove all traces and vias.
+
+   sed -i.bak -e '/(segment /d' -e '/(via /d' [^_]*.kicad_pcb
+
+----------------------------------
+2016-12-16
+I/O Daughter Board revisions
+
+The IODB v1.0 does not work.  Time to make v1.1.
+
+Desired changes:
+
+  - change solder mask clearance to keep from exposing ground plane.
+  - change ground plane clearances to match 1bitsy or bmp.
+    1Bitsy clearances:
+      Solder mask clearance: 0.05mm
+      Solder paste clearance: 0
+      Zones (all):
+        Clearance: 0.15mm
+        Minimum width: 0.15mm
+        Antipad clearance: 0.15mm
+        Spoke width: 0.16mm
+        Segments: 16
+    BMPMv2.1b clearances:
+      Solder mask clearance: ?
+      Solder paste clearance: ?
+      GND zone F.cu:
+        Clearance: 0.2
+        Minimum width: 0.2
+        Antipad clearance: 0.2
+        Spoke width: 0.21
+      GND zone B.cu:
+        Clearance: 0.2
+        Minimum width: 0.2
+        Antipad clearance: 0.2
+        Spoke width: 0.25
+  - move J1 beside J2.
+  - relabel J1 and J2.
+  - J1 pad has no solder paste cutout.
+  - use a different connector for J2.
+      Hirose FH12A-40S-0.5SH(55)
+      HFK140CT-ND
+  - use bigger chips for U11 and U12.
+  - increment the version number.
+  - order more parts...
+
+----------------------------------
 2016-11-28
 I/O Daughter Board silkscreen
 
