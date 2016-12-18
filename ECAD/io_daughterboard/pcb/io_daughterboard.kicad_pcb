@@ -18,7 +18,7 @@
   )
 
   (layers
-    (0 F.Cu signal hide)
+    (0 F.Cu signal)
     (31 B.Cu signal)
     (34 B.Paste user)
     (35 F.Paste user)
@@ -58,7 +58,7 @@
     (pad_to_mask_clearance 0.05)
     (aux_axis_origin 0 0)
     (grid_origin 100 100)
-    (visible_elements FFFFFF7F)
+    (visible_elements FFFFEF7F)
     (pcbplotparams
       (layerselection 0x00030_80000001)
       (usegerberextensions false)
@@ -6140,7 +6140,7 @@
     (feature2 (pts (xy 220 85) (xy 220 112.7)))
     (crossbar (pts (xy 220 110) (xy 203.1 110)))
     (arrow1a (pts (xy 203.1 110) (xy 204.227 110.586421)))
-    (arrow1b (pts (xy 203.1 110) (xy 24.227 109.413579)))
+    (arrow1b (pts (xy 203.1 110) (xy 204.227 109.413579)))
     (arrow2a (pts (xy 220 110) (xy 218.873 110.586421)))
     (arrow2b (pts (xy 220 110) (xy 218.873 109.413579)))
   )
