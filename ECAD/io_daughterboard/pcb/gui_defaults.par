@@ -100,19 +100,19 @@
     (padstack_info
       not_visible
       (bounds
-        100 23 245 500
+        100 23 0 0
       )
     )
     (package_info
       not_visible
       (bounds
-        200 23 442 449
+        200 23 0 0
       )
     )
     (component_info
       not_visible
       (bounds
-        300 23 219 500
+        300 23 0 0
       )
     )
     (net_info
@@ -124,7 +124,7 @@
     (incompletes_info
       not_visible
       (bounds
-        400 23 219 172
+        400 23 0 0
       )
     )
     (violations_info
@@ -136,7 +136,7 @@
   )
   (colors
     (background
-      70 70 70
+      204 204 204
     )
     (hilight 1.0
       255 255 255
@@ -168,8 +168,8 @@
       0 0 255
     )
     (vias 1.0
-      200 200 0
-      200 200 0
+      102 153 0
+      102 153 0
     )
     (fixed_vias 1.0
       200 200 0

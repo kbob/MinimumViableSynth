@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 45049)
+    (start_pass_no 69121)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -79,7 +79,7 @@
     "/I²C3_SCL" "/I²C3_SDA" "/CTOUCH_WAKE" "/CTOUCH_INT" "/LCD_R0" "/LCD_R1" "/LCD_R2" "/LCD_R3"
     "/LCD_R4" "/LCD_R5" "/LCD_G0" "/LCD_G1" "/LCD_G2" "/LCD_G3" "/LCD_G4" "/LCD_G5"
     "/LCD_B0" "/LCD_B1" "/LCD_B2" "/LCD_B3" "/LCD_B4" "/LCD_B5" "/LCD_CLK" "/LCD_DISP"
-    "/LCD_HSYNC" "/LCD_VSYNC" "/LCD_DE" "Net-(J2-Pad35)" "/RTOUCH_XR" "/RTOUCH_YD" "/RTOUCH_XL" "/RTOUCH_YU"
+    "/LCD_HSYNC" "/LCD_VSYNC" "/LCD_DE" "Net-(LCD-Pad35)" "/RTOUCH_XR" "/RTOUCH_YD" "/RTOUCH_XL" "/RTOUCH_YU"
     /PF4 /PF5 /PF2 /PF3 /PF0 /PF1 /PC14 /PC15
     /PE6 /PE5 /PE2 /PE3 /PE0 /PE1 /BOOT0 /Vdd
     /PB6 /PB7 /PB4 /PB5 /PG15 /PB3 /PG13 /PG14

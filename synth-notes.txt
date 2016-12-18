@@ -49,6 +49,12 @@ Desired changes:
   - increment the version number.
   - order board
   - order more parts...
+      J2       HFK140CT-ND
+      U3-U9    568-8285-5-ND
+      U6       497-8387-1-ND
+      U11 U12  296-37176-1-ND
+      buttons  732-7004-1-ND
+      10K 0603 311-10KGRTR-ND
   - order stencil
 
 ----------------------------------
