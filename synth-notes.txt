@@ -44,8 +44,12 @@ Desired changes:
       Hirose FH12A-40S-0.5SH(55)
       HFK140CT-ND
   - use bigger chips for U11 and U12.
+      SN74LV1T34DBVR
+      296-37176-1-ND
   - increment the version number.
+  - order board
   - order more parts...
+  - order stencil
 
 ----------------------------------
 2016-11-28
