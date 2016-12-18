@@ -370,7 +370,7 @@ void lcd_dma_setup(void)
      * PLLM is already set to 8.  8 MHz / 8 = 1 MHz.
      * We set PLLSAIN = 180 and PLLSAIR = 3.  1 MHz * 180 / 3 = 60 MHz.
      * We set PLLSAIDIVR to 2.  60 MHz / 2 = 30 MHz.
-     * So the LCD-TFT pixel clock is 6 MHz.
+     * So the LCD-TFT pixel clock is 30 MHz.
      *
      * The number of clocks per frame is
      * (VSYNC + VBP + LCD_HEIGHT + VFP) * (HSYNC + HBP + LCD_WIDTH + HFP) =
