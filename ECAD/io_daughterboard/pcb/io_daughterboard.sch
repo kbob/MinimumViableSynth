@@ -460,28 +460,6 @@ NoConn ~ 2350 4000
 Text Label 3300 3900 2    60   ~ 0
 LCD_R7
 NoConn ~ 2200 -2050
-$Comp
-L +3.3V #PWR07
-U 1 1 5827531B
-P 4450 900
-F 0 "#PWR07" H 4450 750 50  0001 C CNN
-F 1 "+3.3V" H 4450 1040 50  0000 C CNN
-F 2 "" H 4450 900 50  0000 C CNN
-F 3 "" H 4450 900 50  0000 C CNN
-	1    4450 900 
-	1    0    0    -1  
-$EndComp
-$Comp
-L +3.3V #PWR08
-U 1 1 58275392
-P 5150 900
-F 0 "#PWR08" H 5150 750 50  0001 C CNN
-F 1 "+3.3V" H 5150 1040 50  0000 C CNN
-F 2 "" H 5150 900 50  0000 C CNN
-F 3 "" H 5150 900 50  0000 C CNN
-	1    5150 900 
-	1    0    0    -1  
-$EndComp
 Text Label 4250 1100 0    60   ~ 0
 PF6
 Text Label 3600 1100 0    60   ~ 0
@@ -3032,14 +3010,6 @@ Wire Wire Line
 Wire Wire Line
 	2450 1000 2350 1000
 Wire Wire Line
-	5150 900  5150 1000
-Wire Wire Line
-	5150 1000 5050 1000
-Wire Wire Line
-	4550 1000 4450 1000
-Wire Wire Line
-	4450 1000 4450 900 
-Wire Wire Line
 	4550 1100 3600 1100
 Wire Wire Line
 	5050 1100 5150 1100
@@ -4374,4 +4344,6 @@ F 3 "" H 7350 7450 50  0000 C CNN
 $EndComp
 Connection ~ 7350 7450
 Connection ~ 5350 9450
+NoConn ~ 5050 1000
+NoConn ~ 4550 1000
 $EndSCHEMATC
