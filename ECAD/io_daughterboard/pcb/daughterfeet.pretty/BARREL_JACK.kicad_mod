@@ -1,4 +1,4 @@
-(module BARREL_JACK (layer F.Cu) (tedit 583AB7CD)
+(module BARREL_JACK (layer F.Cu) (tedit 58573BCC)
   (descr "DC Barrel Jack")
   (tags "Power Jack")
   (fp_text reference CON1 (at -2 6 180) (layer F.SilkS) hide
@@ -25,9 +25,9 @@
   (fp_line (start -7.50062 4.50088) (end 7.00024 4.50088) (layer F.SilkS) (width 0.15))
   (fp_line (start 7.00024 4.50088) (end 7.00024 -4.50088) (layer F.SilkS) (width 0.15))
   (fp_line (start 7.00024 -4.50088) (end -7.50062 -4.50088) (layer F.SilkS) (width 0.15))
-  (pad 1 thru_hole rect (at 6.20014 0) (size 3.50012 3.50012) (drill 1.9) (layers *.Cu *.Mask))
-  (pad 2 thru_hole rect (at 0.20066 0) (size 3.50012 3.50012) (drill 1.9) (layers *.Cu *.Mask))
-  (pad 3 thru_hole rect (at 3.2004 4.699) (size 3.50012 3.50012) (drill 1.9) (layers *.Cu *.Mask))
+  (pad 1 thru_hole rect (at 6.20014 0) (size 3.50012 3.50012) (drill 1.1) (layers *.Cu *.Mask))
+  (pad 2 thru_hole rect (at 0.20066 0) (size 3.50012 3.50012) (drill 1.1) (layers *.Cu *.Mask))
+  (pad 3 thru_hole rect (at 3.2004 4.699) (size 3.50012 3.50012) (drill 1.1) (layers *.Cu *.Mask))
   (model Connect.3dshapes/JACK_ALIM.wrl
     (at (xyz 0 0 0))
     (scale (xyz 0.75 0.75 0.75))
