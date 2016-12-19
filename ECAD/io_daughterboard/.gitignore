@@ -3,6 +3,7 @@
 *.bck
 *.dsn
 *.kicad_pcb-bak
+*.kicad_pcb.orig
 *.rpt
 *.ses
 _autosave-*
