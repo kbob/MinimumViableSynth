@@ -130,28 +130,28 @@
     (violations_info
       not_visible
       (bounds
-        500 30 0 0
+        500 23 0 0
       )
     )
   )
   (colors
     (background
-      204 204 204
+      255 255 255
     )
     (hilight 1.0
-      255 255 255
+      0 255 0
     )
     (incompletes 1.0
-      255 255 255
+      51 255 255
     )
     (outline
       100 150 255
     )
     (component_front
-      0 0 255
+      153 153 255
     )
     (component_back
-      255 0 0
+      255 153 153
     )
     (violations
       255 0 255

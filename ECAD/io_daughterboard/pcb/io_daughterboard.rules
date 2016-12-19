@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 69121)
+    (start_pass_no 26362)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -28,7 +28,7 @@
   (rule
     (width 152.4)
     (clear 152.6)
-    (clear 76.2 (type smd_to_turn_gap))
+    (clear 0.0 (type smd_to_turn_gap))
     (clear 38.2 (type smd_smd))
   )
   (padstack "Via[0-1]_685.8:330.2_um"
@@ -79,26 +79,26 @@
     "/I²C3_SCL" "/I²C3_SDA" "/CTOUCH_WAKE" "/CTOUCH_INT" "/LCD_R0" "/LCD_R1" "/LCD_R2" "/LCD_R3"
     "/LCD_R4" "/LCD_R5" "/LCD_G0" "/LCD_G1" "/LCD_G2" "/LCD_G3" "/LCD_G4" "/LCD_G5"
     "/LCD_B0" "/LCD_B1" "/LCD_B2" "/LCD_B3" "/LCD_B4" "/LCD_B5" "/LCD_CLK" "/LCD_DISP"
-    "/LCD_HSYNC" "/LCD_VSYNC" "/LCD_DE" "Net-(LCD-Pad35)" "/RTOUCH_XR" "/RTOUCH_YD" "/RTOUCH_XL" "/RTOUCH_YU"
-    /PF4 /PF5 /PF2 /PF3 /PF0 /PF1 /PC14 /PC15
-    /PE6 /PE5 /PE2 /PE3 /PE0 /PE1 /BOOT0 /Vdd
-    /PB6 /PB7 /PB4 /PB5 /PG15 /PB3 /PG13 /PG14
-    /PD7 /PD5 /PD4 /PD2 /PD1 /PD0 /PC12 /PC11
-    /PA15 /PA14 /PA13 "/MIDI_RX" "/MIDI_TX" /PC8 /PG8 /PG5
-    /PG4 "/LCD_PWM" /N/C /PF8 /PF7 /PF9 /PH1 /PH0
-    /PC1 /PC0 /PC3 /PC2 /PA1 /PA2 /PA5 /PA7
-    /PC5 /PC4 /PB2 /PF12 /PF11 /PF14 /PF13 /PG0
-    /PF15 /PE7 /PG1 /PE9 /PE8 /PE11 /PE10 /PE13
-    /PE12 /PE15 /PE14 /PB13 /PB12 /PB15 /PB14 /PD9
-    /PD8 /PD11 /PD10 /PD13 /PD12 /PD15 /PD14 /PG2
-    "/SLV1A_MISO" "/SLV1A_SCK" "/SLV1A_MOSI" "/SLV3A_MISO" "/SLV3A_SCK" "/SLV3A_MOSI" "/SLV4A_MISO" "/SLV4A_SCK"
-    "/SLV4A_MOSI" "/SLV5A_MISO" "/SLV5A_SCK" "/SLV5A_MOSI" "/SLV1B_MISO" "/SLV1B_SCK" "/SLV1B_MOSI" "/SLV3B_MISO"
-    "/SLV3B_SCK" "/SLV3B_MOSI" "/SLV4B_MISO" "/SLV4B_SCK" "/SLV4B_MOSI" "/SLV5B_MISO" "/SLV5B_SCK" "/SLV5B_MOSI"
-    "/SLV1C_MISO" "/SLV1C_SCK" "/SLV1C_MOSI" "/SLV3C_MISO" "/SLV3C_SCK" "/SLV3C_MOSI" "/SLV4C_MISO" "/SLV4C_SCK"
-    "/SLV4C_MOSI" "/SLV5C_MISO" "/SLV5C_SCK" "/SLV5C_MOSI" "/SLV1D_MISO" "/SLV1D_SCK" "/SLV1D_MOSI" "/SLV3D_MISO"
-    "/SLV3D_SCK" "/SLV3D_MOSI" "/SLV4D_MISO" "/SLV4D_SCK" "/SLV4D_MOSI" "/SLV5D_MISO" "/SLV5D_SCK" "/SLV5D_MOSI"
-    "/MIDI_TX_5V" "/MIDI_RX_5V" "Net-(R22-Pad2)" "Net-(R25-Pad1)" "Net-(R31-Pad2)" "Net-(R32-Pad2)" "Net-(R33-Pad2)" "Net-(R34-Pad2)"
-    "Net-(R35-Pad2)" "Net-(U10-Pad1)" "Net-(U11-Pad1)"
+    "/LCD_HSYNC" "/LCD_VSYNC" "/LCD_DE" "/RTOUCH_XR" "/RTOUCH_YD" "/RTOUCH_XL" "/RTOUCH_YU" /PF4
+    /PF5 /PF2 /PF3 /PF0 /PF1 /PC14 /PC15 /PE6
+    /PE5 /PE2 /PE3 /PE0 /PE1 /BOOT0 /Vdd /PB6
+    /PB7 /PB4 /PB5 /PG15 /PB3 /PG13 /PG14 /PD7
+    /PD5 /PD4 /PD2 /PD1 /PD0 /PC12 /PC11 /PA15
+    /PA14 /PA13 "/MIDI_RX" "/MIDI_TX" /PC8 /PG8 /PG5 /PG4
+    "/LCD_PWM" /N/C /PF8 /PF7 /PF9 /PH1 /PH0 /PC1
+    /PC0 /PC3 /PC2 /PA1 /PA2 /PA5 /PA7 /PC5
+    /PC4 /PB2 /PF12 /PF11 /PF14 /PF13 /PG0 /PF15
+    /PE7 /PG1 /PE9 /PE8 /PE11 /PE10 /PE13 /PE12
+    /PE15 /PE14 /PB13 /PB12 /PB15 /PB14 /PD9 /PD8
+    /PD11 /PD10 /PD13 /PD12 /PD15 /PD14 /PG2 "/SLV1A_MISO"
+    "/SLV1A_SCK" "/SLV1A_MOSI" "/SLV3A_MISO" "/SLV3A_SCK" "/SLV3A_MOSI" "/SLV4A_MISO" "/SLV4A_SCK" "/SLV4A_MOSI"
+    "/SLV5A_MISO" "/SLV5A_SCK" "/SLV5A_MOSI" "/SLV1B_MISO" "/SLV1B_SCK" "/SLV1B_MOSI" "/SLV3B_MISO" "/SLV3B_SCK"
+    "/SLV3B_MOSI" "/SLV4B_MISO" "/SLV4B_SCK" "/SLV4B_MOSI" "/SLV5B_MISO" "/SLV5B_SCK" "/SLV5B_MOSI" "/SLV1C_MISO"
+    "/SLV1C_SCK" "/SLV1C_MOSI" "/SLV3C_MISO" "/SLV3C_SCK" "/SLV3C_MOSI" "/SLV4C_MISO" "/SLV4C_SCK" "/SLV4C_MOSI"
+    "/SLV5C_MISO" "/SLV5C_SCK" "/SLV5C_MOSI" "/SLV1D_MISO" "/SLV1D_SCK" "/SLV1D_MOSI" "/SLV3D_MISO" "/SLV3D_SCK"
+    "/SLV3D_MOSI" "/SLV4D_MISO" "/SLV4D_SCK" "/SLV4D_MOSI" "/SLV5D_MISO" "/SLV5D_SCK" "/SLV5D_MOSI" "/MIDI_TX_5V"
+    "/MIDI_RX_5V" "Net-(R22-Pad2)" "Net-(R25-Pad1)" "Net-(R31-Pad2)" "Net-(R32-Pad2)" "Net-(R33-Pad2)" "Net-(R34-Pad2)" "Net-(R35-Pad2)"
+    "Net-(U10-Pad1)" "Net-(U11-Pad1)" "Net-(J2-Pad35)" "Net-(P2-Pad1)" "Net-(P2-Pad2)"
     (clearance_class "kicad_default")
     (via_rule kicad_default)
     (rule
