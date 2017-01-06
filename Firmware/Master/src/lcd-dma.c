@@ -48,27 +48,23 @@
   #define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_ARGB8888
 #endif
 
-layer1_pixel *const lcd_layer1_frame_buffer = (void *)SDRAM_BASE_ADDRESS;
 #define LCD_LAYER1_PIXEL_SIZE (sizeof(layer1_pixel))
 #define LCD_LAYER1_WIDTH  LCD_WIDTH
 #define LCD_LAYER1_HEIGHT LCD_HEIGHT
 #define LCD_LAYER1_PIXELS (LCD_LAYER1_WIDTH * LCD_LAYER1_HEIGHT)
 #define LCD_LAYER1_BYTES  (LCD_LAYER1_PIXELS * LCD_LAYER1_PIXEL_SIZE)
+layer1_pixel lcd_layer1_frame_buffer[LCD_LAYER1_PIXELS] SDRAM_SECTION;
 
 /* Layer 2 (top layer) is ARGB4444, a 128x128 square. */
 
 typedef uint16_t layer2_pixel;
 #define LCD_LAYER2_PIXFORMAT LTDC_LxPFCR_ARGB4444
-layer2_pixel *const lcd_layer2_frame_buffer =
-        (void *)SDRAM_BASE_ADDRESS + LCD_LAYER1_BYTES;
 #define LCD_LAYER2_PIXEL_SIZE (sizeof(layer2_pixel))
 #define LCD_LAYER2_WIDTH  128
 #define LCD_LAYER2_HEIGHT 128
 #define LCD_LAYER2_PIXELS (LCD_LAYER2_WIDTH * LCD_LAYER2_HEIGHT)
 #define LCD_LAYER2_BYTES (LCD_LAYER2_PIXELS * LCD_LAYER2_PIXEL_SIZE)
-
-uint32_t *const lcd_layer3_frame_buffer =
-    (void *)SDRAM_BASE_ADDRESS + LCD_LAYER1_BYTES + LCD_LAYER2_BYTES;
+layer2_pixel lcd_layer2_frame_buffer[LCD_LAYER2_PIXELS] SDRAM_SECTION;
 
 /*
  * Pin assignments

@@ -73,6 +73,7 @@ int main()
     lcd_dma_setup();
     init_delay(CPU_FREQ);
 
+    printf("\n");
     printf("Minimum Viable Firmware\n");
 
 #ifndef NDEBUG

@@ -23,7 +23,7 @@ ARCH_FLAGS := -mthumb -mcpu=cortex-m4 $(FP_FLAGS)
     CFLAGS := -std=gnu99 -g -Wall -Wundef -Werror \
               -fno-common -ffunction-sections -fdata-sections \
               $(CPPFLAGS) $(ARCH_FLAGS) \
-              -O3
+              -O0
    LDFLAGS := -g --static -nostartfiles \
               -L$(L3_LIBDIR)  \
               -T stm32f429i-discovery.ld \

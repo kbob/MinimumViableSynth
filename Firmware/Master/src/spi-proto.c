@@ -52,10 +52,14 @@ typedef struct SPI_stats {
     uint32_t skip_count;
 } SPI_stats;
 
+// XXX move this where other drivers can use it.
+#define DMA_SECTION __attribute((section(".system_ram")))
+//#define DMA_SECTION
+
 static volatile SPI_state sp_state;
 static volatile int current_grp_idx;
-static spi_buf outgoing_packets[MODULE_COUNT];
-static spi_buf incoming_packets[MODULE_COUNT];
+static spi_buf outgoing_packets[MODULE_COUNT] DMA_SECTION;
+static spi_buf incoming_packets[MODULE_COUNT] DMA_SECTION;
 static slave_state slave_states[MODULE_COUNT];
 static SPI_stats stats;
 static SPI_slave_state_handler *slave_state_handler;
