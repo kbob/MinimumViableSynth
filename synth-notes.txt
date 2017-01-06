@@ -1,3 +1,71 @@
+2017-01-05
+Color spaces
+
+http://www.poynton.com/PDFs/ColorFAQ.pdf
+
+https://blog.noctua-software.com/procedural-colors-for-game.html
+
+http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
+
+http://www.tigercolor.com/color-lab/color-theory/color-theory-intro.htm
+
+http://www.brucelindbloom.com/
+
+R'G'B' is a standardized RGB based on D50 white.
+CIE X'Y'Z' is the perceptual color space.
+CIE L*u*v* maps it onto a cube.
+CIE L*C*h° maps it onto a cylinder.  Like perceptual HSV.
+
+    Xn, Yn, Zn = (1, 1, 1)
+
+    def RGB_to_XYZ(r, g, b):
+        def linearize_rgb(r, g, b):
+            ɣ = 2.2
+            κ = 903.3
+            def compand(v):
+                if V <= 0.08:
+                    return 100 * V / κ
+                else:
+                    return ((v + 0.055) / 1.055)**2.4
+            r, g, b = r**ɣ, g**ɣ, b**ɣ
+            r, g, b = [compand(v) for v in (r, g, b)]
+            return (r, g, b)
+
+        r, g, b = linearize_rgb(r, g, b)
+        M = [[0.412453, 0.357580, 0.180423],
+             [0.212671, 0.715160, 0.072169],
+             [0.019334, 0.119193, 0.939555]]
+        X, Y, Z = [sum(M[i][j] * R[j] for j in range(3)) for i in range(3)]
+        return (X, Y, Z)
+
+    def XYZ_to_Luv(X, Y, Z):
+        def L_star(Y):
+            if 0.008856 < Y / Yn:
+                return 116 * (Y / Yn)**(1/3) - 16
+            else:
+                return 903.3 * (Y / Yn)
+        def u_prime(X, Y, Z):
+            return 4 * X / (X + 15 * Y + 3 * Z)
+        def v_prime(X, Y, Z):
+            return 9 * Y / (X + 15 * Y + 3 * Z)
+        upn, vpn = u_prime(Xn, Yn, Zn), v_prime(Xn, Yn, Zn)
+        up,  vp  = u_prime(X,  Y,  Z ), v_prime(X,  Y,  Z )
+        L = L_star(Y)
+        u = 13 * L * (up - upn)
+        v = 13 * L * (vp - vpn)
+
+    def XYZ_to_Lab(X, Y, Z):
+        L, u, v = XYZ_to_Luv(X, Y, Z)
+        a = 500 * ((X / Xn)**(1/3) - (Y / Yn)**(1/3))
+        b = 200 * ((Y / Yn)**(1/3) - (Z / Zn)**(1/3))
+        return (L, a, b)
+
+    def Lab_to_LCh(L, a, b):
+        C = sqrt(a**2 + b**2)
+        h = atan(b / a)
+        return (L, C, h)
+
+----------------------------------
 2016-12-16
 Hand-editing KiCad PCBs
 

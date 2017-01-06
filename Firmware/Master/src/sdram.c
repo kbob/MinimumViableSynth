@@ -35,7 +35,7 @@
  * This is just syntactic sugar but it helps, all of these
  * GPIO pins get configured in exactly the same way.
  */
-static struct {
+static const struct {
 	uint32_t	gpio;
 	uint16_t	pins;
 } sdram_pins[6] = {

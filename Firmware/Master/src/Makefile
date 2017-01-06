@@ -1,4 +1,4 @@
-# pass LIBOPENCM3 := the root of your libopencm3 tree.
+LIBOPENCM3 = ../libopencm3
 ifeq '$(LIBOPENCM3)' ''
    $(error Please pass LIBOPENCM3 = the root of your libopencm3 tree)
 endif
@@ -15,14 +15,15 @@ endif
 
         CC := arm-none-eabi-gcc
 
-      DEFS := -DSTM32F4
+      DEFS := -DSTM32F4 -D_GNU_SOURCE
   FP_FLAGS := -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ARCH_FLAGS := -mthumb -mcpu=cortex-m4 $(FP_FLAGS)
 
   CPPFLAGS := -MD -I$(L3_INCDIR) $(DEFS)
-    CFLAGS := -std=gnu99 -O0 -g -Wall -Wundef -Werror \
+    CFLAGS := -std=gnu99 -g -Wall -Wundef -Werror \
               -fno-common -ffunction-sections -fdata-sections \
-              $(CPPFLAGS) $(ARCH_FLAGS)
+              $(CPPFLAGS) $(ARCH_FLAGS) \
+              -O3
    LDFLAGS := -g --static -nostartfiles \
               -L$(L3_LIBDIR)  \
               -T stm32f429i-discovery.ld \

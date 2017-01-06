@@ -1,0 +1,3 @@
+[submodule "Firmware/Master/libopencm3"]
+	path = Firmware/Master/libopencm3
+	url = https://github.com/kbob/libopencm3.git

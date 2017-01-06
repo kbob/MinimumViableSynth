@@ -1,5 +1,10 @@
+//#define ARGB4444
+//#define ARGB1555
+#define RGB565
+
 #include "lcd-dma.h"
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,8 +33,20 @@
 
 /* Layer 1 (bottom layer) is ARGB8888 format, full screen. */
 
-typedef uint32_t layer1_pixel;
-#define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_ARGB8888
+#ifdef ARGB4444
+  typedef uint16_t layer1_pixel;
+  #define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_ARGB4444
+#elif defined(ARGB1555)
+  typedef uint16_t layer1_pixel;
+  #define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_ARGB1555
+#elif defined(RGB565)
+  typedef uint16_t layer1_pixel;
+  #define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_RGB565
+  #define L1_COLOR_KEY 0xFFFFF7
+#else
+  typedef uint32_t layer1_pixel;
+  #define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_ARGB8888
+#endif
 
 layer1_pixel *const lcd_layer1_frame_buffer = (void *)SDRAM_BASE_ADDRESS;
 #define LCD_LAYER1_PIXEL_SIZE (sizeof(layer1_pixel))
@@ -45,10 +62,13 @@ typedef uint16_t layer2_pixel;
 layer2_pixel *const lcd_layer2_frame_buffer =
         (void *)SDRAM_BASE_ADDRESS + LCD_LAYER1_BYTES;
 #define LCD_LAYER2_PIXEL_SIZE (sizeof(layer2_pixel))
-#define LCD_LAYER2_WIDTH 128
+#define LCD_LAYER2_WIDTH  128
 #define LCD_LAYER2_HEIGHT 128
-#define LCD_LAYER2_PIXELS (LCD_LAYER2_WIDTH * LCD_LAYER2_HEIGH)
+#define LCD_LAYER2_PIXELS (LCD_LAYER2_WIDTH * LCD_LAYER2_HEIGHT)
 #define LCD_LAYER2_BYTES (LCD_LAYER2_PIXELS * LCD_LAYER2_PIXEL_SIZE)
+
+uint32_t *const lcd_layer3_frame_buffer =
+    (void *)SDRAM_BASE_ADDRESS + LCD_LAYER1_BYTES + LCD_LAYER2_BYTES;
 
 /*
  * Pin assignments
@@ -292,7 +312,22 @@ static void draw_layer_1(void)
                 r = g = b = a ? 0xFF : 0;
                 a = 0xFF;
             }
-            layer1_pixel pix = a << 24 | r << 16 | g << 8 | b << 0;
+
+            layer1_pixel pix;
+#ifdef ARGB4444
+            pix = a >> 4 << 12 | r >> 4 << 8 | g >> 4 << 4 | b >> 4 << 0;
+#elif defined(ARGB1555)
+            pix = a >> 7 << 15 | r >> 3 << 10 | g >> 3 << 5 | b >> 3 << 0;
+#elif defined(RGB565)
+            if (a == 0) {
+                r = (uint8_t)(L1_COLOR_KEY >> 16);
+                g = (uint8_t)(L1_COLOR_KEY >>  8);
+                b = (uint8_t)(L1_COLOR_KEY >>  0);
+            }
+            pix = r >> 3 << 11 | g >> 2 << 5 | b >> 3 << 0;
+#else
+            pix = a << 24 | r << 16 | g << 8 | b << 0;
+#endif
 
             /*
              * Outline the screen in white.  Put a black
@@ -302,9 +337,23 @@ static void draw_layer_1(void)
              */
             if (row == 0 || col == 0 ||
                 row == LCD_LAYER1_HEIGHT - 1 || col == LCD_LAYER1_WIDTH - 1)
+#if defined(ARGB4444) || defined(ARGB1555) || defined(RGB565)
+                pix = 0xFFFF;
+#else
                 pix = 0xFFFFFFFF;
-            else if (row < 20 && col < 20)
+#endif
+            else if (row < 20 && col < 20) {
+#ifdef ARGB4444
+                pix = 0xF000;
+#elif defined(ARGB1555)
+                pix = 0x8000;
+#elif defined(RGB565)
+                pix = 0x0000;
+#else
                 pix = 0xFF000000;
+#endif
+            }
+            // pix = (row ^ col) & 1 ? 0xFFFFFFFF : 0xff000000;
             lcd_layer1_frame_buffer[i] = pix;
         }
     }
@@ -318,9 +367,9 @@ static void draw_layer_1(void)
 static void draw_layer_2(void)
 {
     int row, col;
-    const uint8_t hw = LCD_LAYER2_WIDTH / 2;
-    const uint8_t hh = LCD_LAYER2_HEIGHT / 2;
-    const uint8_t sz = (hw + hh) / 2;
+    const uint32_t hw = LCD_LAYER2_WIDTH / 2;
+    const uint32_t hh = LCD_LAYER2_HEIGHT / 2;
+    const uint32_t sz = (hw + hh) / 2;
 
     for (row = 0; row < LCD_LAYER2_HEIGHT; row++) {
         for (col = 0; col < LCD_LAYER2_WIDTH; col++) {
@@ -380,6 +429,9 @@ void lcd_dma_setup(void)
      */
 
     uint32_t sain = 180;
+#if !defined(ARGB4444) && !defined(ARGB1555) && !defined(RGB565)
+    sain = 90;
+#endif
     uint32_t saiq = (RCC_PLLSAICFGR >> RCC_PLLSAICFGR_PLLSAIQ_SHIFT) &
         RCC_PLLSAICFGR_PLLSAIQ_MASK;
     uint32_t sair = 3;
@@ -401,7 +453,7 @@ void lcd_dma_setup(void)
         continue;
 
     /*
-     * Configure the Synchronous timings: VSYNC, HSNC,
+     * Configure the Synchronous timings: VSYNC, HSYNC,
      * Vertical and Horizontal back porch, active data area, and
      * the front porch timings.
      */
@@ -416,7 +468,8 @@ void lcd_dma_setup(void)
         (VSYNC + VBP + LCD_HEIGHT + VFP - 1) << LTDC_TWCR_TOTALH_SHIFT;
 
     /* Configure the synchronous signals and clock polarity. */
-    LTDC_GCR |= LTDC_GCR_PCPOL_ACTIVE_HIGH;
+    LTDC_GCR |= LTDC_GCR_PCPOL_ACTIVE_LOW;
+    LTDC_GCR |= LTDC_GCR_DITHER_ENABLE;
 
     /* If needed, configure the background color. */
     LTDC_BCCR = 0x00000000;
@@ -509,7 +562,12 @@ void lcd_dma_setup(void)
     LTDC_L2CR |= LTDC_LxCR_LAYER_ENABLE;
 
     /* If needed, enable dithering and/or color keying. */
+#ifdef RGB565
+    LTDC_L1CKCR = L1_COLOR_KEY;
+    LTDC_L1CR = LTDC_LxCR_LAYER_ENABLE | LTDC_LxCR_COLKEY_ENABLE;
+#else
     /* (Not needed) */
+#endif
 
     /* Reload the shadow registers to active registers. */
     LTDC_SRCR |= LTDC_SRCR_VBR;
@@ -589,7 +647,7 @@ static void move_sprite(void)
     age += 1;
     if (age > 0xFF)
         age = 0xFF;
-    // LTDC_L2CACR = 0x000000FF - age;
+    LTDC_L2CACR = 0x000000FF - age;
 }
 
 /*
@@ -599,10 +657,17 @@ static void move_sprite(void)
 
 void lcd_tft_isr(void)
 {
+    // Clear Register Reload Interrupt Flag.
+    // Register Reload interrupt is generated when a vertical blanking
+    // reload occurs (and the first line after the active area is reached)
     LTDC_ICR |= LTDC_ICR_CRRIF;
 
     mutate_background_color();
     move_sprite();
 
+    // Vertical Blanking Reload
+    // The shadow registers are reloaded during the vertical blanking
+    // period (at the beginning of the first line after the Active
+    // Display Area)
     LTDC_SRCR |= LTDC_SRCR_VBR;
 }

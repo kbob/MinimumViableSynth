@@ -19,8 +19,8 @@
 
 #define REPORT_INTERVAL_MSEC 10000
 
-// #define CPU_FREQ 168000000
-#define CPU_FREQ 120000000
+#define CPU_FREQ 168000000
+// #define CPU_FREQ 120000000
 // #define CPU_FREQ 48000000
 
 static void clock_setup(void)
@@ -37,13 +37,18 @@ static void clock_setup(void)
     }
 }
 
-static void adjust_LCD_brightness(uint32_t t0, uint32_t now)
+static void adjust_LCD_brightness(uint32_t now)
 {
     static bool done;
     if (done)
         return;
+    static uint32_t t0;
+    if (!t0) {
+        t0 = now + 1;
+        return;
+    }
     uint32_t b0 = (now - t0);
-    uint32_t b1 = b0 * (b0 + 1) >> 2;
+    uint32_t b1 = b0 * (b0 + 1) >> 5;
     if (b1 > 65535) {
         b1 = 65535;
         done = true;
@@ -76,10 +81,9 @@ int main()
 #endif
 
     uint32_t next_time = REPORT_INTERVAL_MSEC;
-    uint32_t pwm_t0 = system_millis;
 
     while (1) {
-        adjust_LCD_brightness(pwm_t0, system_millis);
+        adjust_LCD_brightness(system_millis);
         usb_midi_poll();
         button_poll();
 
