@@ -1,3 +1,10 @@
+2017-01-06
+Bode Plots
+
+Notes on generating Bode plots.
+http://www.onmyphd.com/?p=bode.plot
+
+----------------------------------
 2017-01-05
 Color spaces
 
